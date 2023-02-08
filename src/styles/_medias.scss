@@ -1,0 +1,60 @@
+// MEDIA QUERIES
+
+// Small devices (landscape phones, 576px and up)
+$small-devices: 576px;
+
+// Medium devices (tablets, 768px and up)
+$medium-devices: 768px;
+
+// Large devices (desktops, 992px and up)
+$large-devices: 992px;
+
+// X-Large devices (large desktops, 1200px and up)
+$x-large-devices: 1200px;
+
+// XX-Large devices (larger desktops, 1400px and up)
+$xx-large-devices: 1400px;
+
+@mixin small-devices-576 {
+  @media only screen
+    and (max-width: #{$small-devices}) {
+    @content;
+  }
+}
+
+@mixin medium-devices-768 {
+  @media only screen
+    and (max-width: #{$medium-devices}) {
+    @content;
+  }
+}
+
+@mixin large-devices-992 {
+  @media only screen
+    and (max-width: #{$large-devices}) {
+    @content;
+  }
+}
+
+@mixin x-large-devices-1200 {
+  @media only screen
+    and (max-width: #{$x-large-devices}) {
+    @content;
+  }
+}
+@mixin xx-large-devices-1400 {
+  @media only screen
+    and (max-width: #{$xx-large-devices}) {
+    @content;
+  }
+}
+
+/*
+Usage:
+
+ @include medium-devices-768 {
+    .class-name {
+      style-name: value;
+    }
+  }
+*/
