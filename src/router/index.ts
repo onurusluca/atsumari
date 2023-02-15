@@ -1,4 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
+import { userSessionStore } from "@/stores/userSession";
+
 import HomeView from "../views/Home.vue";
 
 const router = createRouter({
@@ -6,18 +8,52 @@ const router = createRouter({
   routes: [
     {
       path: "/",
-      name: "home",
+      name: "Home",
       component: HomeView,
     },
     {
-      path: "/about",
-      name: "about",
+      path: "/test",
+      name: "Test",
       // route level code-splitting
       // this generates a separate chunk (About.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
-      component: () => import("../views/Test.vue"),
+      component: () => import("../views/tests/Test.vue"),
+      meta: {
+        needsAuth: true,
+      },
+    },
+
+    {
+      path: "/login",
+      name: "Login",
+      component: () => import("../views/auth/Login.vue"),
+    },
+    {
+      path: "/register",
+      name: "Register",
+      component: () => import("../views/auth/Register.vue"),
+    },
+    {
+      path: "/account",
+      name: "Account",
+      component: () => import("../views/auth/Account.vue"),
     },
   ],
+});
+
+// Check if the page requires authentication, if so, check if the user is logged in. If not, redirect to the home page.
+router.beforeEach((to, from, next) => {
+  const userSession = userSessionStore();
+
+  if (to.meta.needsAuth) {
+    if (userSession.session) {
+      return next();
+    } else {
+      return next("/");
+    }
+  }
+
+  return next();
 });
 
 export default router;

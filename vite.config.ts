@@ -61,6 +61,7 @@ export default defineConfig(({ mode }) => {
           "@vueuse/head",
           "@vueuse/core",
         ],
+
         dts: "src/auto-imports.d.ts",
         dirs: ["src/modules"],
       }),
