@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { supabase } from "@/lib/supabaseInit";
 
-const email = ref<string>("");
-const password = ref<any>(null);
-const passwordConfirm = ref<any>(null);
-const errorUi = ref<string>("");
+let email = ref<string>("");
+let password = ref<any>(null);
+let passwordConfirm = ref<any>(null);
+let errorUi = ref<string>("");
+let showEmailVerification = ref<boolean>(false);
 
 const register = async () => {
   if (password.value !== passwordConfirm.value) {
@@ -16,6 +17,9 @@ const register = async () => {
         email: email.value,
         password: password.value,
       });
+      if (data) {
+        showEmailVerification.value = true;
+      }
       if (error) throw error;
       console.log("data", data);
       return;
@@ -31,9 +35,17 @@ const register = async () => {
 
   <div v-if="errorUi" class="">
     <h4>ERROR LOL :D</h4>
+    <p>{{ errorUi }}</p>
   </div>
 
-  <form @submit.prevent="register">
+  <div v-if="showEmailVerification">
+    Verify your email!
+    <br />
+    <br />
+    <router-link class="button" :to="{ name: 'Home' }">I verified</router-link>
+  </div>
+
+  <form v-show="!showEmailVerification" @submit.prevent="register">
     <div>
       <label for="email">Email</label>
       <input type="email" id="email" v-model="email" />
