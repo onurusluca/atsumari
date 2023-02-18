@@ -14,6 +14,10 @@ const messagesRef = ref("messagesRef");
 
 onMounted(async () => {
   await getSpaces().then(() => listenToChanges());
+
+  if (userSession.session.user) {
+    console.log("userSession.session", userSession.session.user);
+  }
 });
 
 onDeactivated(async () => {
@@ -29,7 +33,6 @@ async function getSpaces() {
         user_id: message.user_id,
       });
     });
-    console.log("messages", messages);
 
     // go to bottom of ref messages
     if (messages) {
@@ -58,7 +61,9 @@ const login = async () => {
 // logout function
 const logOut = async () => {
   try {
-    const { error } = await supabase.auth.signOut().then(router.push("/"));
+    const { error } = await supabase.auth.signOut();
+    console.log("signout");
+
     if (error) throw error;
   } catch (error: any) {
     alert(error.message);
@@ -103,11 +108,11 @@ function listenToChanges() {
 <template>
   <router-link :to="{ name: 'Home' }">Home</router-link>
   <br />
-  <router-link v-if="!userSession.session" :to="{ name: 'Register' }"
+  <router-link v-if="!userSession.session.user" :to="{ name: 'Register' }"
     >Register</router-link
   >
   <br />
-  <router-link v-if="!userSession.session" :to="{ name: 'Login' }"
+  <router-link v-if="!userSession.session.user" :to="{ name: 'Login' }"
     >Login</router-link
   >
   <button
@@ -128,11 +133,12 @@ function listenToChanges() {
       list-style: none;
       display: flex;
       flex-direction: column;
-      max-height: 50vh;
+      height: 50vh;
       overflow-y: scroll;
     "
   >
     <li
+      v-show="userSession.session.user"
       v-for="(item, index) in allMessages"
       :key="index"
       :style="
@@ -145,40 +151,41 @@ function listenToChanges() {
     </li>
   </ul>
 
-  <form @submit.prevent="addMessage">
+  <form @submit.prevent="addMessage" v-show="userSession.session.user">
     <input
       class="inputField"
       type="text"
       placeholder="Your message"
       v-model="message"
     />
-    <button type="submit">Send</button>
+    <button style="float: right margin-top: .5rem;" type="submit">Send</button>
   </form>
+  <br />
 
   <br />
   <hr />
 
-  <div v-if="!userSession.session">
+  <div v-if="!userSession.session.user">
     <div>
       <input
         class="inputField"
         type="email"
-        placeholder="Your email"
+        placeholder="email"
         v-model="email"
         autocomplete="email"
       />
     </div>
     <div>
-      <input type="password" placeholder="Your password" v-model="password" />
+      <input type="password" placeholder="password" v-model="password" />
     </div>
   </div>
-  <div v-else>
+  <div v-if="userSession?.session?.user">
     {{ userSession.session.user.email }}
   </div>
   <button
     className="p-4 bg-blue-400 text-white rounded-xl hover:bg-blue-500"
     @click="login"
-    v-if="!userSession.session"
+    v-if="!userSession.session.user"
   >
     Sign In
   </button>
