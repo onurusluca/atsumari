@@ -15,8 +15,8 @@ const messagesRef = ref("messagesRef");
 onMounted(async () => {
   await getSpaces().then(() => listenToChanges());
 
-  if (userSession.session.user) {
-    console.log("userSession.session", userSession.session.user);
+  if (userSession?.session?.user) {
+    console.log("userSession.session", userSession?.session?.user);
   }
 });
 
@@ -76,7 +76,7 @@ const addMessage = async () => {
       .from("messages")
       .insert({
         message: message.value,
-        user_id: userSession.session.user.id,
+        user_id: userSession?.session?.user.id,
       })
       .select();
     message.value = "";
@@ -108,11 +108,11 @@ function listenToChanges() {
 <template>
   <router-link :to="{ name: 'Home' }">Home</router-link>
   <br />
-  <router-link v-if="!userSession.session.user" :to="{ name: 'Register' }"
+  <router-link v-if="!userSession?.session?.user" :to="{ name: 'Register' }"
     >Register</router-link
   >
   <br />
-  <router-link v-if="!userSession.session.user" :to="{ name: 'Login' }"
+  <router-link v-if="!userSession?.session?.user" :to="{ name: 'Login' }"
     >Login</router-link
   >
   <button
@@ -138,11 +138,11 @@ function listenToChanges() {
     "
   >
     <li
-      v-show="userSession.session.user"
+      v-if="userSession?.session?.user"
       v-for="(item, index) in allMessages"
       :key="index"
       :style="
-        item.user_id === userSession.session.user.id
+        item.user_id === userSession?.session?.user.id
           ? 'align-self: end; margin-bottom:.3rem; color: aqua'
           : 'margin-bottom:.3rem; color: orange'
       "
@@ -151,7 +151,7 @@ function listenToChanges() {
     </li>
   </ul>
 
-  <form @submit.prevent="addMessage" v-show="userSession.session.user">
+  <form @submit.prevent="addMessage" v-show="userSession?.session?.user">
     <input
       class="inputField"
       type="text"
@@ -165,7 +165,7 @@ function listenToChanges() {
   <br />
   <hr />
 
-  <div v-if="!userSession.session.user">
+  <div v-if="!userSession?.session?.user">
     <div>
       <input
         class="inputField"
@@ -180,12 +180,12 @@ function listenToChanges() {
     </div>
   </div>
   <div v-if="userSession?.session?.user">
-    {{ userSession.session.user.email }}
+    {{ userSession?.session?.user.email }}
   </div>
   <button
     className="p-4 bg-blue-400 text-white rounded-xl hover:bg-blue-500"
     @click="login"
-    v-if="!userSession.session.user"
+    v-if="!userSession?.session?.user"
   >
     Sign In
   </button>
