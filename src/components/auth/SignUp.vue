@@ -1,31 +1,31 @@
 <script setup lang="ts">
-import { supabase } from "@/lib/supabaseInit";
+import { supabase } from '@/utils/supabaseInit'
 
-let email = ref<string>("");
-let password = ref<any>(null);
-let passwordConfirm = ref<any>(null);
-let errorUi = ref<string>("");
-let showEmailVerification = ref<boolean>(false);
+let email = ref<string>('')
+let password = ref<any>(null)
+let passwordConfirm = ref<any>(null)
+let errorUi = ref<string>('')
+let showEmailVerification = ref<boolean>(false)
 
 const register = async () => {
   if (password.value !== passwordConfirm.value) {
-    errorUi.value = "Passwords do not match";
-    return;
+    errorUi.value = 'Passwords do not match'
+    return
   } else {
     try {
       let { data, error } = await supabase.auth.signUp({
         email: email.value,
         password: password.value,
-      });
+      })
       if (data) {
-        showEmailVerification.value = true;
+        showEmailVerification.value = true
       }
-      if (error) throw error;
-      console.log("data", data);
-      return;
+      if (error) throw error
+      console.log('data', data)
+      return
     } catch (error) {}
   }
-};
+}
 </script>
 
 <template>

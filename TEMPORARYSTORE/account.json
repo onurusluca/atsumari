@@ -1,0 +1,26 @@
+{
+  "kind": "identitytoolkit#GetAccountInfoResponse",
+  "users": [
+    {
+      "localId": "sMEPn5SL0sUcNfgEw2VRIjxBh5g1",
+      "email": "dur2dakka@gmail.com",
+      "displayName": "hickirik dakika",
+      "photoUrl": "https://lh3.googleusercontent.com/a/AEdFTp4mvqYD9qiyBFc2MvNguJL8_C85UNscf6lOfNtz=s96-c",
+      "emailVerified": true,
+      "providerUserInfo": [
+        {
+          "providerId": "google.com",
+          "displayName": "hickirik dakika",
+          "photoUrl": "https://lh3.googleusercontent.com/a/AEdFTp4mvqYD9qiyBFc2MvNguJL8_C85UNscf6lOfNtz=s96-c",
+          "federatedId": "108705535398832847865",
+          "email": "dur2dakka@gmail.com",
+          "rawId": "108705535398832847865"
+        }
+      ],
+      "validSince": "1675008908",
+      "lastLoginAt": "1675008908570",
+      "createdAt": "1675008908569",
+      "lastRefreshAt": "2023-02-05T16:14:15.716Z"
+    }
+  ]
+}

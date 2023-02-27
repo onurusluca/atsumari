@@ -1,0 +1,18 @@
+auth:
+  shared:
+    signInWithGoogle: Sign in with Google
+    or: or
+    email: Email
+    password: Password
+    rememberMe: Remember me
+    forgotPassword: Forgot password?
+    dontHaveAccount: Don't have an account?
+    alreadyHaveAccount: Already have an account?
+    signUp: Sign up
+    signIn: Sign in
+  login:
+    topTitle: Welcome back!
+    subtitle: Sign in to your account
+  signUp:
+    topTitle: Welcome! Let's get started
+    subtitle: Create a new account

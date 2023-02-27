@@ -1,18 +1,32 @@
 <script setup lang="ts">
-import { supabase } from "@/lib/supabaseInit";
-import { userSessionStore } from "@/stores/userSession";
+import { supabase } from '@/utils/supabaseInit'
+import { useAuthStore } from '@/stores/authStore'
 
-// initialize the userSession store
-const userSession = userSessionStore();
+const router = useRouter()
 
-// listen for auth events (e.g. sign in, sign out, refresh)
-// set session based on the auth event
-supabase.auth.onAuthStateChange((event, session) => {
-  console.log(event);
-  userSession.session = session;
-});
+let session = ref()
+const authStore = useAuthStore()
 
-onMounted(() => {});
+onMounted(async () => {
+  // listen for auth events (e.g. sign in, sign out, refresh)
+  // set session based on the auth event
+  supabase.auth.getSession().then(({ data }) => {
+    session.value = data.session
+    authStore.session = data.session
+  })
+
+  supabase.auth.onAuthStateChange((_, _session) => {
+    session.value = _session
+    authStore.session = _session
+  })
+
+  // if the user is already logged in, redirect to the dashboard else show the login page
+  /*   if (authStore.session) {
+    router.push({ name: 'Home' })
+  } else {
+    router.push({ name: 'Login' })
+  } */
+})
 </script>
 
 <template>

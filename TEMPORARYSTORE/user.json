@@ -1,0 +1,48 @@
+{
+  "completedTutorialTasks": [
+    "RW_ONBOARDING_V2_INTRO",
+    "RW_PLAYGROUND_MOVE",
+    "RW_PLAYGROUND_EXPLORE_LOBBY",
+    "RW_PLAYGROUND_WELCOME",
+    "RW_PLAYGROUND_EXPLORE_QUAD"
+  ],
+  "userBeta": false,
+  "createdAt": "2023-01-29T16:15:10.500Z",
+  "hubSpotContactId": "146768201",
+  "lastActive": { "_seconds": 1675008910, "_nanoseconds": 500000000 },
+  "seenTutorial": false,
+  "joinedSpaces": {
+    "0QzJvdHbBbvs479y\\SDPLKGOPKSDO": [
+      "OWNER",
+      "DEFAULT_BUILDER",
+      "GENERAL_MEMBER"
+    ],
+    "cQ8khGw2oQCGKBgG\\myspacey": ["OWNER", "DEFAULT_BUILDER", "GENERAL_MEMBER"]
+  },
+  "adminRoles": [],
+  "wantToUse": false,
+  "anonymous": false,
+  "overAge": false,
+  "name": null,
+  "currentlyEquippedWearables": {
+    "other": "",
+    "jacket": "",
+    "costume": "",
+    "bottom": "FKIYHfShyjYKN88gt04X",
+    "mobility": "",
+    "skin": "KPK1RNe5O32vJ8IhOicy",
+    "hat": "",
+    "shoes": "jWRxPyatM2P0bdzSnf50",
+    "top": "A2yVRD5JNf8XZV2a1CYk",
+    "facial_hair": "",
+    "glasses": "",
+    "hair": "7tXiw1hexotk1d1UcmTM"
+  },
+  "unsubscribed": false,
+  "analytics": false,
+  "seenHomeTutorial": false,
+  "blocked": {},
+  "email": "dur2dakka@gmail.com",
+  "homeSpace": "Nr2n3IWQoWP8dqpw/My Home Space",
+  "outfitString": "{\"skin\":{\"id\":\"KPK1RNe5O32vJ8IhOicy\",\"color\":\"3\",\"name\":\"typical\",\"type\":\"skin\",\"subType\":null,\"style\":null,\"isDefault\":true,\"previewUrl\":\"https://cdn.gather.town/storage.googleapis.com/gather-town.appspot.com/wearables/TmOICrwAjr4PZS9HM2OYi\",\"startDate\":null,\"endDate\":null,\"parts\":[{\"layerId\":\"skin front\",\"spritesheetId\":\"dQCYs4n7O99ksXuBIe33\"}]},\"hair\":{\"id\":\"7tXiw1hexotk1d1UcmTM\",\"color\":\"orange\",\"name\":\"dread ponytail\",\"type\":\"hair\",\"subType\":null,\"style\":null,\"isDefault\":true,\"previewUrl\":\"https://cdn.gather.town/storage.googleapis.com/gather-town.appspot.com/wearables/72QVovkKSCOuV5CTvod74\",\"startDate\":null,\"endDate\":null,\"parts\":[{\"layerId\":\"hair front\",\"spritesheetId\":\"wrz0b9leKaYmumQsuljH\"}]},\"facial_hair\":null,\"top\":{\"id\":\"A2yVRD5JNf8XZV2a1CYk\",\"color\":\"red\",\"name\":\"t shirt\",\"type\":\"top\",\"subType\":null,\"style\":null,\"isDefault\":true,\"previewUrl\":\"https://cdn.gather.town/storage.googleapis.com/gather-town.appspot.com/wearables/DsZ7PTW_fYgLOJtVh1gF4\",\"startDate\":null,\"endDate\":null,\"parts\":[{\"layerId\":\"top front\",\"spritesheetId\":\"pPyQD6Dd0IIAxWb8Okcj\"}]},\"bottom\":{\"id\":\"FKIYHfShyjYKN88gt04X\",\"color\":\"viridian\",\"name\":\"pants\",\"type\":\"bottom\",\"subType\":null,\"style\":null,\"isDefault\":true,\"previewUrl\":\"https://cdn.gather.town/storage.googleapis.com/gather-town.appspot.com/wearables/jXyH0W2Y0qL81OxhneuTJ\",\"startDate\":null,\"endDate\":null,\"parts\":[{\"layerId\":\"bottom front\",\"spritesheetId\":\"bi2NKG5cTSfkkNd8rltf\"}]},\"shoes\":{\"id\":\"jWRxPyatM2P0bdzSnf50\",\"color\":\"black\",\"name\":\"generic\",\"type\":\"shoes\",\"subType\":null,\"style\":null,\"isDefault\":true,\"previewUrl\":\"https://cdn.gather.town/storage.googleapis.com/gather-town.appspot.com/wearables/wE2kyECTzosMMoWoKO52S\",\"startDate\":null,\"endDate\":null,\"parts\":[{\"layerId\":\"shoes front\",\"spritesheetId\":\"Thh1O95hOZKq4yyTmVQD\"}]},\"hat\":null,\"glasses\":null,\"other\":null,\"costume\":null,\"mobility\":null,\"jacket\":null}"
+}

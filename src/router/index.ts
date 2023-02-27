@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
-import { userSessionStore } from "@/stores/userSession";
+import { useAuthStore } from "@/stores/authStore";
 
 import HomeView from "../views/Home.vue";
 
@@ -26,12 +26,12 @@ const router = createRouter({
     {
       path: "/login",
       name: "Login",
-      component: () => import("../views/auth/Login.vue"),
+      component: () => import("../views/auth/LoginView.vue"),
     },
     {
       path: "/register",
       name: "Register",
-      component: () => import("../views/auth/Register.vue"),
+      component: () => import("../views/auth/RegisterView.vue"),
     },
     {
       path: "/account",
@@ -43,7 +43,7 @@ const router = createRouter({
 
 // Check if the page requires authentication, if so, check if the user is logged in. If not, redirect to the home page.
 router.beforeEach((to, from, next) => {
-  const userSession = userSessionStore();
+  const userSession = useAuthStore();
 
   if (to.meta.needsAuth) {
     if (userSession.session) {
