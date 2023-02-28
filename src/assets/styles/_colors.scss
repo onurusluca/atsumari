@@ -1,14 +1,52 @@
 :root {
---main-color: #FF4755;
---secondary-color: #98DB7C;
+    // Main
+    --main-color: #4FD1C5;
+    --secondary-color: #98DB7C;
 
---darker-green: #82D361;
---gray-black: #5B5B5B;
+    // Brand
+    --brand-color-red: #FF4755;
+    --brand-color-green: #98DB7C;
 
---orange: #f45d08;
+    // Colors
+    --darker-green: #82D361;
+    --gray-black: #5B5B5B;
+    --orange: #f45d08;
+
+
+    // Texts
+    --font-color: #4B4B4B;
+    --link-color: #4F46E5;
+    --pale-font: #585858;
+    --anti-color: #333; // for dark or light mode change
+
+    // Backgrounds
+    --bg-color: #F5F5F5;
+    --nav-bg-color: #fff;
+    --menu-bg-color: #fff;
+    --input-bg-color: #fff;
+
+    // Borders
+    --border-color: #E5E5E5;
+    --border-color-darker: #cccccc;
+    --input-focus-border-color: #4F46E5;
+
+    // Shadows
+    --shadow-color: #d4d4d4bf;
+
+    // Others
+    --place-holder-color: #BDBDBD;
+    --disabled-color: #e7e7e7;
+
+
+    // Hovered
+    --link-color-hover: #4139d8;
+
+    // Buttons
+    --main-btn-bg-color: #4FD1C5;
+    --main-btn-bg-color-hover: #3dc2b5;
+
+    --outline-btn-color: #ffffff;
+    --outline-btn-color-hover: #f1f1f1;
 }
 
-.dark {
-
-
-}
+.dark {}

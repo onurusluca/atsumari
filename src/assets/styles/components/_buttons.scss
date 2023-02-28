@@ -1,0 +1,43 @@
+.btn {
+  display: flex;
+  justify-content: center;
+
+  width: max-content;
+  height: max-content;
+  padding: 0.6rem 1rem;
+
+  border-radius: 0.3rem;
+  box-shadow: $btn-box-shadow;
+
+  cursor: pointer;
+  transition: background 100ms;
+
+  // Icon
+  svg {
+    color: #fff;
+  }
+
+  &:focus {
+    outline: max(1px, 0.15em) solid var(--input-focus-border-color);
+  }
+}
+
+.btn-main {
+  color: #fff;
+
+  background: var(--main-btn-bg-color);
+  border: none;
+
+  &:hover {
+    background: var(--main-btn-bg-color-hover);
+  }
+}
+
+.btn-outline {
+  background: transparent;
+  border: 2px solid var(--border-color);
+
+  &:hover {
+    background: var(--outline-btn-color-hover);
+  }
+}

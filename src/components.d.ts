@@ -10,11 +10,14 @@ declare module '@vue/runtime-core' {
     Account: typeof import('./components/auth/Account.vue')['default']
     Loading: typeof import('./components/nav/Loading.vue')['default']
     Login: typeof import('./components/auth/Login.vue')['default']
+    'Logos:googleIcon': typeof import('~icons/logos/google-icon')['default']
     Navbar: typeof import('./components/nav/Navbar.vue')['default']
     Register: typeof import('./components/auth/Register.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     SignIn: typeof import('./components/auth/SignIn.vue')['default']
     SignUp: typeof import('./components/auth/SignUp.vue')['default']
+    'SvgSpinners:90RingWithBg': typeof import('~icons/svg-spinners/90-ring-with-bg')['default']
+    'Teenyicons:lockSolid': typeof import('~icons/teenyicons/lock-solid')['default']
   }
 }

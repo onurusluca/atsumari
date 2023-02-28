@@ -6,8 +6,9 @@
 @import "typography";
 @import "transitions";
 @import "z-index.scss";
+@import "library.scss";
 
-
+@import "components/inputs.scss";
 @import "components/buttons";
 @import "components/forms";
 @import "components/loading-animations";

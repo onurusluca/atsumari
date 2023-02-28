@@ -9,5 +9,58 @@ body {
   font-weight: 400;
   font-size: 16px;
   line-height: 1.5;
-  color: #333;
+  text-rendering: optimizeLegibility;
+}
+
+h1 {
+  font-size: 3.5rem;
+  margin: 0;
+}
+
+h2 {
+  font-size: 3rem;
+  margin: 0;
+
+}
+
+h3 {
+  font-size: 2.5rem;
+  margin: 0;
+
+}
+
+h4 {
+  font-size: 2rem;
+  margin: 0;
+
+}
+
+h5 {
+  font-size: 1.5rem;
+  margin: 0;
+
+}
+
+h6 {
+  font-size: 1.25rem;
+  margin: 0;
+
+}
+
+
+p {
+  font-size: 1rem;
+  color: var(--font-color);
+  margin: 0;
+
+}
+
+a {
+  text-decoration: none;
+  color: var(--link-color);
+  transition: color 100ms;
+
+  &:hover {
+    filter: brightness(1.5);
+  }
 }

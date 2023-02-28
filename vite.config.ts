@@ -8,6 +8,7 @@ import Components from 'unplugin-vue-components/vite'
 import AutoImport from 'unplugin-auto-import/vite'
 import Icons from 'unplugin-icons/vite'
 import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite'
+import IconsResolver from 'unplugin-icons/resolver'
 
 // https://vitejs.dev/config/
 
@@ -58,6 +59,13 @@ export default defineConfig(({ mode }) => {
         dts: 'src/components.d.ts',
         // allow auto import and register components used in markdown
         include: [/\.vue$/, /\.vue\?vue/, /\.md$/],
+        resolvers: [
+          // auto import icons
+          // https://github.com/antfu/unplugin-icons#auto-importing
+          IconsResolver({
+            prefix: false,
+          }),
+        ],
       }),
 
       Icons({

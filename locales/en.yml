@@ -1,9 +1,68 @@
+##### GLOBAL TEXTS #####
+
+buttons:
+  # Using quotes to avoid conflict with the YAML syntax https://yaml.org/type/bool.html
+  textYes: 'Yes'
+  textNo: 'No'
+  ok: OK
+  close: Close
+  save: Save
+  create: Create
+  signUp: Sign up
+  signIn: Sign in
+
+forms:
+  inputs:
+    email: Email
+    password: Password
+    passwordConfirmation: Password Confirmation
+    rememberMe: Remember me
+
+days:
+  monday: Monday
+  tuesday: Tuesday
+  wednesday: Wednesday
+  thursday: Thursday
+  friday: Friday
+  saturday: Saturday
+  sunday: Sunday
+  today: Today
+  tomorrow: Tomorrow
+  yesterday: Yesterday
+  thisWeek: This Week
+  lastWeek: Last Week
+  thisMonth: This Month
+  lastMonth: Last Month
+  thisYear: This Year
+  month: month
+  dayOfTheWeek: Week Day
+  dayOfTheMonth: Month Day
+  adjectives:
+    daily: Daily
+    weekly: Weekly
+    monthly: Monthly
+
+times:
+  times: Times
+  hours: Hours
+  minutes: Minutes
+  seconds: Seconds
+
+modals:
+  askSaveConfirm: Do you want to save these changes?
+  askCreateConfirm: Do you want to create?
+  askDeleteConfirm: Do you want to delete?
+
+toasts:
+  saved: Saved!
+  created: Created!
+  deleted: Deleted!
+
+##### AUTH #####
 auth:
   shared:
     signInWithGoogle: Sign in with Google
     or: or
-    email: Email
-    password: Password
     rememberMe: Remember me
     forgotPassword: Forgot password?
     dontHaveAccount: Don't have an account?
@@ -12,7 +71,7 @@ auth:
     signIn: Sign in
   login:
     topTitle: Welcome back!
-    subtitle: Sign in to your account
+    subTitle: Sign in to your account
   signUp:
     topTitle: Welcome! Let's get started
-    subtitle: Create a new account
+    subTitle: Create a new account
