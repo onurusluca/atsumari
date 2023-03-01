@@ -6,11 +6,13 @@ input[type="checkbox"] {
   font: inherit;
   width: 1.2em;
   height: 1.2em;
-  border: 0.1em solid var(--border-color-darker);
-  border-radius: 0.2em;
+  border: 0.1em solid var(--border-darker);
+  border-radius: 0.3em;
 
   display: grid;
   place-content: center;
+
+  cursor: pointer;
 }
 
 input[type="checkbox"]::before {
@@ -23,15 +25,17 @@ input[type="checkbox"]::before {
   transition: 60ms transform ease-in-out;
   box-shadow: inset 1em 1em var(--anti-color);
   /* Windows High Contrast Mode */
-  background-color: red;
+  background-color: CanvasText;
 }
 
 input[type="checkbox"]:checked {
-  background-color: var(--main-color);
+  background-color: var(--primary-100);
 }
 
 input[type="checkbox"]:checked::before {
   transform: scale(1);
+  color: red !important;
+
 }
 
 input[type="checkbox"]:focus {
@@ -39,6 +43,6 @@ input[type="checkbox"]:focus {
 }
 
 input[type="checkbox"]:disabled {
-  color: var(--disabled-color);
+  background-color: var(--disabled-color);
   cursor: not-allowed;
 }

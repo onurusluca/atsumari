@@ -1,6 +1,7 @@
 .btn {
   display: flex;
   justify-content: center;
+  align-items: center;
 
   width: max-content;
   height: max-content;
@@ -8,6 +9,7 @@
 
   border-radius: 0.3rem;
   box-shadow: $btn-box-shadow;
+  font-weight: 500;
 
   cursor: pointer;
   transition: background 100ms;
@@ -18,26 +20,27 @@
   }
 
   &:focus {
-    outline: max(1px, 0.15em) solid var(--input-focus-border-color);
+    outline: max(1px, 0.15em) solid var(--input-focus-border);
   }
 }
 
 .btn-main {
   color: #fff;
-
-  background: var(--main-btn-bg-color);
+  background: var(--main-btn-bg);
   border: none;
 
   &:hover {
-    background: var(--main-btn-bg-color-hover);
+    background: var(--main-btn-bg-hover);
   }
 }
 
+
+
 .btn-outline {
   background: transparent;
-  border: 2px solid var(--border-color);
+  border: 2px solid var(--border);
 
   &:hover {
-    background: var(--outline-btn-color-hover);
+    background: var(--outline-btn-hover);
   }
 }

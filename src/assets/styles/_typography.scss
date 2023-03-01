@@ -2,7 +2,7 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap');
 
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;300;400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;400;500;700&display=swap');
 
 body {
   font-family: 'Poppins', sans-serif;
@@ -50,14 +50,14 @@ h6 {
 
 p {
   font-size: 1rem;
-  color: var(--font-color);
+  color: var(--text-100);
   margin: 0;
 
 }
 
 a {
   text-decoration: none;
-  color: var(--link-color);
+  color: var(--link);
   transition: color 100ms;
 
   &:hover {

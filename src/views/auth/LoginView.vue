@@ -1,10 +1,8 @@
-<script setup lang="ts">
-import type SignInVue from '@/components/auth/SignIn.vue'
-</script>
+<script setup lang="ts"></script>
 
 <template>
   <div class="login-view">
-    <SignIn />
+    <Auth auth-type="login" />
   </div>
 </template>
 

@@ -1,5 +1,5 @@
 <script setup>
-import { supabase } from '@/utils/useAuth'
+import { supabase } from '@/utils/supabaseInit'
 
 const props = defineProps(['session'])
 const { session } = toRefs(props)

@@ -1,11 +1,16 @@
 :root {
-    // Main
-    --main-color: #4FD1C5;
-    --secondary-color: #98DB7C;
+    // Primary
+    --primary-100: #00ebc7;
+    --primary-200: #ff5470;
+    --primary-300: #19725D;
+
+    // Accent
+    --accent-100: #f5be0b;
+    --accent-200: #fef1c7;
 
     // Brand
-    --brand-color-red: #FF4755;
-    --brand-color-green: #98DB7C;
+    --brand-red: #FF4755;
+    --brand-green: #98DB7C;
 
     // Colors
     --darker-green: #82D361;
@@ -14,39 +19,57 @@
 
 
     // Texts
-    --font-color: #4B4B4B;
-    --link-color: #4F46E5;
+    --text-100: #292524;
+    --text-200: #78716c;
+    --link: #4F46E5;
     --pale-font: #585858;
+    --paler-font: #8c8c8c;
+    --palest-font: #b3b3b3;
+
     --anti-color: #333; // for dark or light mode change
 
     // Backgrounds
-    --bg-color: #F5F5F5;
-    --nav-bg-color: #fff;
-    --menu-bg-color: #fff;
-    --input-bg-color: #fff;
+    --bg-100: #fafaf9;
+    --bg-200: #f5f5f4;
+    --bg-300: #E0E2E5;
+    --input-bg: #fff;
 
     // Borders
-    --border-color: #E5E5E5;
-    --border-color-darker: #cccccc;
-    --input-focus-border-color: #4F46E5;
+    --border: #E5E5E5;
+    --border-darker: #cccccc;
+    --input-focus-border: var(--primary-100);
 
     // Shadows
-    --shadow-color: #d4d4d4bf;
+    --shadow: #d4d4d4bf;
 
     // Others
-    --place-holder-color: #BDBDBD;
-    --disabled-color: #e7e7e7;
+    --place-holder: #BDBDBD;
+    --disabled: #e7e7e7;
 
 
     // Hovered
     --link-color-hover: #4139d8;
 
     // Buttons
-    --main-btn-bg-color: #4FD1C5;
-    --main-btn-bg-color-hover: #3dc2b5;
+    --main-btn-bg: #4FD1C5;
+    --main-btn-bg-hover: #3dc2b5;
 
-    --outline-btn-color: #ffffff;
-    --outline-btn-color-hover: #f1f1f1;
+    --outline-btn: #ffffff;
+    --outline-btn-hover: #f5f5f5;
 }
 
-.dark {}
+.dark {
+    /*     --primary-100:#00ADB5;
+    --primary-200:#AAE3E2;
+    --primary-300:#fdf6fd;
+    --accent-100:#AC7DD2;
+    --accent-200:#fff4ff;
+    --text-100:#EEEEEE;
+    --text-200:#C5C5C5;
+    --bg-100:#222831;
+    --bg-200:#393E46;
+    --bg-300:#454e59;
+       */
+
+
+}

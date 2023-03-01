@@ -8,11 +8,16 @@ export {}
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
     Account: typeof import('./components/auth/Account.vue')['default']
+    Auth: typeof import('./components/auth/Auth.vue')['default']
+    'Carbon:email': typeof import('~icons/carbon/email')['default']
+    'Carbon:locked': typeof import('~icons/carbon/locked')['default']
     Loading: typeof import('./components/nav/Loading.vue')['default']
     Login: typeof import('./components/auth/Login.vue')['default']
     'Logos:googleIcon': typeof import('~icons/logos/google-icon')['default']
     Navbar: typeof import('./components/nav/Navbar.vue')['default']
     Register: typeof import('./components/auth/Register.vue')['default']
+    'Ri:lockPasswordLine': typeof import('~icons/ri/lock-password-line')['default']
+    'Ri:mailLine': typeof import('~icons/ri/mail-line')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     SignIn: typeof import('./components/auth/SignIn.vue')['default']

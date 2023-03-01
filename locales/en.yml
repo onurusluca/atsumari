@@ -10,6 +10,7 @@ buttons:
   create: Create
   signUp: Sign up
   signIn: Sign in
+  createAccount: Create Account
 
 forms:
   inputs:
@@ -65,13 +66,14 @@ auth:
     or: or
     rememberMe: Remember me
     forgotPassword: Forgot password?
-    dontHaveAccount: Don't have an account?
-    alreadyHaveAccount: Already have an account?
+    dontHaveAccount: Don't have an account? Sign up
+    alreadyHaveAccount: Already have an account? Sign in
     signUp: Sign up
     signIn: Sign in
   login:
     topTitle: Welcome back!
     subTitle: Sign in to your account
-  signUp:
-    topTitle: Welcome! Let's get started
+  register:
+    topTitle: Let's get started!
     subTitle: Create a new account
+    checkEmail: Check your email to confirm your account

@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 
 export const useAuthStore = defineStore('authStore', {
   state: () => {
-    return { session: {} as Session }
+    return { session: {} }
   },
   actions: {
     increment() {},
