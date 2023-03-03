@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { supabase } from '@/utils/supabaseInit'
 import { useAuthStore } from '@/stores/authStore'
+import Dashboard from './layouts/dashboard.vue'
 
 const router = useRouter()
+const authStore = useAuthStore()
 
 let session = ref()
-const authStore = useAuthStore()
 
 onMounted(async () => {
   // listen for auth events (e.g. sign in, sign out, refresh)
@@ -13,29 +14,27 @@ onMounted(async () => {
   supabase.auth.getSession().then(({ data }) => {
     session.value = data.session
     authStore.session = data.session
+    authStore.user = data.session?.user
   })
 
   supabase.auth.onAuthStateChange((_, _session) => {
     session.value = _session
     authStore.session = _session
+    authStore.user = _session?.user
   })
-
-  // if the user is already logged in, redirect to the dashboard else show the login page
-  /*   if (authStore.session) {
-    router.push({ name: 'Home' })
-  } else {
-    router.push({ name: 'Login' })
-  } */
 })
+
+// if the user is already logged in, redirect to the dashboard else show the login page
+/* if (authStore.session) {
+  router.push({ name: 'Home' })
+} else {
+  router.push({ name: 'Login' })
+} */
 </script>
 
 <template>
   <main>
-    <router-view v-slot="{ Component }">
-      <keep-alive>
-        <component :is="Component" />
-      </keep-alive>
-    </router-view>
+    <Dashboard />
   </main>
 </template>
 

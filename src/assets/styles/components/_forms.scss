@@ -24,7 +24,7 @@
   box-shadow: 0 0px 2px 0 var(--shadow);
 
   border: 1px solid var(--border);
-  border-radius: 0.3rem;
+  border-radius: 0.5rem;
   outline: 2px solid transparent;
 
   &:focus {
@@ -37,7 +37,6 @@
     opacity: 0.6;
   }
 
-
 }
 
 
@@ -45,9 +44,17 @@
 .input-single__icon {
   position: absolute;
   right: .5rem;
-  top: 2.5rem;
+  top: 2.35rem;
   color: var(--palest-font);
   font-size: 1.1rem;
+}
+
+.input-single__clickable-icon {
+  cursor: pointer;
+
+  &:hover {
+    color: var(--f-color);
+  }
 }
 
 .form__with-icon {

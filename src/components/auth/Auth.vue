@@ -5,7 +5,7 @@ const router = useRouter()
 const { t } = useI18n()
 const authStore = useAuthStore()
 
-defineProps({
+const props = defineProps({
   authType: String,
 })
 
@@ -14,10 +14,16 @@ const emit = defineEmits(['change', 'delete'])
 let email = ref<string>('')
 let password = ref<any>(null)
 let loading = ref(false)
-let rememberMeChecked = ref(false)
+let rememberMeChecked = ref<boolean>(false)
 let errorUi = ref<string>('')
 let showEmailVerification = ref<boolean>(false)
+/* const authLocalStorage = useStorage('atsumari_auth', { rememberMeEmail: '' })
+ */
+onMounted(() => {})
 
+/****************************************
+ * API CALLS
+ ****************************************/
 const handleLogin = async () => {
   try {
     loading.value = true
@@ -26,7 +32,7 @@ const handleLogin = async () => {
       password: password.value,
     })
     if (error) {
-      errorUi.value = 'auth.register.checkEmail'
+      errorUi.value = error.message
     } else {
       router.push({ name: 'Home' })
     }
@@ -61,6 +67,13 @@ const handleRegister = async () => {
     loading.value = false
   }
 }
+
+/****************************************
+ * HELPERS
+ ****************************************/
+// Reveal password button
+let revealPasswordButtonRef = ref<HTMLElement>()
+const { pressed } = useMousePressed({ target: revealPasswordButtonRef })
 </script>
 
 <template>
@@ -93,7 +106,7 @@ const handleRegister = async () => {
       </p>
     </div>
 
-    <!-- auth form -->
+    <!-- Auth form -->
     <form
       class="auth__form"
       @submit.prevent="authType === 'login' ? handleLogin() : handleRegister()"
@@ -102,26 +115,40 @@ const handleRegister = async () => {
         <p class="form__label">{{ t('forms.inputs.email') }}</p>
         <input
           v-model="email"
-          type="text"
+          autofocus
+          type="email"
           name="email"
           id="email"
           required
           class="form__text-input"
         />
-        <ri:mail-line class="input-single__icon" />
       </div>
 
       <div class="form__input-single form__with-icon">
         <p class="form__label">{{ t('forms.inputs.password') }}</p>
         <input
           v-model="password"
-          type="password"
+          :type="pressed ? 'text' : 'password'"
           name="password"
           id="password"
           required
           class="form__text-input"
         />
-        <ri:lock-password-line class="input-single__icon" />
+        <button
+          v-if="!pressed"
+          ref="revealPasswordButtonRef"
+          class="btn-no-style input-single__icon input-single__clickable-icon"
+        >
+          <ri:eye-close-line />
+        </button>
+        <button
+          v-else
+          class="btn-no-style input-single__icon input-single__clickable-icon"
+        >
+          <ri:eye-line />
+        </button>
+
+        <!-- <ri:lock-password-line class="input-single__icon" /> -->
       </div>
 
       <!-- Remember me, Forgot password -->
@@ -136,17 +163,20 @@ const handleRegister = async () => {
 
           <p for="rememberMe" class="ml-s">{{ t('forms.inputs.rememberMe') }}</p>
         </div>
-        <router-link to="" class="mb-s">
+        <router-link to="" class="auth__link">
           {{ t('auth.shared.forgotPassword') }}
         </router-link>
       </div>
 
-      <p>{{ t(errorUi) }}</p>
+      <div v-if="errorUi" class="form__error">
+        <p>{{ errorUi }}</p>
+        <!--  <p>{{ t(errorUi) }}</p> -->
+      </div>
 
       <!-- Submit button -->
       <button type="submit" class="btn form__submit-btn" :disabled="loading">
         <span v-if="!loading">
-          <!--  <teenyicons:lock-solid class="submit-btn__lock-icon" /> -->
+          <teenyicons:lock-solid class="submit-btn__lock-icon" />
 
           {{
             authType === 'login' ? t('buttons.signIn') : t('buttons.createAccount')
@@ -157,13 +187,19 @@ const handleRegister = async () => {
     </form>
 
     <div class="auth__bottom">
-      <router-link :to="{ name: `${authType === 'login' ? 'Register' : 'Login'}` }">
+      <p>
         {{
           authType === 'login'
             ? t('auth.shared.dontHaveAccount')
             : t('auth.shared.alreadyHaveAccount')
         }}
-      </router-link>
+        <router-link
+          :to="{ name: `${authType === 'login' ? 'Register' : 'Login'}` }"
+          class="auth__link"
+        >
+          {{ authType === 'login' ? t('auth.shared.signUp') : t('auth.shared.signIn') }}
+        </router-link></p
+      >
     </div>
   </div>
 </template>
@@ -175,8 +211,8 @@ const handleRegister = async () => {
   height: max-content;
   padding: 2rem;
 
-  border: 1px solid var(--border);
-  box-shadow: 0 0 0.5rem var(--shadow);
+  // border: 1px solid var(--border);
+  // box-shadow: 0 0 0.5rem var(--shadow);
   .auth__top {
     display: flex;
     flex-direction: column;
@@ -217,10 +253,10 @@ const handleRegister = async () => {
       width: 100%;
       position: relative;
 
-      margin-top: 3rem;
+      margin-top: 2rem;
 
       color: #fff;
-      background-color: #00ebc7;
+      background: var(--main-btn-bg);
       border: none;
 
       &:hover {
@@ -241,9 +277,24 @@ const handleRegister = async () => {
     justify-content: space-between;
     align-items: center;
     margin-top: 2rem;
+  }
 
-    a {
-      text-decoration: underline;
+  .form__error {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 2rem 0 0 0;
+
+    p {
+      color: var(--primary-200);
+    }
+  }
+
+  .auth__link {
+    color: var(--primary-100);
+    font-weight: bold;
+    &:hover {
+      filter: brightness(0.9);
     }
   }
 }

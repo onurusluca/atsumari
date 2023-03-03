@@ -69,6 +69,7 @@ export default defineConfig(({ mode }) => {
       }),
 
       Icons({
+        autoInstall: true,
         /* https://github.com/antfu/unplugin-icons */
       }),
 

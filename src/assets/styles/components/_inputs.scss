@@ -23,7 +23,7 @@ input[type="checkbox"]::before {
   transform: scale(0);
   transform-origin: bottom;
   transition: 60ms transform ease-in-out;
-  box-shadow: inset 1em 1em var(--anti-color);
+  box-shadow: inset 1em 1em var(--border-color);
   /* Windows High Contrast Mode */
   background-color: CanvasText;
 }
