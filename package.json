@@ -13,6 +13,7 @@
   "dependencies": {
     "@intlify/unplugin-vue-i18n": "^0.8.2",
     "@supabase/supabase-js": "^2.10.0",
+    "@vueuse/components": "^9.13.0",
     "@vueuse/core": "^9.13.0",
     "@vueuse/head": "^1.1.15",
     "nanoid": "^4.0.1",

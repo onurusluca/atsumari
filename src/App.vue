@@ -2,8 +2,12 @@
 import { supabase } from '@/utils/supabaseInit'
 import { useAuthStore } from '@/stores/authStore'
 import Dashboard from './layouts/dashboard.vue'
+import Default from './layouts/default.vue'
+import NoLayout from './layouts/noLayout.vue'
 
 const router = useRouter()
+const route = useRouter()
+
 const authStore = useAuthStore()
 
 let session = ref()
@@ -25,17 +29,40 @@ onMounted(async () => {
 })
 
 // if the user is already logged in, redirect to the dashboard else show the login page
-/* if (authStore.session) {
-  router.push({ name: 'Home' })
-} else {
-  router.push({ name: 'Login' })
-} */
+watch(
+  () => authStore.session,
+  (session) => {
+    if (session) {
+      router.push({ name: 'Home' })
+    } else {
+      router.push({ name: 'Login' })
+    }
+  }
+)
+
+// Layout logic based on the route
+// Dashboard and default usage(in-room) have different layouts
+const layoutLogic = computed(() => {
+  if (
+    route.currentRoute.value.name === 'Login' ||
+    route.currentRoute.value.name === 'Register'
+  ) {
+    return 'no-layout'
+  } else if (
+    route.currentRoute.value.name === 'Home' ||
+    route.currentRoute.value.name === 'Spaces'
+  ) {
+    return 'dashboard'
+  } else if (route.currentRoute.value.path.includes('room')) {
+    return 'default'
+  }
+})
 </script>
 
 <template>
-  <main>
-    <Dashboard />
-  </main>
+  <NoLayout v-if="layoutLogic === 'no-layout'" />
+  <Dashboard v-if="layoutLogic === 'dashboard'" />
+  <Default v-if="layoutLogic === 'default'" />
 </template>
 
 <style lang="scss"></style>

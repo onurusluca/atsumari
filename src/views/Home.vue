@@ -2,6 +2,7 @@
 import { supabase } from '@/utils/supabaseInit'
 import { useAuthStore } from '@/stores/authStore'
 
+const { t } = useI18n()
 const authStore = useAuthStore()
 const router = useRouter()
 
@@ -35,9 +36,9 @@ const handleCreateSpace = async () => {
       },
     ])
     if (error) throw error
-    console.log('Space created!', data)
+    console.log('Space created!: ', data)
   } catch (error: any) {
-    alert(error.message)
+    console.log('CREATE SPACE CATCH ERROR: ', error.message)
   }
 }
 
@@ -49,17 +50,20 @@ const handleReadSpace = async () => {
       .eq('user_id', authStore?.session?.user?.id)
     if (spaces) {
       userSpaces.value.push(spaces)
+      console.log('Space read!: ', spaces)
     } else {
     }
     if (error) throw error
   } catch (error: any) {
-    console.log('CATCH ERROR: ', error.message)
+    console.log('READ SPACE CATCH ERROR: ', error.message)
   }
 }
 </script>
 
 <template>
-  <div class="home"> </div>
+  <div class="home">
+    <button className="btn" @click="logOut">{{ t('auth.logout') }}</button>
+  </div>
   <!--   <router-link v-if="!authStore?.session?.user" :to="{ name: 'Register' }"
     >Register</router-link
   >

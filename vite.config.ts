@@ -38,6 +38,15 @@ export default defineConfig(({ mode }) => {
       __APP_ENV__: env.APP_ENV,
     },
 
+    css: {
+      preprocessorOptions: {
+        scss: {
+          // We need to import the variables and mixins here so that they are available in the global scope
+          additionalData: `@import "./src/assets/styles/_z-index.scss"; @import "./src/assets/styles/_variables.scss"; @import "./src/assets/styles/_mixins.scss"; @import "./src/assets/styles/_media-queries.scss";`,
+        },
+      },
+    },
+
     plugins: [
       vue({ include: [/\.vue$/] }),
 

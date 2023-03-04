@@ -4,10 +4,101 @@
     <meta charset="UTF-8" />
     <link rel="icon" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/public/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/public/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/public/favicon-16x16.png" />
+    <link rel="manifest" href="/public/site.webmanifest" />
     <title>Atsumari</title>
+
+    <script>
+      // See if the user has dark mode enabled, or if they have a preference stored in localStorage and if so use that.
+      ;(function () {
+        const prefersDark =
+          window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        const setting = localStorage.getItem('vueuse-color-scheme') || 'auto'
+        if (setting === 'dark' || (prefersDark && setting !== 'light'))
+          document.documentElement.classList.toggle('dark', true)
+      })()
+    </script>
   </head>
   <body>
-    <div id="app"></div>
+    <div id="app">
+      <!-- Loading animation to show until app mount -->
+      <!--   <section id="app-loading-animation">
+        <div class="loading-animation">
+          <div></div>
+          <div></div>
+        </div>
+      </section> -->
+    </div>
+
+    <!-- For modal using teleport: https://vuejs.org/guide/built-ins/teleport.html#teleport  -->
+    <div id="modal"></div>
     <script type="module" src="/src/main.ts"></script>
+
+    <style>
+      #app-loading-animation {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        font-family: 'Noto Sans JP', sans-serif;
+        background: #000000d2 !important;
+        backdrop-filter: blur(2px);
+        z-index: 9910;
+      }
+      .loading-animation {
+        display: inline-block;
+        position: relative;
+        width: 80px;
+        height: 80px;
+      }
+      .loading-animation div {
+        position: absolute;
+        border: 4px solid #00ebc7;
+        opacity: 1;
+        border-radius: 50%;
+        animation: loading-animation 1s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+      }
+      .loading-animation div:nth-child(2) {
+        animation-delay: -0.5s;
+        border: 4px solid #00ebc7;
+      }
+      @keyframes loading-animation {
+        0% {
+          top: 36px;
+          left: 36px;
+          width: 0;
+          height: 0;
+          opacity: 0;
+        }
+        4.9% {
+          top: 36px;
+          left: 36px;
+          width: 0;
+          height: 0;
+          opacity: 0;
+        }
+        5% {
+          top: 36px;
+          left: 36px;
+          width: 0;
+          height: 0;
+          opacity: 1;
+        }
+        100% {
+          top: 0;
+          left: 0;
+          width: 72px;
+          height: 72px;
+          opacity: 0;
+        }
+      }
+    </style>
   </body>
 </html>

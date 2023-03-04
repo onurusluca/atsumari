@@ -7,12 +7,13 @@
   height: max-content;
   padding: 0.6rem 1rem;
 
+  border: none;
   border-radius: 0.5rem;
   box-shadow: $btn-box-shadow;
   font-weight: 500;
 
   cursor: pointer;
-  transition: background 100ms;
+  transition: background 60ms;
 
   // Icon
   svg {
@@ -24,18 +25,33 @@
   }
 }
 
-.btn-main {
-  color: #fff;
-  background: var(--main-btn-bg);
+.btn-no-style {
+  background: transparent;
   border: none;
+}
+
+.btn-icon {
+  background: transparent;
+  border: none;
+  line-height: 0;
+  padding: 0.3rem 1rem;
+
+  border-radius: 0.5rem;
+  cursor: pointer;
 
   &:hover {
-    background: var(--main-btn-bg-hover);
+    background: var(--icon-btn-hover);
+
+    // icon
+    svg {}
+  }
+
+  &:focus {
+    outline: max(1px, 0.15em) solid var(--input-focus-border);
   }
 }
 
-
-
+// General use
 .btn-outline {
   background: transparent;
   border: 2px solid var(--border);
@@ -45,8 +61,23 @@
   }
 }
 
-.btn-no-style {
-  background: transparent;
-  border: none;
+.btn-main {
 
+  color: #fff;
+  background: var(--main-btn-bg);
+
+  &:hover {
+    background: var(--main-btn-bg-hover);
+  }
+}
+
+
+.btn-create {
+
+  color: #fff;
+  background: var(--create-btn-bg);
+
+  &:hover {
+    background: var(--create-btn-bg-hover);
+  }
 }

@@ -69,7 +69,7 @@ const handleRegister = async () => {
 }
 
 /****************************************
- * HELPERS
+ * UI EVENTS
  ****************************************/
 // Reveal password button
 let revealPasswordButtonRef = ref<HTMLElement>()

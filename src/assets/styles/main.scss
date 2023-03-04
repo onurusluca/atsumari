@@ -2,13 +2,14 @@
 @import "variables";
 @import "global";
 @import "colors";
-@import "medias";
+@import "media-queries";
 @import "typography";
 @import "transitions";
-@import "z-index.scss";
-@import "library.scss";
+@import "z-index";
+@import "library";
 
-@import "components/inputs.scss";
+@import "components/inputs";
 @import "components/buttons";
 @import "components/forms";
 @import "components/loading-animations";
+@import "components/dropdowns";

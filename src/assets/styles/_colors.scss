@@ -15,7 +15,6 @@
   // Colors
   --darker-green: #82D361;
   --gray-black: #5B5B5B;
-  --orange: #f45d08;
 
 
   // Texts
@@ -41,6 +40,7 @@
 
   // Shadows
   --shadow: #d4d4d4bf;
+  --shadow-darker: #b3b3b3bf;
 
   // Others
   --place-holder: #BDBDBD;
@@ -53,13 +53,16 @@
   // Buttons
   --main-btn-bg: #00ebc7;
   --main-btn-bg-hover: #3dc2b5;
-
   --outline-btn: #ffffff;
   --outline-btn-hover: #f5f5f5;
+  --create-btn-bg: #2CC56F;
+  --create-btn-bg-hover: #20b661;
+  --icon-btn-hover: #e2e2e2;
+
 }
 
 .dark {
-  --primary-100: #00ADB5;
+  /*   --primary-100: #00ADB5;
   --primary-200: #AAE3E2;
   --primary-300: #fdf6fd;
   --accent-100: #AC7DD2;
@@ -81,5 +84,5 @@
   --bg-200: #393E46;
   --bg-300: #454e59;
 
-
+ */
 }

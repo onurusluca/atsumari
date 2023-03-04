@@ -77,3 +77,7 @@ auth:
     topTitle: Let's get started!
     subTitle: Create a new account
     checkEmail: Check your email to confirm your account
+  logout: Sign Out
+
+space:
+  createSpace: Create Space

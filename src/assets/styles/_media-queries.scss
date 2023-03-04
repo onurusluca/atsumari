@@ -15,36 +15,32 @@ $x-large-devices: 1200px;
 // XX-Large devices (larger desktops, 1400px and up)
 $xx-large-devices: 1400px;
 
-@mixin small-devices-576 {
-  @media only screen
-    and (max-width: #{$small-devices}) {
+@mixin s-576 {
+  @media only screen and (max-width: #{$small-devices}) {
     @content;
   }
 }
 
-@mixin medium-devices-768 {
-  @media only screen
-    and (max-width: #{$medium-devices}) {
+@mixin m-768 {
+  @media only screen and (max-width: #{$medium-devices}) {
     @content;
   }
 }
 
-@mixin large-devices-992 {
-  @media only screen
-    and (max-width: #{$large-devices}) {
+@mixin l-992 {
+  @media only screen and (max-width: #{$large-devices}) {
     @content;
   }
 }
 
-@mixin x-large-devices-1200 {
-  @media only screen
-    and (max-width: #{$x-large-devices}) {
+@mixin xl-1200 {
+  @media only screen and (max-width: #{$x-large-devices}) {
     @content;
   }
 }
+
 @mixin xx-large-devices-1400 {
-  @media only screen
-    and (max-width: #{$xx-large-devices}) {
+  @media only screen and (max-width: #{$xx-large-devices}) {
     @content;
   }
 }
