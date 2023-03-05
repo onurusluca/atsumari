@@ -1,10 +1,11 @@
 <script setup lang="ts">
+import type { SpacesType } from '@/api/Types'
+
 const { t } = useI18n()
 const authStore = useAuthStore()
 const router = useRouter()
 
-let userSpaces = ref<Array<object>>([])
-
+let userSpaces = ref<SpacesType[]>([])
 onMounted(async () => {
   await handleReadSpace()
 })
@@ -20,7 +21,7 @@ const handleReadSpace = async () => {
       .select('*')
       .eq('user_id', authStore?.session?.user?.id)
     if (spaces) {
-      userSpaces.value.push(spaces)
+      userSpaces.value = spaces
       console.log('Space read!: ', spaces)
     } else {
     }
@@ -29,15 +30,36 @@ const handleReadSpace = async () => {
     console.log('READ SPACE CATCH ERROR: ', error.message)
   }
 }
+
+// Realtime
+supabase
+  .channel('custom-all-channel')
+  .on(
+    'postgres_changes',
+    { event: '*', schema: 'public', table: 'spaces' },
+    async () => {
+      console.log('Spaces changed!')
+      await handleReadSpace()
+    }
+  )
+  .subscribe()
 </script>
 
 <template>
   <div class="home">
-    <ul class="mt-xl"
-      ><li v-for="(item, index) in userSpaces" :key="index">
-        <p>{{ item }}</p>
-      </li></ul
-    >
+    <ul class="home__spaces" v-if="userSpaces.length > 0"
+      ><li v-for="(item, index) in userSpaces" :key="index" class="spaces__space">
+        <div class="space__top">
+          <div class="top__title">{{ item.name }}</div>
+          <div class="top__space-settings"></div>
+        </div>
+        <div class="space__image"> </div>
+        <div class="space__bottom">
+          <div class="bottom__online-count"></div>
+          <div class="bottom__last-used"></div>
+        </div> </li
+    ></ul>
+    <div v-else class="clp"> <div class="clp clp-place"></div> </div>
   </div>
   <!--   <router-link v-if="!authStore?.session?.user" :to="{ name: 'Register' }"
     >Register</router-link
@@ -64,4 +86,23 @@ const handleReadSpace = async () => {
   </div> -->
 </template>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.home {
+  padding: 1rem;
+  .home__spaces {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+
+    .spaces__space {
+      width: 30rem;
+      min-width: 20rem;
+
+      padding: 1rem;
+
+      border: 1px solid var(--border);
+      border-radius: $borderRadius;
+    }
+  }
+}
+</style>

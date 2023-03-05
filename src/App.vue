@@ -26,7 +26,7 @@ onMounted(async () => {
   })
 })
 
-// if the user is already logged in, redirect to the dashboard else show the login page
+// if the user is already logged in, redirect to the dashboard else redirect to the login page
 watch(
   () => authStore.session,
   (session) => {

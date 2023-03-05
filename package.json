@@ -8,7 +8,8 @@
     "preview": "vite preview",
     "build-only": "vite build",
     "type-check": "vue-tsc --noEmit",
-    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
+    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
+    "update-types": "npx supabase gen types typescript --project-id \"$PROJECT_ID\" > types/supabase.ts"
   },
   "dependencies": {
     "@intlify/unplugin-vue-i18n": "^0.8.2",
@@ -19,6 +20,7 @@
     "nanoid": "^4.0.1",
     "pinia": "^2.0.32",
     "vue": "^3.2.47",
+    "vue-confetti-explosion": "^1.0.2",
     "vue-i18n": "^9.2.2",
     "vue-router": "^4.1.6"
   },

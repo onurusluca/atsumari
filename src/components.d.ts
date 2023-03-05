@@ -29,6 +29,7 @@ declare module '@vue/runtime-core' {
     Register: typeof import('./components/auth/Register.vue')['default']
     'Ri:accountCircleLine': typeof import('~icons/ri/account-circle-line')['default']
     'Ri:addLine': typeof import('~icons/ri/add-line')['default']
+    'Ri:checkLine': typeof import('~icons/ri/check-line')['default']
     'Ri:eyeCloseLine': typeof import('~icons/ri/eye-close-line')['default']
     'Ri:eyeLine': typeof import('~icons/ri/eye-line')['default']
     'Ri:lockPasswordLine': typeof import('~icons/ri/lock-password-line')['default']

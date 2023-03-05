@@ -24,6 +24,7 @@
   }
 
   @include s-576 {
+    // Don't show sidebar on mobile
     display: none;
   }
 }

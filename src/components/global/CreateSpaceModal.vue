@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { OnClickOutsideHandler } from '@vueuse/core'
 import { vOnClickOutside } from '@vueuse/components'
+import ConfettiExplosion from 'vue-confetti-explosion'
 
 const { t } = useI18n()
 const authStore = useAuthStore()
@@ -11,6 +12,7 @@ const emit = defineEmits(['closeModal'])
 /****************************************
  * API CALLS
  ****************************************/
+let spaceCreated = ref<boolean>(false)
 let spaceName = ref<string>('')
 let spacePassword = ref<string>('')
 const handleCreateSpace = async () => {
@@ -22,10 +24,13 @@ const handleCreateSpace = async () => {
         password: spacePassword.value ? spacePassword.value : null,
       },
     ])
-    if (error) throw error
-    if (data) {
-      emit('closeModal')
-      router.push({ name: 'Home' })
+    if (error) {
+      throw error
+    } else {
+      spaceCreated.value = true
+      showButtonLoading.value = false
+      // emit('closeModal')
+      // router.push({ name: 'Home' })
     }
   } catch (error: any) {
     console.log('CREATE SPACE CATCH ERROR: ', error.message)
@@ -63,6 +68,12 @@ const togglePasswordProtect = () => {
 // Reveal password button
 let revealPasswordButtonRef = ref<HTMLElement>()
 const { pressed } = useMousePressed({ target: revealPasswordButtonRef })
+
+// Show me
+const onClickShowMe = () => {
+  emit('closeModal')
+  router.push({ name: 'Home' })
+}
 </script>
 <template>
   <div class="create-space-modal">
@@ -70,26 +81,32 @@ const { pressed } = useMousePressed({ target: revealPasswordButtonRef })
       class="create-space-modal__content"
       v-on-click-outside.bubble="clickOutsideHandlerModal"
     >
-      <h5 class="mb-xl">{{ t('space.createSpace.title') }}</h5>
-      <form @submit.prevent="handleClickOnConfirm" class="content__form">
+      <form
+        v-if="!spaceCreated"
+        @submit.prevent="handleClickOnConfirm"
+        class="content__form"
+      >
+        <h5 class="mb-xl">{{ t('space.createSpace.title') }}</h5>
         <div class="form__input-single">
           <label for="spaceName" class="form__label">{{
             t('space.createSpace.spaceName')
           }}</label>
-
+          <!-- autocomplete="new-password" is to override autofill -->
+          <!-- @input is for mobile(v-model won't update until input loses focus): https://github.com/vuejs/vue/issues/8231 -->
           <input
             v-model="spaceName"
+            @input="(e) => (spaceName = e?.target?.value)"
             type="text"
             name="spaceName"
             id="spaceName"
-            autofocus
+            autocomplete="new-password"
             required
             :placeholder="t('space.createSpace.spaceNamePlaceholder')"
             class="form__text-input"
           />
         </div>
 
-        <span class="toggle-container form__password-protect">
+        <span class="toggle-container">
           <ri:lock-password-line class="mr-s" />
           <label class="toggle-container__text-left"
             >{{ t('space.createSpace.passwordProtect') }}
@@ -160,6 +177,27 @@ const { pressed } = useMousePressed({ target: revealPasswordButtonRef })
           </button>
         </div>
       </form>
+      <!-- Space created -->
+      <div v-else class="content__space-created">
+        <ph:check-circle style="font-size: 3rem; color: var(--brand-green)" />
+        <h5 class="mb-s" style="color: var(--brand-green)">{{
+          t('space.createSpace.spaceCreated')
+        }}</h5>
+
+        <!-- Confetti -->
+        <component
+          :is="ConfettiExplosion"
+          :particleCount="200"
+          :particleSize="8"
+          :duration="4000"
+          :force="1"
+          :colors="['#FF4755', '#98DB7C', '#000000']"
+        />
+
+        <button @click.prevent="onClickShowMe" class="btn btn-outline mt-l">
+          {{ t('space.createSpace.showMe') }}
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -190,7 +228,7 @@ const { pressed } = useMousePressed({ target: revealPasswordButtonRef })
     max-width: 95vw; //mobile
     padding: 1.5rem 1rem;
 
-    border-radius: 0.5rem;
+    border-radius: $borderRadius;
     border: 1px solid var(--border);
     background-color: var(--bg-100);
 
@@ -201,13 +239,21 @@ const { pressed } = useMousePressed({ target: revealPasswordButtonRef })
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      .form__password-protect {
-      }
+      width: 100%;
+
       .form__bottom {
         display: flex;
         align-items: center;
         justify-content: start;
       }
+    }
+    .content__space-created {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+
+      width: 100%;
     }
   }
 }

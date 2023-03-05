@@ -130,7 +130,7 @@ watch(
           type="email"
           name="email"
           id="email"
-          :autocomplete="`${authType === 'login' ? '' : 'off'}`"
+          :autocomplete="authType === 'login' ? '' : 'off'"
           required
           class="form__text-input"
         />
@@ -143,7 +143,7 @@ watch(
           :type="pressed ? 'text' : 'password'"
           name="password"
           id="password"
-          minlength="8"
+          :minlength="authType === 'login' ? 6 : 8"
           required
           :autocomplete="`${
             authType === 'login' ? 'current-password' : 'new-password'

@@ -102,3 +102,5 @@ space:
     spaceName: Space Name
     spaceNamePlaceholder: Enter a name for your space
     spacePassword: Password
+    spaceCreated: Space created!
+    showMe: Show me

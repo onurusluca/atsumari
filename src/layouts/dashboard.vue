@@ -15,5 +15,11 @@ import Navbar from '@/components/nav/dashboard/Navbar.vue';
 <style scoped lang="scss">
 .content {
   margin: 5rem 1rem 0 6rem;
+  @include m-768 {
+  }
+
+  @include s-576 {
+    margin: 4rem 0 0 0;
+  }
 }
 </style>
