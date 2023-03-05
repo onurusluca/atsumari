@@ -17,13 +17,13 @@
   width: 100%;
   line-height: 0.5rem;
 
-  background-color: var(--input-bg);
+  background-color: var(--text-input-bg);
   padding: 0.5rem;
   font-size: 1rem;
   color: var(--f-color);
   box-shadow: 0 0px 2px 0 var(--shadow);
 
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-darker);
   border-radius: 0.5rem;
   outline: 2px solid transparent;
 
@@ -44,9 +44,12 @@
 .input-single__icon {
   position: absolute;
   right: .5rem;
-  top: 2.35rem;
+  top: 2rem;
+
   color: var(--palest-font);
   font-size: 1.1rem;
+  border-radius: .5rem;
+
 }
 
 .input-single__clickable-icon {

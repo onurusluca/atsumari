@@ -33,7 +33,11 @@ const handleReadSpace = async () => {
 
 <template>
   <div class="home">
-    <button className="btn" @click="logOut">{{ t('auth.logout') }}</button>
+    <ul class="mt-xl"
+      ><li v-for="(item, index) in userSpaces" :key="index">
+        <p>{{ item }}</p>
+      </li></ul
+    >
   </div>
   <!--   <router-link v-if="!authStore?.session?.user" :to="{ name: 'Register' }"
     >Register</router-link

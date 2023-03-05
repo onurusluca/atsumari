@@ -25,9 +25,21 @@
   }
 }
 
+button:disabled {
+  background-color: var(--disabled) !important;
+}
+
 .btn-no-style {
   background: transparent;
   border: none;
+  padding: .3rem .5rem;
+
+  &:hover {
+    background: var(--icon-btn-hover);
+
+    // icon
+    svg {}
+  }
 }
 
 .btn-icon {

@@ -12,11 +12,9 @@ const emit = defineEmits(['change', 'delete'])
 let email = ref<string>('')
 let password = ref<any>(null)
 let loading = ref(false)
-let rememberMeChecked = ref<boolean>(false)
 let errorUi = ref<string>('')
 let showEmailVerification = ref<boolean>(false)
-/* const authLocalStorage = useStorage('atsumari_auth', { rememberMeEmail: '' })
- */
+
 onMounted(() => {})
 
 /****************************************
@@ -72,6 +70,21 @@ const handleRegister = async () => {
 // Reveal password button
 let revealPasswordButtonRef = ref<HTMLElement>()
 const { pressed } = useMousePressed({ target: revealPasswordButtonRef })
+
+// Remember me
+let rememberMeChecked = ref<boolean>(false)
+
+/* const authLocalStorage = useStorage('atsumari_auth', { rememberMeEmail: '' }) */
+watch(
+  () => email.value,
+  (newValue) => {
+    if (newValue.length) {
+      rememberMeChecked.value = true
+    } else {
+      rememberMeChecked.value = false
+    }
+  }
+)
 </script>
 
 <template>
@@ -109,27 +122,32 @@ const { pressed } = useMousePressed({ target: revealPasswordButtonRef })
       class="auth__form"
       @submit.prevent="authType === 'login' ? handleLogin() : handleRegister()"
     >
-      <div class="form__input-single form__with-icon">
-        <p class="form__label">{{ t('forms.inputs.email') }}</p>
+      <div class="form__input-single">
+        <label class="form__label">{{ t('forms.inputs.email') }}</label>
         <input
           v-model="email"
           autofocus
           type="email"
           name="email"
           id="email"
+          :autocomplete="`${authType === 'login' ? '' : 'off'}`"
           required
           class="form__text-input"
         />
       </div>
 
       <div class="form__input-single form__with-icon">
-        <p class="form__label">{{ t('forms.inputs.password') }}</p>
+        <label class="form__label">{{ t('forms.inputs.password') }}</label>
         <input
           v-model="password"
           :type="pressed ? 'text' : 'password'"
           name="password"
           id="password"
+          minlength="8"
           required
+          :autocomplete="`${
+            authType === 'login' ? 'current-password' : 'new-password'
+          }`"
           class="form__text-input"
         />
         <button
@@ -157,9 +175,12 @@ const { pressed } = useMousePressed({ target: revealPasswordButtonRef })
             type="checkbox"
             name="rememberMe"
             id="rememberMe"
+            class="normal-checkbox"
           />
 
-          <p for="rememberMe" class="ml-s">{{ t('forms.inputs.rememberMe') }}</p>
+          <label for="rememberMe" class="ml-s">{{
+            t('forms.inputs.rememberMe')
+          }}</label>
         </div>
         <router-link to="" class="auth__link">
           {{ t('auth.shared.forgotPassword') }}

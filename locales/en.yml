@@ -13,6 +13,16 @@ buttons:
   signIn: Sign in
   createAccount: Create Account
 
+language:
+  language: Language
+  english: English
+  japanese: 日本語
+
+appearance:
+  appearance: Appearance
+  dark: Dark
+  light: Light
+
 forms:
   inputs:
     email: Email
@@ -80,5 +90,15 @@ auth:
     checkEmail: Check your email to confirm your account
   logout: Sign Out
 
+##### USER #####
+user:
+  editCharacter: Edit Character
+
+##### SPACES #####
 space:
-  createSpace: Create Space
+  createSpace:
+    title: Create Space
+    passwordProtect: Password Protect
+    spaceName: Space Name
+    spaceNamePlaceholder: Enter a name for your space
+    spacePassword: Password
