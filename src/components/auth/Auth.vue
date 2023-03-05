@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { supabase } from '@/utils/supabaseInit'
-import { useAuthStore } from '@/stores/authStore'
 const router = useRouter()
 const { t } = useI18n()
 const authStore = useAuthStore()

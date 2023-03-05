@@ -1,5 +1,3 @@
-import { fileURLToPath, URL } from 'node:url'
-import { resolve, dirname } from 'node:path'
 import path from 'path'
 import { defineConfig, loadEnv, splitVendorChunkPlugin } from 'vite'
 import vue from '@vitejs/plugin-vue'
@@ -52,7 +50,15 @@ export default defineConfig(({ mode }) => {
 
       // https://github.com/antfu/unplugin-auto-import
       AutoImport({
-        imports: ['vue', 'vue-router', 'vue-i18n', '@vueuse/head', '@vueuse/core'],
+        imports: [
+          'vue',
+          'vue-router',
+          'vue-i18n',
+          '@vueuse/head',
+          '@vueuse/core',
+          { '/src/utils/supabaseInit': ['supabase'] },
+          { '/src/stores/authStore': ['useAuthStore'] },
+        ],
         dts: 'src/auto-imports.d.ts',
         dirs: ['src/composables', 'src/stores', 'src/modules'],
       }),

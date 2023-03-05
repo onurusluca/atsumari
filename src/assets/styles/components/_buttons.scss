@@ -81,3 +81,30 @@
     background: var(--create-btn-bg-hover);
   }
 }
+
+.btn-save {
+  color: #fff;
+  background: var(--save-btn-bg);
+
+  &:hover {
+    background: var(--save-btn-bg-hover);
+  }
+}
+
+.btn-danger {
+  color: #fff;
+  background: var(--danger-btn-bg);
+
+  &:hover {
+    background: var(--danger-btn-bg-hover);
+  }
+}
+
+.btn-warning {
+  color: #fff;
+  background: var(--warning-btn-bg);
+
+  &:hover {
+    background: var(--warning-btn-bg-hover);
+  }
+}

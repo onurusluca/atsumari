@@ -8,3 +8,19 @@
 .fade-leave-to {
   opacity: 0;
 }
+
+
+// Slide down
+.slide-down-up-enter-active {
+  transition: all 80ms ease-out;
+}
+
+.slide-down-up-leave-active {
+  transition: all 80ms cubic-bezier(1, 0.5, 0.8, 1);
+}
+
+.slide-down-up-enter-from,
+.slide-down-up-leave-to {
+  transform: translateY(-10px);
+  opacity: 0;
+}

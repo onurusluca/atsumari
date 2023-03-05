@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { supabase } from '@/utils/supabaseInit'
-import { useAuthStore } from '@/stores/authStore'
 import Dashboard from './layouts/dashboard.vue'
 import Default from './layouts/default.vue'
 import NoLayout from './layouts/noLayout.vue'

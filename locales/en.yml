@@ -8,6 +8,7 @@ buttons:
   close: Close
   save: Save
   create: Create
+  cancel: Cancel
   signUp: Sign up
   signIn: Sign in
   createAccount: Create Account

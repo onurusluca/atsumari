@@ -1,25 +1,45 @@
 <script setup lang="ts">
 import type { OnClickOutsideHandler } from '@vueuse/core'
 import { vOnClickOutside } from '@vueuse/components'
+import CreateSpaceModal from '@/components/global/CreateSpaceModal.vue'
+
+const authStore = useAuthStore()
+const router = useRouter()
+
 /****************************************
  * API CALLS
  ****************************************/
+// Logout
+const logOut = async () => {
+  try {
+    const { error } = await supabase.auth.signOut()
+    console.log('signout')
+
+    if (error) throw error
+  } catch (error: any) {
+    alert(error.message)
+  }
+}
 
 /****************************************
  * UI EVENTS
  ****************************************/
+
+// Language
 const { t, locale } = useI18n()
 const changeLanguage = (lang: string) => {
   locale.value = lang
   useStorage('atsumari_local-storage', { language: lang })
 }
 
-// Dropdown :
+// Dropdown
 const userDropdownOpen = ref<Boolean>(false)
-
-const dropdownHandler: OnClickOutsideHandler = (event) => {
+const clickOutsideHandlerDrowpdown: OnClickOutsideHandler = (event) => {
   userDropdownOpen.value = false
 }
+
+// Modal
+let showModal = ref<boolean>(false)
 </script>
 
 <template>
@@ -37,7 +57,7 @@ const dropdownHandler: OnClickOutsideHandler = (event) => {
       </div>
     </div>
     <div class="navbar__right">
-      <button class="btn btn-create mr-xxl">
+      <button @click.stop="showModal = !showModal" class="btn btn-create mr-xxl">
         <ri:add-line class="mr-xs" style="font-size: 1.3rem" />
         {{ t('space.createSpace') }}
       </button>
@@ -57,13 +77,17 @@ const dropdownHandler: OnClickOutsideHandler = (event) => {
       <Transition name="slide-down-up">
         <div
           v-if="userDropdownOpen"
-          v-on-click-outside.bubble="dropdownHandler"
+          v-on-click-outside.bubble="clickOutsideHandlerDrowpdown"
           class="user-menu-dropdown dropdown-menu"
         >
           <h1>fsdfsdf</h1>
         </div>
       </Transition>
     </div>
+
+    <Transition name="fade">
+      <CreateSpaceModal v-if="showModal" @close-modal="showModal = false" />
+    </Transition>
   </div>
 </template>
 
@@ -97,8 +121,8 @@ const dropdownHandler: OnClickOutsideHandler = (event) => {
       border-right: 1px solid var(--border);
 
       .icon-container__icon {
-        width: 3.3rem;
-        height: 3.3rem;
+        width: 3rem;
+        height: 3rem;
         cursor: pointer;
       }
     }

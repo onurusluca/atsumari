@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import { supabase } from '@/utils/supabaseInit'
-import { useAuthStore } from '@/stores/authStore'
-
 const { t } = useI18n()
 const authStore = useAuthStore()
 const router = useRouter()
@@ -15,32 +12,6 @@ onMounted(async () => {
 /****************************************
  * API CALLS
  ****************************************/
-// Logout
-const logOut = async () => {
-  try {
-    const { error } = await supabase.auth.signOut()
-    console.log('signout')
-
-    if (error) throw error
-  } catch (error: any) {
-    alert(error.message)
-  }
-}
-
-const handleCreateSpace = async () => {
-  try {
-    const { data, error } = await supabase.from('spaces').insert([
-      {
-        name: 'My Space',
-        user_id: authStore?.session?.user?.id,
-      },
-    ])
-    if (error) throw error
-    console.log('Space created!: ', data)
-  } catch (error: any) {
-    console.log('CREATE SPACE CATCH ERROR: ', error.message)
-  }
-}
 
 const handleReadSpace = async () => {
   try {
