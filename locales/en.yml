@@ -100,7 +100,19 @@ space:
     title: Create Space
     passwordProtect: Password Protect
     spaceName: Space Name
+    thisWillAppearInURL: This will appear in the URL
     spaceNamePlaceholder: Enter a name for your space
     spacePassword: Password
     spaceCreated: Space created!
     showMe: Show me
+    onlyUseLettersNumbers: Only use letters and numbers. No spaces or special characters.
+  deleteSpace:
+    title: Delete Space
+    message: Are you sure you want to delete this space?
+    confirm: Delete
+    cancel: Cancel
+
+##### HOME #####
+home:
+  spaces:
+    noSpacesMessage: You don't have any spaces yet. Create one now!

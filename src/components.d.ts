@@ -26,6 +26,7 @@ declare module '@vue/runtime-core' {
     Modal: typeof import('./components/global/Modal.vue')['default']
     Navbar: typeof import('./components/nav/dashboard/Navbar.vue')['default']
     'Ph:checkCircle': typeof import('~icons/ph/check-circle')['default']
+    'Ph:dotsThreeOutlineFill': typeof import('~icons/ph/dots-three-outline-fill')['default']
     Register: typeof import('./components/auth/Register.vue')['default']
     'Ri:accountCircleLine': typeof import('~icons/ri/account-circle-line')['default']
     'Ri:addLine': typeof import('~icons/ri/add-line')['default']

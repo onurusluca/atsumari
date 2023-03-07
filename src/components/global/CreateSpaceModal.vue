@@ -205,7 +205,6 @@ const onClickShowMe = () => {
 .create-space-modal {
   backdrop-filter: blur(2px);
   position: fixed;
-  z-index: $modal-z-index;
   left: 0;
   top: 0;
   width: 100%;
@@ -216,6 +215,7 @@ const onClickShowMe = () => {
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: $modal-z-index;
 
   .create-space-modal__content {
     display: flex;

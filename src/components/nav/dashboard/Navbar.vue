@@ -26,7 +26,7 @@ const logOut = async () => {
 }
 
 /****************************************
- * UI EVENTS
+ * UI
  ****************************************/
 
 // Language
@@ -37,9 +37,9 @@ const changeLanguage = (lang: string) => {
 }
 
 // User menu dropdown
-const userDropdownOpen = ref<Boolean>(false)
+const userMenuDropdownOpen = ref<Boolean>(false)
 const clickOutsideHandlerDrowpdown: OnClickOutsideHandler = (event) => {
-  userDropdownOpen.value = false
+  userMenuDropdownOpen.value = false
 }
 
 // Dark&Light mode
@@ -49,9 +49,9 @@ function changeThemeDarkMode() {
 }
 
 // Language menu dropdown
-const languageDropdownOpen = ref<Boolean>(false)
+const languageMenuDropdownOpen = ref<Boolean>(false)
 const clickOutsideHandlerLanguageDrowpdown: OnClickOutsideHandler = (event) => {
-  languageDropdownOpen.value = false
+  languageMenuDropdownOpen.value = false
 }
 
 // Modal
@@ -83,7 +83,7 @@ let showModal = ref<boolean>(false)
       </button> -->
 
       <button
-        @click.stop="userDropdownOpen = !userDropdownOpen"
+        @click.stop="userMenuDropdownOpen = !userMenuDropdownOpen"
         class="btn btn-no-style right__avatar"
       >
         <img src="@/assets/images/mockup/avatar.png" class="avatar__img" />
@@ -93,7 +93,7 @@ let showModal = ref<boolean>(false)
       <!-- Dropdown -->
       <Transition name="slide-down-up">
         <div
-          v-if="userDropdownOpen && authStore?.session?.user"
+          v-if="userMenuDropdownOpen && authStore?.session?.user"
           v-on-click-outside.bubble="clickOutsideHandlerDrowpdown"
           class="user-menu-dropdown dropdown-menu"
         >
@@ -141,7 +141,7 @@ let showModal = ref<boolean>(false)
 
           <!-- Language -->
           <button
-            @click.stop="languageDropdownOpen = !languageDropdownOpen"
+            @click.stop="languageMenuDropdownOpen = !languageMenuDropdownOpen"
             class="btn btn-no-style ml-s"
           >
             <carbon:ibm-watson-language-translator
@@ -158,7 +158,7 @@ let showModal = ref<boolean>(false)
           <!-- Language menu dropdown -->
           <Transition name="slide-down-up">
             <div
-              v-if="languageDropdownOpen"
+              v-if="languageMenuDropdownOpen"
               v-on-click-outside.bubble="clickOutsideHandlerLanguageDrowpdown"
               class="language-menu-dropdown__user-menu-dropdown dropdown-menu"
             >
@@ -180,11 +180,10 @@ let showModal = ref<boolean>(false)
         </div>
       </Transition>
     </div>
-
-    <Transition name="fade">
-      <CreateSpaceModal v-if="showModal" @close-modal="showModal = false" />
-    </Transition>
   </div>
+  <Transition name="fade">
+    <CreateSpaceModal v-if="showModal" @close-modal="showModal = false" />
+  </Transition>
 </template>
 
 <style scoped lang="scss">
