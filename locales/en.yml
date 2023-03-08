@@ -111,6 +111,9 @@ space:
     message: Are you sure you want to delete this space?
     confirm: Delete
     cancel: Cancel
+  spaceImageAlt: Space Image
+  onlineCount: online
+  enterSpace: Enter Space
 
 ##### HOME #####
 home:

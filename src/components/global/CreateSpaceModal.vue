@@ -101,6 +101,7 @@ const onClickShowMe = () => {
             id="spaceName"
             autocomplete="new-password"
             required
+            maxlength="30"
             :placeholder="t('space.createSpace.spaceNamePlaceholder')"
             class="form__text-input"
           />
@@ -224,7 +225,7 @@ const onClickShowMe = () => {
     align-items: center;
 
     width: max-content;
-    min-width: 25rem;
+    min-width: 30rem;
     max-width: 95vw; //mobile
     padding: 1.5rem 1rem;
 

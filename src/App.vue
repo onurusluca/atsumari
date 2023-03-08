@@ -30,9 +30,7 @@ onMounted(async () => {
 watch(
   () => authStore.session,
   (session) => {
-    if (session) {
-      router.push({ name: 'Home' })
-    } else {
+    if (!session) {
       router.push({ name: 'Login' })
     }
   }
@@ -46,10 +44,7 @@ const layoutLogic = computed(() => {
     route.currentRoute.value.name === 'Register'
   ) {
     return 'no-layout'
-  } else if (
-    route.currentRoute.value.name === 'Home' ||
-    route.currentRoute.value.name === 'Spaces'
-  ) {
+  } else if (route.currentRoute.value.name === 'Home') {
     return 'dashboard'
   } else if (route.currentRoute.value.path.includes('room')) {
     return 'default'

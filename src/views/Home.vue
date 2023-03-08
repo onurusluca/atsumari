@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import type { SpacesType } from '@/api/Types'
+import type { SpacesType } from '@/api/types'
 import type { OnClickOutsideHandler } from '@vueuse/core'
 import { vOnClickOutside } from '@vueuse/components'
 
 const { t } = useI18n()
 const authStore = useAuthStore()
-const router = useRouter()
+// const router = useRouter()
 
 let userSpaces = ref<SpacesType[]>([])
 let showContentLoadingPlaceholder = ref<boolean>(true)
@@ -39,6 +39,7 @@ const handleReadSpace = async () => {
         showNoSpacesMessage.value = false
       }
     }
+    if (error) throw error
   } catch (error: any) {
     console.log('READ SPACE CATCH ERROR: ', error.message)
   }
@@ -47,6 +48,7 @@ const handleReadSpace = async () => {
 // Delete space
 
 const handleDeleteSpace = async (spaceId: string) => {
+  settingsMenuDropDownOpen.value = false
   try {
     let { data: spaces, error } = await supabase
       .from('spaces')
@@ -55,6 +57,7 @@ const handleDeleteSpace = async (spaceId: string) => {
     if (spaces) {
       await handleReadSpace()
     }
+    if (error) throw error
   } catch (error: any) {
     console.log('DELETE SPACE CATCH ERROR: ', error.message)
   }
@@ -93,6 +96,17 @@ const openSettingsMenu = (index: number) => {
 const clickOutsideHandlersettingsMenuDrowpdown: OnClickOutsideHandler = () => {
   settingsMenuDropDownOpen.value = false
 }
+
+// TEMPORARY: random seed maker for space image:
+
+let generateRandomSeeds = computed(() => {
+  let seeds = []
+
+  for (let i = 0; i < 10; i++) {
+    seeds.push(Math.floor(Math.random() * 100))
+  }
+  return seeds
+})
 </script>
 
 <template>
@@ -124,22 +138,48 @@ const clickOutsideHandlersettingsMenuDrowpdown: OnClickOutsideHandler = () => {
         </div>
 
         <!-- Image -->
-        <div class="space__image-container"> </div>
+        <div class="space__image-container">
+          <img
+            :src="`https://picsum.photos/seed/${generateRandomSeeds[index]}/600/300`"
+            :alt="t('space.spaceImageAlt')"
+            class="image-container__image"
+          />
+          <router-link
+            class="btn btn-main image-container__enter-btn"
+            :to="`/room/${item.id}`"
+          >
+            {{ t('space.enterSpace') }}
+            <radix-icons:enter class="ml-s" />
+          </router-link>
+        </div>
 
         <!-- Bottom -->
         <div class="space__bottom">
-          <div class="bottom__left"></div>
+          <div class="bottom__left">
+            <carbon:dot-mark
+              style="
+                font-size: 1.2rem;
+                color: var(--online-count-green);
+                margin-right: 0.2rem;
+              "
+            />
+            <p>30 {{ t('space.onlineCount') }}</p>
+          </div>
           <div class="bottom__right"></div>
         </div> </li
     ></ul>
     <!-- clp -->
-    <div v-if="showContentLoadingPlaceholder" class="clp-container">
+    <!-- TODO: Enable if it takes too much time to load spaces -->
+    <!--  <div v-if="showContentLoadingPlaceholder" class="clp-container">
       <div class="clp"></div>
       <div class="clp"></div>
       <div class="clp"></div>
       <div class="clp"></div>
-    </div>
+    </div> -->
+
+    <!-- No spaces -->
     <div v-if="showNoSpacesMessage" class="home__no-spaces">
+      <fluent-emoji:sad-but-relieved-face style="font-size: 5rem" />
       <p class="no-spaces__message">
         {{ t('home.spaces.noSpacesMessage') }}
       </p>
@@ -161,31 +201,66 @@ const clickOutsideHandlersettingsMenuDrowpdown: OnClickOutsideHandler = () => {
       width: 30rem;
       min-width: 20rem;
 
-      padding: 1rem;
-
-      border: 1px solid var(--border);
+      border: 2px solid var(--border);
       border-radius: $borderRadius;
+
+      transition: border 100ms ease;
 
       .space__top {
         display: flex;
         align-items: center;
         justify-content: space-between;
+
         .top__title {
           font-size: 1.2rem;
           font-weight: 600;
+          padding: 0 0.8rem;
         }
         .top__space-settings {
           .space-settings__menu-dropdown {
             position: absolute;
-            top: 3.2rem;
+            top: 2.2rem;
             right: 0;
           }
         }
       }
       .space__image-container {
+        position: relative;
+        height: 15rem;
+
+        padding: 0.8rem;
+
+        &:hover {
+          .image-container__image {
+            transition: filter 100ms ease;
+
+            filter: brightness(0.8);
+          }
+          .image-container__enter-btn {
+            transition: visibility 100ms ease;
+            visibility: visible;
+          }
+        }
+        .image-container__image {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          border-radius: $borderRadius;
+        }
+        .image-container__enter-btn {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+
+          visibility: hidden;
+        }
       }
       .space__bottom {
+        padding: 0 0.5rem 0.5rem 0.5rem;
+
         .bottom__left {
+          display: flex;
         }
         .bottom__right {
         }
@@ -195,6 +270,7 @@ const clickOutsideHandlersettingsMenuDrowpdown: OnClickOutsideHandler = () => {
   .home__no-spaces {
     // Center
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     width: 100%;
