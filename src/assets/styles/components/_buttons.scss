@@ -11,7 +11,7 @@
   border: none;
   border-radius: 0.5rem;
   box-shadow: $btn-box-shadow;
-  font-weight: 500;
+  font-weight: 600;
 
   cursor: pointer;
   transition: background 60ms;
@@ -31,12 +31,14 @@ button:disabled {
 }
 
 .btn-no-style {
-  background: transparent;
   border: none;
   padding: .3rem .5rem;
 
+  color: var(--text-100);
+  background: transparent;
+
   &:hover {
-    background: var(--icon-btn-hover);
+    background: var(--grey-hover);
 
     // icon
     svg {}
@@ -44,16 +46,16 @@ button:disabled {
 }
 
 .btn-icon {
-  background: transparent;
-  border: none;
-  line-height: 0;
   padding: 0.3rem .8rem;
 
+  line-height: 0;
+  background: transparent;
+  border: none;
   border-radius: 0.5rem;
   cursor: pointer;
 
   &:hover {
-    background: var(--icon-btn-hover);
+    background: var(--grey-hover);
 
     // icon
     svg {}

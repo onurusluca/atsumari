@@ -10,6 +10,7 @@ declare module '@vue/runtime-core' {
     Account: typeof import('./components/auth/Account.vue')['default']
     Auth: typeof import('./components/auth/Auth.vue')['default']
     'Carbon:chevronDown': typeof import('~icons/carbon/chevron-down')['default']
+    'Carbon:copy': typeof import('~icons/carbon/copy')['default']
     'Carbon:dotMark': typeof import('~icons/carbon/dot-mark')['default']
     'Carbon:email': typeof import('~icons/carbon/email')['default']
     'Carbon:ibmWatsonLanguageTranslator': typeof import('~icons/carbon/ibm-watson-language-translator')['default']
@@ -17,7 +18,10 @@ declare module '@vue/runtime-core' {
     'Carbon:locked': typeof import('~icons/carbon/locked')['default']
     'Carbon:moon': typeof import('~icons/carbon/moon')['default']
     'Carbon:settings': typeof import('~icons/carbon/settings')['default']
+    'Carbon:share': typeof import('~icons/carbon/share')['default']
     'Carbon:sun': typeof import('~icons/carbon/sun')['default']
+    CarbonCheckmarkOutline: typeof import('~icons/carbon/checkmark-outline')['default']
+    CarbonWarningAlt: typeof import('~icons/carbon/warning-alt')['default']
     ConfirmModal: typeof import('./components/global/ConfirmModal.vue')['default']
     CreateSpaceModal: typeof import('./components/global/CreateSpaceModal.vue')['default']
     'FluentEmoji:sadButRelievedFace': typeof import('~icons/fluent-emoji/sad-but-relieved-face')['default']
@@ -29,6 +33,7 @@ declare module '@vue/runtime-core' {
     Navbar: typeof import('./components/nav/dashboard/Navbar.vue')['default']
     'Ph:checkCircle': typeof import('~icons/ph/check-circle')['default']
     'Ph:dotsThreeOutlineFill': typeof import('~icons/ph/dots-three-outline-fill')['default']
+    PhXSquareDuotone: typeof import('~icons/ph/x-square-duotone')['default']
     'RadixIcons:enter': typeof import('~icons/radix-icons/enter')['default']
     Register: typeof import('./components/auth/Register.vue')['default']
     'Ri:accountCircleLine': typeof import('~icons/ri/account-circle-line')['default']
@@ -46,5 +51,6 @@ declare module '@vue/runtime-core' {
     SignUp: typeof import('./components/auth/SignUp.vue')['default']
     'SvgSpinners:90RingWithBg': typeof import('~icons/svg-spinners/90-ring-with-bg')['default']
     'Teenyicons:lockSolid': typeof import('~icons/teenyicons/lock-solid')['default']
+    Toast: typeof import('./components/global/Toast.vue')['default']
   }
 }

@@ -169,7 +169,7 @@ const onClickShowMe = () => {
               spaceName === '' ||
               (passwordProtectEnabled === true && spacePassword === '')
             "
-            class="btn btn-save"
+            class="btn btn-create"
             type="submit"
           >
             <ph:check-circle v-if="!showButtonLoading" class="mr-s" />

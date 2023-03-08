@@ -12,6 +12,13 @@ const router = createRouter({
       meta: {
         needsAuth: true,
       },
+      children: [
+        {
+          path: 'space-edit/:id',
+          name: 'Space Edit',
+          component: () => import('../views/SpaceEdit.vue'),
+        },
+      ],
     },
     {
       path: '/login',
@@ -31,7 +38,7 @@ const router = createRouter({
 
     // Room
     {
-      path: '/room/:id',
+      path: '/room/:user_id/:id',
       name: 'Room',
       component: () => import('../views/Room.vue'),
       meta: {

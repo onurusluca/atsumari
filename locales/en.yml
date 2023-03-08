@@ -69,6 +69,7 @@ toasts:
   saved: Saved!
   created: Created!
   deleted: Deleted!
+  copied: Copied!
 
 ##### AUTH #####
 auth:
@@ -114,6 +115,10 @@ space:
   spaceImageAlt: Space Image
   onlineCount: online
   enterSpace: Enter Space
+  copySpaceUrl: Copy URL
+  menu:
+    manageSpace: Manage Space
+    editMap: Edit Map
 
 ##### HOME #####
 home:

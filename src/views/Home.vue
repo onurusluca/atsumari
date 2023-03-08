@@ -97,6 +97,38 @@ const clickOutsideHandlersettingsMenuDrowpdown: OnClickOutsideHandler = () => {
   settingsMenuDropDownOpen.value = false
 }
 
+// Space name as slug logic
+const slugify = (string: string) => {
+  return string
+    .toString()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+    .replace(/&/g, '-and-')
+    .replace(/[\s\W-]+/g, '-')
+}
+
+// Copy
+const onCopyToClipboard = (spaceUrl: string) => {
+  navigator.clipboard.writeText(spaceUrl)
+  showToast('copiedNotification')
+}
+
+// Toast
+let toastOpen = ref<boolean>(false)
+let toastType = ref<string>('')
+
+function showToast(toastTypeProp: string) {
+  // Set toast props
+  toastType.value = toastTypeProp
+  toastOpen.value = true
+
+  setTimeout(() => {
+    toastOpen.value = false
+  }, 5500)
+}
+
 // TEMPORARY: random seed maker for space image:
 
 let generateRandomSeeds = computed(() => {
@@ -124,15 +156,22 @@ let generateRandomSeeds = computed(() => {
             <!-- Settings menu -->
             <!-- Language menu dropdown -->
             <Transition name="fade">
-              <div
+              <ul
                 v-if="settingsMenuDropDownOpen && settingsMenuDropDownIndex === index"
                 v-on-click-outside.bubble="clickOutsideHandlersettingsMenuDrowpdown"
                 class="space-settings__menu-dropdown dropdown-menu"
               >
-                <button class="btn btn-danger" @click="handleDeleteSpace(item.id)">
-                  {{ t('space.deleteSpace.title') }}
-                </button>
-              </div>
+                <li class="dropdown-menu__item">
+                  <router-link :to="`/space-edit/${item.id}`">
+                    {{ t('space.menu.manageSpace') }}
+                  </router-link>
+                </li>
+                <li class="dropdown-menu__item">
+                  <router-link :to="`/space-edit/${item.id}`">
+                    {{ t('space.menu.editMap') }}
+                  </router-link>
+                </li>
+              </ul>
             </Transition>
           </div>
         </div>
@@ -144,9 +183,12 @@ let generateRandomSeeds = computed(() => {
             :alt="t('space.spaceImageAlt')"
             class="image-container__image"
           />
+
+          <!-- Go to space -->
+          <!-- :to="`/room/${item.id}`" -->
           <router-link
-            class="btn btn-main image-container__enter-btn"
-            :to="`/room/${item.id}`"
+            class="btn btn-save image-container__enter-btn"
+            :to="`/room/${authStore?.session?.user?.id}/${slugify(item.name)}`"
           >
             {{ t('space.enterSpace') }}
             <radix-icons:enter class="ml-s" />
@@ -165,9 +207,27 @@ let generateRandomSeeds = computed(() => {
             />
             <p>30 {{ t('space.onlineCount') }}</p>
           </div>
-          <div class="bottom__right"></div>
-        </div> </li
-    ></ul>
+          <div class="bottom__right">
+            <!-- Copy space URL -->
+            <button
+              @click="
+                onCopyToClipboard(
+                  `https://atsumari.app/room/${authStore?.session?.user?.id}/${slugify(
+                    item.name
+                  )}`
+                )
+              "
+              class="btn btn-icon"
+            >
+              <carbon:copy
+                style="font-size: 1rem; color: var(--text-100); margin-right: 0.5rem"
+              />
+              {{ t('space.copySpaceUrl') }}
+            </button>
+          </div>
+        </div>
+      </li></ul
+    >
     <!-- clp -->
     <!-- TODO: Enable if it takes too much time to load spaces -->
     <!--  <div v-if="showContentLoadingPlaceholder" class="clp-container">
@@ -185,6 +245,11 @@ let generateRandomSeeds = computed(() => {
       </p>
     </div>
   </div>
+
+  <!-- Toast -->
+  <Transition name="slide-up">
+    <Toast v-if="toastOpen === true" toastTheme="successToast" :toastType="toastType" />
+  </Transition>
 </template>
 
 <style scoped lang="scss">
@@ -227,14 +292,13 @@ let generateRandomSeeds = computed(() => {
       .space__image-container {
         position: relative;
         height: 15rem;
-
         padding: 0.8rem;
 
         &:hover {
           .image-container__image {
             transition: filter 100ms ease;
 
-            filter: brightness(0.8);
+            filter: brightness(0.9);
           }
           .image-container__enter-btn {
             transition: visibility 100ms ease;
@@ -257,6 +321,9 @@ let generateRandomSeeds = computed(() => {
         }
       }
       .space__bottom {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
         padding: 0 0.5rem 0.5rem 0.5rem;
 
         .bottom__left {
@@ -277,7 +344,7 @@ let generateRandomSeeds = computed(() => {
     height: 60vh;
     .no-spaces__message {
       font-size: 1.5rem;
-      font-weight: 500;
+      font-weight: 600;
       color: var(--text-300);
     }
   }
