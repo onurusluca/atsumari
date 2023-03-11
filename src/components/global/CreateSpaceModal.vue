@@ -99,7 +99,6 @@ const onClickShowMe = () => {
             type="text"
             name="spaceName"
             id="spaceName"
-            autocomplete="new-password"
             required
             maxlength="30"
             :placeholder="t('space.createSpace.spaceNamePlaceholder')"

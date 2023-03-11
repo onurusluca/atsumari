@@ -149,9 +149,9 @@ let generateRandomSeeds = computed(() => {
         <div class="space__top">
           <p class="top__title">{{ item.name }}</p>
           <div class="top__space-settings">
-            <div @click.stop="openSettingsMenu(index)" class="btn btn-icon">
+            <button @click.stop="openSettingsMenu(index)" class="btn btn-icon">
               <ph:dots-three-outline-fill style="color: black; font-size: 1.2rem" />
-            </div>
+            </button>
 
             <!-- Settings menu -->
             <!-- Language menu dropdown -->
@@ -162,7 +162,14 @@ let generateRandomSeeds = computed(() => {
                 class="space-settings__menu-dropdown dropdown-menu"
               >
                 <li class="dropdown-menu__item">
-                  <router-link :to="`/space-edit/${item.id}`">
+                  <router-link
+                    :to="{
+                      name: 'SpaceSettings',
+                      params: {
+                        id: item.id,
+                      },
+                    }"
+                  >
                     {{ t('space.menu.manageSpace') }}
                   </router-link>
                 </li>
@@ -188,7 +195,13 @@ let generateRandomSeeds = computed(() => {
           <!-- :to="`/room/${item.id}`" -->
           <router-link
             class="btn btn-save image-container__enter-btn"
-            :to="`/room/${authStore?.session?.user?.id}/${slugify(item.name)}`"
+            :to="{
+              name: 'Room',
+              params: {
+                id: item.id,
+                name: slugify(item.name),
+              },
+            }"
           >
             {{ t('space.enterSpace') }}
             <radix-icons:enter class="ml-s" />
@@ -209,12 +222,11 @@ let generateRandomSeeds = computed(() => {
           </div>
           <div class="bottom__right">
             <!-- Copy space URL -->
+            <!-- TODO: change to real root route -->
             <button
               @click="
                 onCopyToClipboard(
-                  `https://atsumari.app/room/${authStore?.session?.user?.id}/${slugify(
-                    item.name
-                  )}`
+                  `http://localhost:5173/room/${item.id}/${slugify(item.name)}`
                 )
               "
               class="btn btn-icon"
@@ -263,7 +275,7 @@ let generateRandomSeeds = computed(() => {
     .spaces__space {
       position: relative;
 
-      width: 30rem;
+      width: 28rem;
       min-width: 20rem;
 
       border: 2px solid var(--border);
@@ -291,8 +303,8 @@ let generateRandomSeeds = computed(() => {
       }
       .space__image-container {
         position: relative;
-        height: 15rem;
-        padding: 0.8rem;
+        height: 14rem;
+        padding: 0.4rem 0.8rem;
 
         &:hover {
           .image-container__image {
@@ -324,7 +336,7 @@ let generateRandomSeeds = computed(() => {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 0 0.5rem 0.5rem 0.5rem;
+        padding: 0 0.5rem 0.3rem 0.5rem;
 
         .bottom__left {
           display: flex;

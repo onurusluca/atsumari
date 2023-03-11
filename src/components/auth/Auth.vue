@@ -13,6 +13,8 @@ let email = ref<string>('')
 let password = ref<any>(null)
 let loading = ref(false)
 let errorUi = ref<string>('')
+let errorUiSecond = ref<string>('')
+let checkYourEmail = ref<string>('')
 let showEmailVerification = ref<boolean>(false)
 
 onMounted(() => {})
@@ -28,13 +30,16 @@ const handleLogin = async () => {
       password: password.value,
     })
     if (error) {
-      errorUi.value = error.message
+      console.log('err')
+
+      errorUi.value = t('auth.login.invalidCredentials')
+      errorUiSecond.value = t('auth.login.tryAgain')
     } else {
       router.push({ name: 'Home' })
     }
   } catch (error) {
     if (error instanceof Error) {
-      alert(error.message)
+      console.log(error.message)
     }
   } finally {
     loading.value = false
@@ -52,8 +57,9 @@ const handleRegister = async () => {
     if (data) {
       showEmailVerification.value = true
     }
-    if (error) throw error
-    errorUi.value = 'auth.register.checkEmail'
+    if (error) {
+      checkYourEmail.value = t('auth.register.checkEmail')
+    }
     return
   } catch (error) {
     if (error instanceof Error) {
@@ -130,7 +136,6 @@ watch(
           type="email"
           name="email"
           id="email"
-          :autocomplete="authType === 'login' ? '' : 'off'"
           required
           class="form__text-input"
         />
@@ -145,9 +150,7 @@ watch(
           id="password"
           :minlength="authType === 'login' ? 6 : 8"
           required
-          :autocomplete="`${
-            authType === 'login' ? 'current-password' : 'new-password'
-          }`"
+          :autocomplete="authType === 'login' ? 'current-password' : 'new-password'"
           class="form__text-input"
         />
         <button
@@ -187,9 +190,12 @@ watch(
         </router-link>
       </div>
 
-      <div v-if="errorUi" class="form__error">
-        <p>{{ errorUi }}</p>
-        <!--  <p>{{ t(errorUi) }}</p> -->
+      <div v-if="errorUi" class="form__warning">
+        <p class="warning__error">{{ errorUi }}</p>
+        <p class="warning__error">{{ errorUiSecond }}</p>
+      </div>
+      <div v-if="checkYourEmail" class="form__warning">
+        <p class="warning__info">{{ checkYourEmail }}</p>
       </div>
 
       <!-- Submit button -->
@@ -298,14 +304,22 @@ watch(
     margin-top: 2rem;
   }
 
-  .form__error {
+  .form__warning {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    text-align: center;
     margin: 2rem 0 0 0;
 
-    p {
+    .warning__error {
       color: var(--primary-200);
+      font-weight: 600;
+    }
+
+    .warning__info {
+      color: var(--brand-green);
+      font-weight: 600;
     }
   }
 

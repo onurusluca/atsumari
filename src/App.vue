@@ -44,11 +44,14 @@ const layoutLogic = computed(() => {
     route.currentRoute.value.name === 'Register'
   ) {
     return 'no-layout'
-  } else if (route.currentRoute.value.name === 'Home') {
-    return 'dashboard'
-  } else if (route.currentRoute.value.path.includes('room')) {
+  } else if (route.currentRoute.value.name === 'Room') {
     return 'default'
+  } else {
+    return 'dashboard'
   }
+  /*  else if (route.currentRoute.value.name === 'Home') {
+    return 'dashboard'
+  } */
 })
 </script>
 

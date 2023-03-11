@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
-import HomeView from '../views/Home.vue'
+import HomeView from '@/views/Home.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -12,35 +12,47 @@ const router = createRouter({
       meta: {
         needsAuth: true,
       },
-      children: [
-        {
-          path: 'space-edit/:id',
-          name: 'Space Edit',
-          component: () => import('../views/SpaceEdit.vue'),
-        },
+      /*children: [
       ],
+      */
     },
+
+    // Space
+    {
+      path: '/space-settings/:id',
+      name: 'SpaceSettings',
+      component: () => import('@/views/SpaceSettings.vue'),
+    },
+
+    // Map
+    {
+      path: '/space-edit/:id',
+      name: 'Space Edit',
+      component: () => import('@/views/SpaceSettings.vue'),
+    },
+
+    // Auth
     {
       path: '/login',
       name: 'Login',
-      component: () => import('../views/auth/LoginView.vue'),
+      component: () => import('@/views/auth/LoginView.vue'),
     },
     {
       path: '/register',
       name: 'Register',
-      component: () => import('../views/auth/RegisterView.vue'),
+      component: () => import('@/views/auth/RegisterView.vue'),
     },
     {
       path: '/account',
       name: 'Account',
-      component: () => import('../views/auth/Account.vue'),
+      component: () => import('@/views/auth/Account.vue'),
     },
 
     // Room
     {
-      path: '/room/:user_id/:id',
+      path: '/room/:id/:name',
       name: 'Room',
-      component: () => import('../views/Room.vue'),
+      component: () => import('@/views/Room.vue'),
       meta: {
         // needsAuth: true,
       },

@@ -37,6 +37,7 @@ declare module '@vue/runtime-core' {
     'RadixIcons:enter': typeof import('~icons/radix-icons/enter')['default']
     Register: typeof import('./components/auth/Register.vue')['default']
     'Ri:accountCircleLine': typeof import('~icons/ri/account-circle-line')['default']
+    'Ri:addCircleLine': typeof import('~icons/ri/add-circle-line')['default']
     'Ri:addLine': typeof import('~icons/ri/add-line')['default']
     'Ri:checkLine': typeof import('~icons/ri/check-line')['default']
     'Ri:eyeCloseLine': typeof import('~icons/ri/eye-close-line')['default']
