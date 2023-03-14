@@ -1,12 +1,14 @@
 export class Sprite {
-  constructor(image, x, y, ctx) {
-    this.image = image
+  constructor(x, y, width, height, color) {
     this.x = x
     this.y = y
-    this.ctx = ctx
+    this.width = width
+    this.height = height
+    this.color = color
   }
 
   draw() {
-    ctx.drawImage(this.image, this.x, this.y)
+    ctx.fillStyle = this.color
+    ctx.fillRect(this.x, this.y, this.width, this.height)
   }
 }
