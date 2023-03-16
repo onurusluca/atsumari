@@ -9,7 +9,7 @@
     "build-only": "vite build",
     "type-check": "vue-tsc --noEmit",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
-    "update-types": "npx supabase gen types typescript --project-id \"ulvdytmovaovzsoxyxpt\" > types/supabase.ts"
+    "update-types": "npx supabase gen types typescript --project-id \"rznoqrxsbrfyzlrlfcvj\" > types/supabase.ts"
   },
   "dependencies": {
     "@intlify/unplugin-vue-i18n": "^0.8.2",

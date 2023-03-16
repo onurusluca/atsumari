@@ -1,7 +1,12 @@
 <template>
   <router-view v-slot="{ Component }">
-    <keep-alive>
+    <div class="content">
       <component :is="Component" />
-    </keep-alive>
+    </div>
   </router-view>
 </template>
+
+<style scoped lang="scss">
+.content {
+}
+</style>
