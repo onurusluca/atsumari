@@ -59,20 +59,21 @@ export function createCanvasApp(
     // Draw users on center
     users.forEach((user) => {
       //FIXME: Draw rectangle for each user
-      ctx.fillStyle = user.color;
-      ctx.fillRect(user.x - cameraX, user.y - cameraY, 50, 50);
+      /*   ctx.fillStyle = user.color;
+      ctx.fillRect(user.x - cameraX, user.y - cameraY, 50, 50); */
 
-      /*      ctx.drawImage(
+      // Draw character
+      ctx.drawImage(
         characterImg,
         0,
         0,
         characterImg.width / 4,
         characterImg.height,
-        canvas.width / 2 - characterImg.width / 8,
-        canvas.height / 2 - characterImg.height / 8,
+        user.x - cameraX - characterImg.width / 8,
+        user.y - cameraY - characterImg.height / 8,
         characterImg.width / 4,
         characterImg.height
-      ); */
+      );
     });
 
     // Request next frame
