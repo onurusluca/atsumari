@@ -13,8 +13,4 @@ app.use(router);
 app.use(i18n);
 app.use(createPinia());
 
-// Mount the app when router is ready: https://www.youtube.com/watch?v=a6gT6qHtch8&ab_channel=VueMastery
-// This will prevent layout shift or and slow routing with auth guards
-router.isReady().then(() => {
-  app.mount("#app");
-});
+app.mount("#app");

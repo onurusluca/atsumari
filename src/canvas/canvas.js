@@ -1,48 +1,42 @@
-export async function createCanvasApp(
+import { emitter } from "@/composables/useEmit";
+
+export function createCanvasApp(
+  // Get needed data from Room.vue
   myPlayerId,
   users,
   canvas,
   canvasImage,
   characterImage
 ) {
-  // Check for canvas support
-  if (!canvas.getContext) {
-    throw new Error("Canvas not supported");
-  }
-
   const ctx = canvas.getContext("2d");
 
   // Set width and height of canvas
   canvas.width = 1024;
   canvas.height = 768;
 
+  // Draw background image
   const worldImg = new Image();
-  worldImg.onerror = handleImageError;
   worldImg.src = canvasImage;
 
+  // Draw character
   const characterImg = new Image();
-  characterImg.onerror = handleImageError;
   characterImg.src = characterImage;
 
-  function handleImageError(event) {
-    console.error(`Error loading image: ${event.target.src}`);
-  }
-
+  // Animate canvas
   function animate() {
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    let myPlayer = null;
-
-    myPlayer = users.find((user) => user.id === myPlayerId);
+    // Get my player(the current user)
+    const myPlayer = users.find((user) => user.id === myPlayerId);
 
     // Center camera on player
     let cameraX = 0;
     let cameraY = 0;
-
     if (myPlayer) {
-      cameraX = Math.round(myPlayer.x - canvas.width / 2);
-      cameraY = Math.round(myPlayer.y - canvas.height / 2);
+      // Prevent tearing
+      cameraX = parseInt(myPlayer.x - canvas.width / 2);
+      cameraY = parseInt(myPlayer.y - canvas.height / 2);
     }
 
     // Draw background so it covers all canvas and moves with camera
@@ -78,5 +72,94 @@ export async function createCanvasApp(
     requestAnimationFrame(animate);
   }
 
+  // Start drawing
   animate();
+
+  // MOUSE INPUT
+  canvas.addEventListener("dblclick", (e) => {
+    // Get my player(the current user)
+    const myPlayer = users.find((user) => user.id === myPlayerId);
+
+    // Get mouse position
+    const mouse = {
+      x: e.clientX,
+      y: e.clientY,
+    };
+
+    // Get camera position
+    const camera = {
+      x: parseInt(myPlayer.x - canvas.width / 2),
+      y: parseInt(myPlayer.y - canvas.height / 2),
+    };
+
+    // Get mouse position relative to canvas
+    const mouseOnCanvas = {
+      x: mouse.x - canvas.offsetLeft,
+      y: mouse.y - canvas.offsetTop,
+    };
+
+    // Get mouse position relative to camera
+    const mouseOnCamera = {
+      x: mouseOnCanvas.x + camera.x,
+      y: mouseOnCanvas.y + camera.y,
+    };
+
+    // Move player to mouse position
+    myPlayer.x = mouseOnCamera.x;
+    myPlayer.y = mouseOnCamera.y;
+
+    // Emit event to server
+    emitter.emit("playerMove", myPlayer);
+  });
+
+  // KEYBOARD INPUT
+  const inputs = {
+    up: false,
+    down: false,
+    left: false,
+    right: false,
+  };
+
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "w") {
+      inputs["up"] = true;
+    } else if (e.key === "s") {
+      inputs["down"] = true;
+    } else if (e.key === "d") {
+      inputs["right"] = true;
+    } else if (e.key === "a") {
+      inputs["left"] = true;
+    }
+    if (["a", "s", "w", "d"].includes(e.key)) {
+      console.log(inputs);
+      emitter.emit("playerMove", inputs);
+    }
+  });
+
+  window.addEventListener("keyup", (e) => {
+    if (e.key === "w") {
+      inputs["up"] = false;
+    } else if (e.key === "s") {
+      inputs["down"] = false;
+    } else if (e.key === "d") {
+      inputs["right"] = false;
+    } else if (e.key === "a") {
+      inputs["left"] = false;
+    }
+    if (["a", "s", "w", "d"].includes(e.key)) {
+      console.log();
+    }
+  });
 }
+
+/* ctx.drawImage(
+  image,
+  sx(top-left of x),
+  sy(top-left of y),
+  swidth(width portion to draw),
+  sheight(height portion to draw),
+  x(x to draw on),
+  y(y to draw on),
+  width(width of image to draw on canvas),
+  height(height of image to draw on canvas))
+  */

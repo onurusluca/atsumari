@@ -1,12 +1,20 @@
 <script setup lang="ts">
+/******************
+ * IMPORTS
+ ******************/
 // Need to import images or put them into public folder: https://stackoverflow.com/questions/59632839/how-to-use-canvas-with-vue-in-component
 import WorldImage from "@/canvas/images/world-image.png";
 import CharacterDown from "@/canvas/images/char-down.png";
 
-import type { User } from "@/types/types";
 import { createCanvasApp } from "@/canvas/canvas";
+import { emitter } from "@/composables/useEmit";
 
-// const { t } = useI18n()
+import type { User } from "@/types/general";
+
+/******************
+ * DECLARATIONS
+ ******************/
+const { t } = useI18n();
 const authStore = useAuthStore();
 const route = useRouter();
 
@@ -19,30 +27,24 @@ const canvasLocalStorage = useStorage("atsumari_canvas", {
 });
 let users = reactive<Array<User>>([]);
 
+/******************
+ * INITIALIZATION
+ ******************/
 onMounted(async () => {
   const canvas = document.getElementById("main-canvas") as HTMLCanvasElement;
 
   createCanvasApp(userId, users, canvas, WorldImage, CharacterDown);
 
-  canvas.addEventListener("keydown", function (event) {
-    if (event.target === canvas) {
-      // Handle keydown event
-      handleKeyDown(event);
-    }
-  });
-
   // Focus canvas on click
   canvas.addEventListener("click", function () {
     canvas.focus();
   });
-});
 
-/* let windowWidth = ref(window.innerWidth);
-let windowHeight = ref(window.innerHeight);
-window.addEventListener("resize", () => {
-  windowWidth.value = window.innerWidth;
-  windowHeight.value = window.innerHeight;
-}); */
+  // Listen to events sent from canvas
+  emitter.on("playerMove", (data) => {
+    console.log("EMITRECEIVED", data);
+  });
+});
 
 let x = ref(0);
 let y = ref(0);
@@ -52,53 +54,13 @@ let initialUserPosition = {
   y: 0,
 };
 
-// Detect w a s d key events and increment x and y
-const handleKeyDown = async (event: { key: string }) => {
-  let lastKey = "";
-  let pressedKey = "";
-
-  if (event.key === "w" || event.key === "W") {
-    lastKey = "w";
-    pressedKey = "w";
-  } else if (event.key === "s" || event.key === "S") {
-    lastKey = "s";
-    pressedKey = "s";
-
-    await sendUserAction(x.value, y.value);
-  } else if (event.key === "a" || event.key === "A") {
-    lastKey = "a";
-    pressedKey = "a";
-  } else if (event.key === "d" || event.key === "D") {
-    lastKey = "d";
-    pressedKey = "d";
-  }
-
-  if (pressedKey === "w" && lastKey === "w") {
-    y.value -= speed;
-    lastKey = "w";
-    await sendUserAction(x.value, y.value);
-  } else if (pressedKey === "s" && lastKey === "s") {
-    lastKey = "s";
-    y.value += speed;
-    await sendUserAction(x.value, y.value);
-  } else if (pressedKey === "a" && lastKey === "a") {
-    lastKey = "a";
-    x.value -= speed;
-    await sendUserAction(x.value, y.value);
-  } else if (pressedKey === "d" && lastKey === "d") {
-    lastKey = "d";
-    x.value += speed;
-    await sendUserAction(x.value, y.value);
-  }
-};
-
-/* ====================
- REALTIME
- ====================*/
+/******************
+ * REALTIME
+ ******************/
 const broadCastChannel = supabase.channel(roomId, {
   config: {
     broadcast: {
-      self: true, // Listen to your own broadcast events: https://supabase.com/docs/guides/realtime/broadcast#self-send-messages
+      self: false, // Listen to your own broadcast events: https://supabase.com/docs/guides/realtime/broadcast#self-send-messages
       ack: true, // Acknowledge the event: https://supabase.com/docs/guides/realtime/broadcast#acknowledge-messages
     },
   },
@@ -111,14 +73,16 @@ broadCastChannel
   }) */
   .on("presence", { event: "join" }, async ({ key, newPresences }) => {
     // Listen to join event
-    console.log("Someone joined the channel: ", newPresences);
+    console.log("Someone joined the channel: ", newPresences[0].id);
 
-    users.push({
-      id: newPresences[0].id,
-      x: x.value,
-      y: y.value,
-      color: "#" + Math.floor(Math.random() * 16777215).toString(16),
-    });
+    // Add user to users array except self
+    if (newPresences[0].id !== userId) {
+      users.push({
+        id: newPresences[0].id,
+        x: 0,
+        y: 0,
+      });
+    }
 
     // Send start position
     await sendUserAction(initialUserPosition.x, initialUserPosition.y);
@@ -146,7 +110,6 @@ broadCastChannel
   .on("broadcast", { event: "sendUserPositionEvent" }, (payload: any) => {
     // Listen for broadcast events
     console.log("Received broadcast event", payload);
-    console.log("users at broadcast receive: ", users);
 
     // Update user position
     const user = users.find((user) => user.id === payload.payload.id);
@@ -167,9 +130,10 @@ const sendUserAction = async (x: number, y: number) => {
     },
   });
 };
-/* ====================
- end REALTIME
- ====================*/
+
+/******************
+ * -end REALTIME
+ ******************/
 </script>
 
 <template>

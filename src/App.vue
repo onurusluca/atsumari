@@ -1,58 +1,59 @@
 <script setup lang="ts">
-import Dashboard from './layouts/dashboard.vue'
-import Default from './layouts/default.vue'
-import NoLayout from './layouts/noLayout.vue'
+import Dashboard from "./layouts/dashboard.vue";
+import Default from "./layouts/default.vue";
+import NoLayout from "./layouts/noLayout.vue";
 
-const router = useRouter()
-const route = useRouter()
+const router = useRouter();
+const route = useRouter();
 
-const authStore = useAuthStore()
+const authStore = useAuthStore();
 
-let session = ref()
+let session = ref();
 
 onMounted(async () => {
   // listen for auth events (e.g. sign in, sign out, refresh)
   // set session based on the auth event
   supabase.auth.getSession().then(({ data }) => {
-    session.value = data.session
-    authStore.session = data.session
-    authStore.user = data.session?.user
-  })
+    session.value = data.session;
+    authStore.session = data.session;
+    authStore.user = data.session?.user;
+  });
 
   supabase.auth.onAuthStateChange((_, _session) => {
-    session.value = _session
-    authStore.session = _session
-    authStore.user = _session?.user
-  })
-})
+    session.value = _session;
+    authStore.session = _session;
+    authStore.user = _session?.user;
+  });
+});
 
-// if the user is already logged in, redirect to the dashboard else redirect to the login page
+// If the user is not logged in, redirect to login page
+
 watch(
-  () => authStore.session,
+  () => session.value,
   (session) => {
     if (!session) {
-      router.push({ name: 'Login' })
+      router.push({ name: "Login" });
     }
   }
-)
+);
 
 // Layout logic based on the route
 // Dashboard and default usage(in-room) have different layouts
 const layoutLogic = computed(() => {
   if (
-    route.currentRoute.value.name === 'Login' ||
-    route.currentRoute.value.name === 'Register'
+    route.currentRoute.value.name === "Login" ||
+    route.currentRoute.value.name === "Register"
   ) {
-    return 'no-layout'
-  } else if (route.currentRoute.value.name === 'Room') {
-    return 'default'
-  } else {
-    return 'dashboard'
+    return "no-layout";
+  } else if (route.currentRoute.value.name === "Room") {
+    return "default";
+  } else if (session.value) {
+    return "dashboard";
   }
   /*  else if (route.currentRoute.value.name === 'Home') {
     return 'dashboard'
   } */
-})
+});
 </script>
 
 <template>
