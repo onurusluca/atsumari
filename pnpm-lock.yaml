@@ -13,6 +13,7 @@ specifiers:
   '@vueuse/components': ^9.13.0
   '@vueuse/core': ^9.13.0
   '@vueuse/head': ^1.1.19
+  emittery: ^1.0.1
   eslint: ^8.35.0
   eslint-plugin-vue: ^9.9.0
   nanoid: ^4.0.1
@@ -37,6 +38,7 @@ dependencies:
   '@vueuse/components': 9.13.0_vue@3.2.47
   '@vueuse/core': 9.13.0_vue@3.2.47
   '@vueuse/head': 1.1.19_vue@3.2.47
+  emittery: 1.0.1
   nanoid: 4.0.1
   pinia: 2.0.33_5yi2kxxaqg74pgvs6b75qdtvru
   vue: 3.2.47
@@ -1600,6 +1602,11 @@ packages:
   /electron-to-chromium/1.4.325:
     resolution: {integrity: sha512-K1C03NT4I7BuzsRdCU5RWkgZxtswnKDYM6/eMhkEXqKu4e5T+ck610x3FPzu1y7HVFSiQKZqP16gnJzPpji1TQ==}
     dev: true
+
+  /emittery/1.0.1:
+    resolution: {integrity: sha512-2ID6FdrMD9KDLldGesP6317G78K7km/kMcwItRtVFva7I/cSEOIaLpewaUb+YLXVwdAp3Ctfxh/V5zIl1sj7dQ==}
+    engines: {node: '>=14.16'}
+    dev: false
 
   /enhanced-resolve/4.5.0:
     resolution: {integrity: sha512-Nv9m36S/vxpsI+Hc4/ZGRs0n9mXqSWGGq49zxb/cJfPAQMbUtttJAlNPS4AQzaBdw/pKskw5bMbekT/Y7W/Wlg==}

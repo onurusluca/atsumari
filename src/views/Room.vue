@@ -3,6 +3,7 @@
 import WorldImage from "@/canvas/images/world-image.png";
 import CharacterDown from "@/canvas/images/char-down.png";
 
+import type { User } from "@/types/types";
 import { createCanvasApp } from "@/canvas/canvas";
 
 // const { t } = useI18n()
@@ -13,8 +14,14 @@ let roomId = route.currentRoute.value.params.id;
 let roomName = route.currentRoute.value.params.name;
 let userId = authStore.user?.id;
 
+const canvasLocalStorage = useStorage("atsumari_canvas", {
+  lastUserPosition: { x: 0, y: 0 },
+});
+let users = reactive<Array<User>>([]);
+
 onMounted(async () => {
   const canvas = document.getElementById("main-canvas") as HTMLCanvasElement;
+
   createCanvasApp(userId, users, canvas, WorldImage, CharacterDown);
 
   canvas.addEventListener("keydown", function (event) {
@@ -30,35 +37,38 @@ onMounted(async () => {
   });
 });
 
-// Windows size to canvas size
-let windowWidth = ref(window.innerWidth);
+/* let windowWidth = ref(window.innerWidth);
 let windowHeight = ref(window.innerHeight);
 window.addEventListener("resize", () => {
   windowWidth.value = window.innerWidth;
   windowHeight.value = window.innerHeight;
-});
+}); */
 
 let x = ref(0);
 let y = ref(0);
 const speed = 35;
+let initialUserPosition = {
+  x: 0,
+  y: 0,
+};
 
-// detect w a s d key events and increment x and y
+// Detect w a s d key events and increment x and y
 const handleKeyDown = async (event: { key: string }) => {
   let lastKey = "";
   let pressedKey = "";
 
-  if (event.key === "w") {
+  if (event.key === "w" || event.key === "W") {
     lastKey = "w";
     pressedKey = "w";
-  } else if (event.key === "s") {
+  } else if (event.key === "s" || event.key === "S") {
     lastKey = "s";
     pressedKey = "s";
 
     await sendUserAction(x.value, y.value);
-  } else if (event.key === "a") {
+  } else if (event.key === "a" || event.key === "A") {
     lastKey = "a";
     pressedKey = "a";
-  } else if (event.key === "d") {
+  } else if (event.key === "d" || event.key === "D") {
     lastKey = "d";
     pressedKey = "d";
   }
@@ -82,18 +92,10 @@ const handleKeyDown = async (event: { key: string }) => {
   }
 };
 
-let users = reactive<Array<User>>([]);
-
-// Types for users array
-interface User {
-  id: string;
-  x: number;
-  y: number;
-  color: string;
-}
-
-// REALTIME
-const broadCastChannel = supabase.channel("test", {
+/* ====================
+ REALTIME
+ ====================*/
+const broadCastChannel = supabase.channel(roomId, {
   config: {
     broadcast: {
       self: true, // Listen to your own broadcast events: https://supabase.com/docs/guides/realtime/broadcast#self-send-messages
@@ -107,21 +109,19 @@ broadCastChannel
     const state = broadCastChannel.presenceState()
     console.log('Channel synced: ', state)
   }) */
-  .on("presence", { event: "join" }, ({ key, newPresences }) => {
+  .on("presence", { event: "join" }, async ({ key, newPresences }) => {
     // Listen to join event
     console.log("Someone joined the channel: ", newPresences);
 
-    // Add user to users array if not already there except self
-    /* if (
-      !users.find((user) => user.id === newPresences[0].id) &&
-      newPresences[0].id !== authStore.user?.id
-    ) { */
     users.push({
       id: newPresences[0].id,
       x: x.value,
       y: y.value,
       color: "#" + Math.floor(Math.random() * 16777215).toString(16),
     });
+
+    // Send start position
+    await sendUserAction(initialUserPosition.x, initialUserPosition.y);
   })
   .on("presence", { event: "leave" }, ({ key, leftPresences }) => {
     // Listen to leave event
@@ -141,8 +141,6 @@ broadCastChannel
         online_at: new Date().toISOString(),
       });
       console.log("Sent join event: ", presenceTrackStatus);
-
-      await sendUserAction(x.value, y.value);
     }
   })
   .on("broadcast", { event: "sendUserPositionEvent" }, (payload: any) => {
@@ -169,23 +167,9 @@ const sendUserAction = async (x: number, y: number) => {
     },
   });
 };
-
-// Listen for presence events
-/* channel.on('presence', { event: 'sync' }, () => {
-  const state = channel.presenceState()
-  console.log(state)
-}) */
-
-// Send a presence event
-/* channel.subscribe(async (status) => {
-  if (status === 'SUBSCRIBED') {
-    const presenceTrackStatus = await channel.track({
-      id: authStore.user?.id,
-      online_at: new Date().toISOString(),
-    })
-    console.log(presenceTrackStatus)
-  }
-}) */
+/* ====================
+ end REALTIME
+ ====================*/
 </script>
 
 <template>

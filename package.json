@@ -17,6 +17,7 @@
     "@vueuse/components": "^9.13.0",
     "@vueuse/core": "^9.13.0",
     "@vueuse/head": "^1.1.19",
+    "emittery": "^1.0.1",
     "nanoid": "^4.0.1",
     "pinia": "^2.0.33",
     "vue": "^3.2.47",
