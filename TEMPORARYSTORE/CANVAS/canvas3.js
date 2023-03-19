@@ -1,7 +1,6 @@
 import { emitter } from "@/composables/useEmit";
 
 export function createCanvasApp(
-  // Get needed data from Room.vue
   myPlayerId,
   users,
   canvas,

@@ -4,7 +4,7 @@
   <h1 class="animate-spin">Loading!</h1>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 .animate-spin {
   animation: spin 1s linear infinite;
 }

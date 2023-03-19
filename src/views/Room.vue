@@ -26,6 +26,7 @@ const canvasLocalStorage = useStorage("atsumari_canvas", {
   lastUserPosition: { x: 0, y: 0 },
 });
 let users = reactive<Array<User>>([]);
+let myPlayer = ref<User | null>(null);
 
 let rightClickMenuIsEnabled = ref<boolean>(false);
 let rightClickMenuPosition = ref<{ x: number; y: number }>({
@@ -66,7 +67,7 @@ onMounted(async () => {
   );
 
   // Create canvas
-  createCanvasApp(userId, users, canvas, WorldImage, CharacterDown);
+  createCanvasApp(users, userId, speed, canvas, WorldImage, CharacterDown);
 
   // Focus canvas on click
   canvas.addEventListener("click", function () {
@@ -74,32 +75,20 @@ onMounted(async () => {
   });
 
   // Listen to emit events sent from canvas
-  emitter.on("playerMove", async (inputs) => {
+  emitter.on("playerMove", async (myPlayer) => {
     users.forEach(async (user) => {
       if (user.id === userId) {
-        if (inputs.w) {
-          user.y -= speed;
-        } else if (inputs.s) {
-          user.y += speed;
-        } else if (inputs.a) {
-          user.x -= speed;
-        } else if (inputs.d) {
-          user.x += speed;
-        }
+        user.x = myPlayer.x;
+        user.y = myPlayer.y;
 
-        // Send data 1 second after user stopped moving
-        if (!inputs.w && !inputs.s && !inputs.a && !inputs.d) {
-          // Send user position in realtime
-          // TODO: Use bitmap to send data for performance
+        // TODO: Use bitmap to send data and send every 1 sec intervals for performance
 
-          await sendUserAction(user.x, user.y);
-
-          // Save user position in localstorage
-          canvasLocalStorage.value = {
-            lastUserPosition: { x: user.x, y: user.y },
-          };
-          console.log("User move received,saved and updated");
-        }
+        await sendUserAction(user.x, user.y);
+        // Save user position in localstorage
+        canvasLocalStorage.value = {
+          lastUserPosition: { x: user.x, y: user.y },
+        };
+        console.log("User move received,saved and updated");
       }
     });
   });
@@ -158,6 +147,9 @@ const moveUserToRightClickedPosition = async () => {
       user.x = rightClickWorldPosition.value.x;
       user.y = rightClickWorldPosition.value.y;
 
+      // Emit event to update canvas
+      emitter.emit("rightClickPlayerMoveConfirmed", user);
+
       // Send user position in realtime
       await sendUserAction(user.x, user.y);
 
@@ -172,7 +164,7 @@ const moveUserToRightClickedPosition = async () => {
   rightClickMenuIsEnabled.value = false;
 };
 
-let speed = 20;
+let speed = 15;
 let initialUserPosition = {
   x: 100,
   y: 100,
@@ -208,7 +200,7 @@ broadCastChannel
         : initialUserPosition.y
     );
 
-    // Add user to users array except self
+    // Add user to users array
     //if (newPresences[0].id !== userId) {
     users.push({
       id: newPresences[0].id,

@@ -9,6 +9,7 @@ declare module '@vue/runtime-core' {
   export interface GlobalComponents {
     Account: typeof import('./components/auth/Account.vue')['default']
     Auth: typeof import('./components/auth/Auth.vue')['default']
+    BottomControl: typeof import('./components/nav/room/BottomControl.vue')['default']
     'Carbon:chevronDown': typeof import('~icons/carbon/chevron-down')['default']
     'Carbon:copy': typeof import('~icons/carbon/copy')['default']
     'Carbon:dotMark': typeof import('~icons/carbon/dot-mark')['default']
