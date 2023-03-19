@@ -16,13 +16,14 @@
 
     <script>
       // See if the user has dark mode enabled, or if they have a preference stored in localStorage and if so use that.
-      ;(function () {
+      (function () {
         const prefersDark =
-          window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-        const setting = localStorage.getItem('vueuse-color-scheme') || 'auto'
-        if (setting === 'dark' || (prefersDark && setting !== 'light'))
-          document.documentElement.classList.toggle('dark', true)
-      })()
+          window.matchMedia &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches;
+        const setting = localStorage.getItem("vueuse-color-scheme") || "auto";
+        if (setting === "dark" || (prefersDark && setting !== "light"))
+          document.documentElement.classList.toggle("dark", true);
+      })();
     </script>
   </head>
   <body>
@@ -49,7 +50,7 @@
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        font-family: 'Noto Sans JP', sans-serif;
+        font-family: "Noto Sans JP", sans-serif;
         background: #000000d2 !important;
         backdrop-filter: blur(2px);
         z-index: 9910;

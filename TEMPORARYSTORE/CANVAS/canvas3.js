@@ -10,10 +10,6 @@ export function createCanvasApp(
 ) {
   const ctx = canvas.getContext("2d");
 
-  // Set width and height of canvas
-  canvas.width = 1024;
-  canvas.height = 768;
-
   // Draw background image
   const worldImg = new Image();
   worldImg.src = canvasImage;
@@ -22,17 +18,18 @@ export function createCanvasApp(
   const characterImg = new Image();
   characterImg.src = characterImage;
 
+  // Center camera on player
+  let cameraX = 0;
+  let cameraY = 0;
+
   // Animate canvas
-  function animate() {
+  const animate = () => {
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // Get my player(the current user)
     const myPlayer = users.find((user) => user.id === myPlayerId);
 
-    // Center camera on player
-    let cameraX = 0;
-    let cameraY = 0;
     if (myPlayer) {
       // Prevent tearing
       cameraX = parseInt(myPlayer.x - canvas.width / 2);
@@ -70,85 +67,94 @@ export function createCanvasApp(
 
     // Request next frame
     requestAnimationFrame(animate);
-  }
+  };
 
   // Start drawing
   animate();
 
-  // MOUSE INPUT
+  // MOUSE INPUT DOUBLE CLICK
   canvas.addEventListener("dblclick", (e) => {
-    // Get my player(the current user)
-    const myPlayer = users.find((user) => user.id === myPlayerId);
-
-    // Get mouse position
-    const mouse = {
-      x: e.clientX,
-      y: e.clientY,
-    };
-
-    // Get camera position
-    const camera = {
-      x: parseInt(myPlayer.x - canvas.width / 2),
-      y: parseInt(myPlayer.y - canvas.height / 2),
-    };
-
-    // Get mouse position relative to canvas
-    const mouseOnCanvas = {
-      x: mouse.x - canvas.offsetLeft,
-      y: mouse.y - canvas.offsetTop,
-    };
-
-    // Get mouse position relative to camera
-    const mouseOnCamera = {
-      x: mouseOnCanvas.x + camera.x,
-      y: mouseOnCanvas.y + camera.y,
-    };
-
-    // Move player to mouse position
-    myPlayer.x = mouseOnCamera.x;
-    myPlayer.y = mouseOnCamera.y;
+    // Get the x and y position of the mouse based on camera
+    const x = e.clientX + cameraX - 8; // -10 to account for character width
+    const y = e.clientY + cameraY - 25; // -25 to account for character height
 
     // Emit event to server
-    emitter.emit("playerMove", myPlayer);
+    emitter.emit("doubleClick", { x, y });
   });
 
-  // KEYBOARD INPUT
-  const inputs = {
-    up: false,
-    down: false,
-    left: false,
-    right: false,
-  };
+  // MOUSE INPUT RIGHT CLICK
+  canvas.addEventListener("contextmenu", (e) => {
+    // Get right click position
+    const mouseX = e.clientX;
+    const mouseY = e.clientY;
 
+    // Get the x and y position of the mouse based on camera
+    const worldX = e.clientX + cameraX;
+    const worldY = e.clientY + cameraY;
+
+    const mousePos = {
+      mouseX,
+      mouseY,
+    };
+
+    const worldPos = {
+      worldX,
+      worldY,
+    };
+
+    // Emit event to server
+    emitter.emit("rightClick", { mousePos, worldPos });
+
+    // Prevent default context menu
+    e.preventDefault();
+  });
+
+  // KEYBOARD INPUTS
+  const inputs = {
+    w: false,
+    a: false,
+    s: false,
+    d: false,
+  };
+  let lastKey = "";
   window.addEventListener("keydown", (e) => {
-    if (e.key === "w") {
-      inputs["up"] = true;
-    } else if (e.key === "s") {
-      inputs["down"] = true;
-    } else if (e.key === "d") {
-      inputs["right"] = true;
-    } else if (e.key === "a") {
-      inputs["left"] = true;
+    switch (e.key.toLowerCase()) {
+      case "w":
+        inputs.w = true;
+        lastKey = "w";
+        break;
+      case "a":
+        inputs.a = true;
+        lastKey = "a";
+        break;
+      case "s":
+        inputs.s = true;
+        lastKey = "s";
+        break;
+      case "d":
+        inputs.d = true;
+        lastKey = "d";
+        break;
     }
-    if (["a", "s", "w", "d"].includes(e.key)) {
-      console.log(inputs);
-      emitter.emit("playerMove", inputs);
-    }
+    emitter.emit("playerMove", inputs);
   });
 
   window.addEventListener("keyup", (e) => {
-    if (e.key === "w") {
-      inputs["up"] = false;
-    } else if (e.key === "s") {
-      inputs["down"] = false;
-    } else if (e.key === "d") {
-      inputs["right"] = false;
-    } else if (e.key === "a") {
-      inputs["left"] = false;
+    switch (e.key.toLowerCase()) {
+      case "w":
+        inputs.w = false;
+        break;
+      case "a":
+        inputs.a = false;
+        break;
+      case "s":
+        inputs.s = false;
+        break;
+      case "d":
+        inputs.d = false;
+        break;
     }
-    if (["a", "s", "w", "d"].includes(e.key)) {
-      console.log();
-    }
+    emitter.emit("playerMove", inputs);
   });
 }
 
