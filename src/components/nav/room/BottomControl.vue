@@ -19,10 +19,11 @@ onMounted(() => {});
   left: 0;
   right: 0;
   height: 4rem;
+  margin: 0;
+  padding: 0;
 
   background-color: var(--bg-100);
   border-top: 1px solid var(--border);
-  box-shadow: 0px -12px 10px -10px var(--shadow-darkest);
 
   z-index: $room-bottom-control-z-index;
 }

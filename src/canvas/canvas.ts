@@ -12,6 +12,7 @@ export function createCanvasApp(
   myPlayerId: string,
   speed: number,
   canvas: HTMLCanvasElement,
+  canvasFrameRate,
   canvasImage: string,
   characterImage: string
 ) {
@@ -32,17 +33,13 @@ export function createCanvasApp(
   let lastTime = performance.now();
   let frameCount = 0;
   let fps = 0;
-  const FRAME_RATE = 30; // Limit frame rate to 30 FPS
-  const FRAME_TIME = 1000 / FRAME_RATE;
 
   // Get my player(the current user)
   let myPlayer = {
     x: 0,
     y: 0,
   };
-  if (users.length > 0) {
-    myPlayer = users.find((user) => user.id === myPlayerId)!;
-  }
+
   // Keyboard inputs
   const inputs = {
     w: false,
@@ -57,11 +54,12 @@ export function createCanvasApp(
     // Request next frame
     setTimeout(() => {
       requestAnimationFrame(animate);
-    }, FRAME_TIME);
+    }, canvasFrameRate);
 
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    myPlayer = users.find((user) => user.id === myPlayerId)!;
     // Center camera on player
     cameraX = parseInt(myPlayer.x - canvas.width / 2);
     cameraY = parseInt(myPlayer.y - canvas.height / 2);
@@ -139,7 +137,17 @@ export function createCanvasApp(
   };
 
   // Start drawing
-  animate();
+  if (users.length > 0) {
+    animate();
+  } else {
+    // Check if users array is empty
+    const checkUsers = setInterval(() => {
+      if (users.length > 0) {
+        animate();
+        clearInterval(checkUsers);
+      }
+    }, 1000);
+  }
 
   /******************
    * Mouse events *
@@ -173,9 +181,6 @@ export function createCanvasApp(
       worldX,
       worldY,
     };
-
-    // myPlayer.x = worldX;
-    // myPlayer.y = worldY;
 
     // Emit right click event
     emitter.emit("rightClick", { mousePos, worldPos });
@@ -231,8 +236,12 @@ export function createCanvasApp(
         break;
     }
 
-    // Emit player move event
-    // Only emit after user has stopped moving
-    emitter.emit("playerMove", myPlayer);
+    // Only emit if key is w,a,s,d or W,A,S,D and after user has stopped moving
+    const validKeys = ["w", "a", "s", "d"];
+
+    if (validKeys.includes(e.key.toLocaleLowerCase())) {
+      // Emit player move event
+      emitter.emit("playerMove", myPlayer);
+    }
   });
 }

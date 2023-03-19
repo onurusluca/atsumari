@@ -1,79 +1,79 @@
 <script setup lang="ts">
-import type { OnClickOutsideHandler } from '@vueuse/core'
-import { vOnClickOutside } from '@vueuse/components'
-import ConfettiExplosion from 'vue-confetti-explosion'
+import type { OnClickOutsideHandler } from "@vueuse/core";
+import { vOnClickOutside } from "@vueuse/components";
+import ConfettiExplosion from "vue-confetti-explosion";
 
-const { t } = useI18n()
-const authStore = useAuthStore()
-const router = useRouter()
+const { t } = useI18n();
+const authStore = useAuthStore();
+const router = useRouter();
 
-const emit = defineEmits(['closeModal'])
+const emit = defineEmits(["closeModal"]);
 
 /****************************************
  * API CALLS
  ****************************************/
-let spaceCreated = ref<boolean>(false)
-let spaceName = ref<string>('')
-let spacePassword = ref<string>('')
+let spaceCreated = ref<boolean>(false);
+let spaceName = ref<string>("");
+let spacePassword = ref<string>("");
 const handleCreateSpace = async () => {
   try {
-    const { data, error } = await supabase.from('spaces').insert([
+    const { data, error } = await supabase.from("spaces").insert([
       {
         name: spaceName.value,
         user_id: authStore?.session?.user?.id,
         password: spacePassword.value ? spacePassword.value : null,
       },
-    ])
+    ]);
     if (error) {
-      throw error
+      throw error;
     } else {
-      spaceCreated.value = true
-      showButtonLoading.value = false
+      spaceCreated.value = true;
+      showButtonLoading.value = false;
       // emit('closeModal')
       // router.push({ name: 'Home' })
     }
   } catch (error: any) {
-    console.log('CREATE SPACE CATCH ERROR: ', error.message)
+    console.log("CREATE SPACE CATCH ERROR: ", error.message);
   }
-}
+};
 
 /****************************************
  * UI EVENTS
  ****************************************/
 
-let showButtonLoading = ref<boolean>(false)
-let buttonsActive = ref<boolean>(true)
+let showButtonLoading = ref<boolean>(false);
+let buttonsActive = ref<boolean>(true);
 
 const handleClickOnConfirm = async () => {
-  buttonsActive.value = false
-  showButtonLoading.value = true
-  await handleCreateSpace()
-}
+  buttonsActive.value = false;
+  showButtonLoading.value = true;
+  await handleCreateSpace();
+};
 const onClickCancel = async () => {
-  buttonsActive.value = false
-  emit('closeModal')
-}
+  buttonsActive.value = false;
+  emit("closeModal");
+};
 
 // Click outside
 const clickOutsideHandlerModal: OnClickOutsideHandler = () => {
-  emit('closeModal')
-}
+  emit("closeModal");
+};
 
 // Password protect
-const passwordProtectEnabled = ref<boolean>(false)
+const passwordProtectEnabled = ref<boolean>(false);
 const togglePasswordProtect = () => {
-  passwordProtectEnabled.value = !passwordProtectEnabled.value
-}
+  passwordProtectEnabled.value = !passwordProtectEnabled.value;
+};
 
 // Reveal password button
-let revealPasswordButtonRef = ref<HTMLElement>()
-const { pressed } = useMousePressed({ target: revealPasswordButtonRef })
+let revealPasswordButtonRef = ref<HTMLElement>();
+const { pressed } = useMousePressed({ target: revealPasswordButtonRef });
 
 // Show me
 const onClickShowMe = () => {
-  emit('closeModal')
-  router.push({ name: 'Home' })
-}
+  emit("closeModal");
+  router.push({ name: "Home" });
+};
 </script>
 <template>
   <div class="create-space-modal">
@@ -86,10 +86,10 @@ const onClickShowMe = () => {
         @submit.prevent="handleClickOnConfirm"
         class="content__form"
       >
-        <h5 class="mb-xl">{{ t('space.createSpace.title') }}</h5>
+        <h5 class="mb-xl">{{ t("space.createSpace.title") }}</h5>
         <div class="form__input-single">
           <label for="spaceName" class="form__label">{{
-            t('space.createSpace.spaceName')
+            t("space.createSpace.spaceName")
           }}</label>
           <!-- autocomplete="new-password" is to override autofill -->
           <!-- @input is for mobile(v-model won't update until input loses focus): https://github.com/vuejs/vue/issues/8231 -->
@@ -109,7 +109,7 @@ const onClickShowMe = () => {
         <span class="toggle-container">
           <ri:lock-password-line class="mr-s" />
           <label class="toggle-container__text-left"
-            >{{ t('space.createSpace.passwordProtect') }}
+            >{{ t("space.createSpace.passwordProtect") }}
           </label>
           <input
             @input="togglePasswordProtect"
@@ -122,7 +122,7 @@ const onClickShowMe = () => {
 
         <div v-if="passwordProtectEnabled" class="form__input-single form__with-icon">
           <label for="spacePassword" class="form__label">{{
-            t('space.createSpace.spacePassword')
+            t("space.createSpace.spacePassword")
           }}</label>
 
           <input
@@ -158,7 +158,7 @@ const onClickShowMe = () => {
             :disabled="!buttonsActive"
             class="btn btn-outline mr-l"
           >
-            {{ t('buttons.cancel') }}
+            {{ t("buttons.cancel") }}
           </button>
 
           <!-- Confirmation -->
@@ -172,7 +172,7 @@ const onClickShowMe = () => {
             type="submit"
           >
             <ph:check-circle v-if="!showButtonLoading" class="mr-s" />
-            <div v-if="!showButtonLoading">{{ t('buttons.create') }}</div>
+            <div v-if="!showButtonLoading">{{ t("buttons.create") }}</div>
             <svg-spinners:90-ring-with-bg v-show="showButtonLoading" />
           </button>
         </div>
@@ -181,7 +181,7 @@ const onClickShowMe = () => {
       <div v-else class="content__space-created">
         <ph:check-circle style="font-size: 3rem; color: var(--brand-green)" />
         <h5 class="mb-s" style="color: var(--brand-green)">{{
-          t('space.createSpace.spaceCreated')
+          t("space.createSpace.spaceCreated")
         }}</h5>
 
         <!-- Confetti -->
@@ -195,7 +195,7 @@ const onClickShowMe = () => {
         />
 
         <button @click.prevent="onClickShowMe" class="btn btn-outline mt-l">
-          {{ t('space.createSpace.showMe') }}
+          {{ t("space.createSpace.showMe") }}
         </button>
       </div>
     </div>
@@ -203,18 +203,21 @@ const onClickShowMe = () => {
 </template>
 <style scoped lang="scss">
 .create-space-modal {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  // Glassmorphism
   backdrop-filter: blur(2px);
+
   position: fixed;
   left: 0;
   top: 0;
   width: 100%;
   height: 100%;
-  background: hsla(0, 0%, 0%, 0.295);
+  background: var(--modal-overlay);
   overflow: hidden;
 
-  display: flex;
-  justify-content: center;
-  align-items: center;
   z-index: $modal-z-index;
 
   .create-space-modal__content {

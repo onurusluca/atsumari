@@ -49,24 +49,6 @@ const handleReadSpace = async () => {
   }
 };
 
-// Delete space
-
-const handleDeleteSpace = async (spaceId: string) => {
-  settingsMenuDropDownOpen.value = false;
-  try {
-    let { data: spaces, error } = await supabase
-      .from("spaces")
-      .delete()
-      .eq("id", spaceId);
-    if (spaces) {
-      await handleReadSpace();
-    }
-    if (error) throw error;
-  } catch (error: any) {
-    console.log("DELETE SPACE CATCH ERROR: ", error.message);
-  }
-};
-
 // Realtime
 supabase
   .channel("custom-all-channel")
@@ -154,7 +136,9 @@ let generateRandomSeeds = computed(() => {
           <p class="top__title">{{ item.name }}</p>
           <div class="top__space-settings">
             <button @click.stop="openSettingsMenu(index)" class="btn btn-icon">
-              <ph:dots-three-outline-fill style="color: black; font-size: 1.2rem" />
+              <ph:dots-three-outline-fill
+                style="color: var(--text-100); font-size: 1.2rem"
+              />
             </button>
 
             <!-- Settings menu -->

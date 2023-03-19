@@ -14,7 +14,7 @@
   font-weight: 600;
 
   cursor: pointer;
-  transition: background 60ms;
+  transition: all 60ms;
 
   // Icon
   svg {
@@ -37,11 +37,15 @@ button:disabled {
   color: var(--text-100);
   background: transparent;
 
+  svg {
+    color: var(--text-100);
+  }
+
+
   &:hover {
     background: var(--grey-hover);
 
-    // icon
-    svg {}
+
   }
 
 }
@@ -54,19 +58,21 @@ button:disabled {
   border: none;
   border-radius: 0.5rem;
   cursor: pointer;
+  color: var(--text-100);
+
+  svg {
+    color: var(--text-100);
+  }
 
   &:hover {
     background: var(--grey-hover);
 
-    // icon
-    svg {}
   }
-
-
 }
 
 // General use
 .btn-outline {
+  color: var(--text-100);
   background: transparent;
   border: 2px solid var(--border);
 

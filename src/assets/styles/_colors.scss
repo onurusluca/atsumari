@@ -43,6 +43,7 @@
   --shadow: #d4d4d4bf;
   --shadow-darker: #b3b3b3bf;
   --shadow-darkest: #8c8c8cbf;
+  --modal-overlay: #202020bf;
 
   // Others
   --place-holder: #BDBDBD;
@@ -78,27 +79,79 @@
 }
 
 .dark {
-  /*   --primary-100: #00ADB5;
-  --primary-200: #AAE3E2;
-  --primary-300: #fdf6fd;
-  --accent-100: #AC7DD2;
-  --accent-200: #fff4ff;
-  --text-100: #EEEEEE;
-  --text-200: #C5C5C5;
-  --bg-100: #222831;
-  --bg-200: #393E46;
-  --bg-300: #454e59;
+  // Primary
+  --primary-100: #00b3a8;
+  --primary-200: #e63956;
+  --primary-300: #0e594f;
 
-  --primary-100: #892CDC;
-  --primary-200: #BC6FF1;
-  --primary-300: #fdf6fd;
-  --accent-100: #D9ACF5;
-  --accent-200: #fff4ff;
-  --text-100: #EEEEEE;
-  --text-200: #FDEBED;
-  --bg-100: #222831;
-  --bg-200: #393E46;
-  --bg-300: #454e59;
+  // Accent
+  --accent-100: #f0ae0a;
+  --accent-200: #fdf6c3;
 
- */
+  // Brand
+  --brand-red: #ff3f4d;
+  --brand-green: #77b859;
+
+  // Colors
+  --darker-green: #6eb94d;
+  --gray-black: #939393;
+
+  // Texts
+  --text-100: #f0efef;
+  --text-200: #a8a5a5;
+  --link: #a188ff;
+  --pale-font: #c7c7c7;
+  --paler-font: #9e9e9e;
+  --palest-font: #757575;
+
+  --anti-color: #111; // for dark or light mode change
+
+  // Backgrounds
+  --bg-100: #181818;
+  --bg-200: #1a1a1a;
+  --bg-300: #212121;
+  --text-input-bg: #212121;
+  --toggle-input-bg: #1e88e5;
+
+  // Borders
+  --border: #333;
+  --border-darker: #555;
+  --input-focus-border: var(--primary-100);
+
+  // Shadows
+  --shadow: #222222bf;
+  --shadow-darker: #111111bf;
+  --shadow-darkest: #000000bf;
+  --modal-overlay: #474747bf;
+
+  // Others
+  --place-holder: #757575;
+  --disabled: #3f3f3f;
+  --online-count-green: #3cb371;
+
+  // Hovered
+  --link-color-hover: #4139d8;
+
+  // Buttons
+  --main-btn-bg: #00ebc7;
+  --main-btn-bg-hover: #3dc2b5;
+  --outline-btn: #ffffff;
+  --outline-btn-hover: #f5f5f5;
+  --create-btn-bg: #2CC56F;
+  --create-btn-bg-hover: #20b661;
+  --save-btn-bg: #4F46E5;
+  --save-btn-bg-hover: #4139d8;
+  --danger-btn-bg: #FF4755;
+  --danger-btn-bg-hover: #e53b49;
+  --warning-btn-bg: #f5be0b;
+  --warning-btn-bg-hover: #e4b00a;
+  --grey-hover: #444444;
+
+
+  // Toast
+  --toast-success: #2CC56F;
+  --toast-error: #FF4755;
+  --toast-warning: #f5be0b;
+  --toast-info: #4F46E5;
+
 }

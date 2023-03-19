@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import type { OnClickOutsideHandler } from '@vueuse/core'
-import { vOnClickOutside } from '@vueuse/components'
-import CreateSpaceModal from '@/components/global/CreateSpaceModal.vue'
-import { isDark, toggleDarkMode } from '@/utils/dark'
+import type { OnClickOutsideHandler } from "@vueuse/core";
+import { vOnClickOutside } from "@vueuse/components";
+import CreateSpaceModal from "@/components/global/CreateSpaceModal.vue";
+import { isDark, toggleDarkMode } from "@/utils/dark";
 
-const authStore = useAuthStore()
-const router = useRouter()
+const authStore = useAuthStore();
+const router = useRouter();
 
 /****************************************
  * API CALLS
@@ -13,49 +13,49 @@ const router = useRouter()
 // Logout
 const logOut = async () => {
   try {
-    const { error, data } = await supabase.auth.signOut()
+    const { error, data } = await supabase.auth.signOut();
     if (data) {
-      console.log('LOGOUT DATA: ', data)
+      console.log("LOGOUT DATA: ", data);
 
-      router.push({ name: 'Home' })
+      router.push({ name: "Home" });
     }
-    if (error) throw error
+    if (error) throw error;
   } catch (error: any) {
-    alert(error.message)
+    alert(error.message);
   }
-}
+};
 
 /****************************************
  * UI
  ****************************************/
 
 // Language
-const { t, locale } = useI18n()
+const { t, locale } = useI18n();
 const changeLanguage = (lang: string) => {
-  locale.value = lang
-  useStorage('atsumari_local-storage', { language: lang })
-}
+  locale.value = lang;
+  useStorage("atsumari_local-storage", { language: lang });
+};
 
 // User menu dropdown
-const userMenuDropdownOpen = ref<Boolean>(false)
+const userMenuDropdownOpen = ref<Boolean>(false);
 const clickOutsideHandlerDrowpdown: OnClickOutsideHandler = (event) => {
-  userMenuDropdownOpen.value = false
-}
+  userMenuDropdownOpen.value = false;
+};
 
 // Dark&Light mode
 function changeThemeDarkMode() {
-  toggleDarkMode()
+  toggleDarkMode();
   // window.location.reload();
 }
 
 // Language menu dropdown
-const languageMenuDropdownOpen = ref<Boolean>(false)
+const languageMenuDropdownOpen = ref<Boolean>(false);
 const clickOutsideHandlerLanguageDrowpdown: OnClickOutsideHandler = (event) => {
-  languageMenuDropdownOpen.value = false
-}
+  languageMenuDropdownOpen.value = false;
+};
 
 // Modal
-let showModal = ref<boolean>(false)
+let showModal = ref<boolean>(false);
 </script>
 
 <template>
@@ -75,7 +75,7 @@ let showModal = ref<boolean>(false)
     <div class="navbar__right">
       <button @click.stop="showModal = !showModal" class="btn btn-create mr-xxl">
         <ri:add-circle-line class="mr-xs" style="font-size: 1.3rem" />
-        {{ t('space.createSpace.title') }}
+        {{ t("space.createSpace.title") }}
       </button>
 
       <!--  <button class="btn-icon mr-l">
@@ -110,33 +110,18 @@ let showModal = ref<boolean>(false)
           <p class="user-menu-dropdown__email">{{ authStore?.session?.user.email }}</p>
 
           <!-- Edit character -->
-          <router-link
-            to=""
-            class="btn btn-no-style mt-s"
-            style="color: var(--text-100)"
-          >
-            <gridicons:customize
-              class="mr-s"
-              style="font-size: 1rem; color: var(--text-100)"
-            />
-            {{ t('user.editCharacter') }}
+          <router-link to="" class="btn btn-no-style mt-s">
+            <gridicons:customize class="mr-s" style="font-size: 1rem" />
+            {{ t("user.editCharacter") }}
           </router-link>
 
           <span class="user-menu-dropdown__divider"></span>
 
           <!-- Dark&light mode -->
           <button @click="changeThemeDarkMode" class="btn btn-no-style mb-xs">
-            <carbon:moon
-              v-if="!isDark"
-              class="mr-s"
-              style="font-size: 1rem; color: var(--text-100)"
-            />
-            <carbon:sun
-              v-else
-              class="mr-s"
-              style="font-size: 1rem; color: var(--text-100)"
-            />
-            {{ t('appearance.appearance') }}
+            <carbon:moon v-if="!isDark" class="mr-s" style="font-size: 1rem" />
+            <carbon:sun v-else class="mr-s" style="font-size: 1rem" />
+            {{ t("appearance.appearance") }}
           </button>
 
           <!-- Language -->
@@ -146,13 +131,10 @@ let showModal = ref<boolean>(false)
           >
             <carbon:ibm-watson-language-translator
               class="mr-s"
-              style="font-size: 1rem; color: var(--text-100)"
+              style="font-size: 1rem"
             />
-            {{ t('language.language') }}
-            <carbon:chevron-down
-              class="ml-s"
-              style="font-size: 0.8rem; color: var(--text-100)"
-            />
+            {{ t("language.language") }}
+            <carbon:chevron-down class="ml-s" style="font-size: 0.8rem" />
           </button>
 
           <!-- Language menu dropdown -->
@@ -163,10 +145,10 @@ let showModal = ref<boolean>(false)
               class="language-menu-dropdown__user-menu-dropdown dropdown-menu"
             >
               <button class="btn btn-no-style" @click="changeLanguage('en')">
-                {{ t('language.english') }}
+                {{ t("language.english") }}
               </button>
               <button class="btn btn-no-style" @click="changeLanguage('ja')">
-                {{ t('language.japanese') }}
+                {{ t("language.japanese") }}
               </button>
             </div>
           </Transition>
@@ -175,7 +157,7 @@ let showModal = ref<boolean>(false)
 
           <!-- Logout -->
           <button className="btn btn-danger" @click="logOut">{{
-            t('auth.logout')
+            t("auth.logout")
           }}</button>
         </div>
       </Transition>
@@ -216,8 +198,8 @@ let showModal = ref<boolean>(false)
       border-right: 1px solid var(--border);
 
       .icon-container__icon {
-        width: 3rem;
-        height: 3rem;
+        width: 2.5rem;
+        height: 2.5rem;
         cursor: pointer;
       }
     }

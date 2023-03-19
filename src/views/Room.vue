@@ -18,15 +18,19 @@ const { t } = useI18n();
 const authStore = useAuthStore();
 const route = useRouter();
 
-let roomId = route.currentRoute.value.params.id;
-let roomName = route.currentRoute.value.params.name;
-let userId = authStore.user?.id;
+const roomId = route.currentRoute.value.params.id;
+const roomName = route.currentRoute.value.params.name;
+const userId = authStore.user?.id;
 
 const canvasLocalStorage = useStorage("atsumari_canvas", {
   lastUserPosition: { x: 0, y: 0 },
 });
 let users = reactive<Array<User>>([]);
 let myPlayer = ref<User | null>(null);
+
+// Request animation frame every ..ms. Lowest is 30ms(30fps), highest is 10ms(60fps)
+// Need to change user speed based on this value
+let canvasFrameRate = ref<number>(10);
 
 let rightClickMenuIsEnabled = ref<boolean>(false);
 let rightClickMenuPosition = ref<{ x: number; y: number }>({
@@ -67,7 +71,15 @@ onMounted(async () => {
   );
 
   // Create canvas
-  createCanvasApp(users, userId, speed, canvas, WorldImage, CharacterDown);
+  createCanvasApp(
+    users,
+    userId,
+    speed,
+    canvas,
+    canvasFrameRate.value,
+    WorldImage,
+    CharacterDown
+  );
 
   // Focus canvas on click
   canvas.addEventListener("click", function () {
@@ -164,7 +176,7 @@ const moveUserToRightClickedPosition = async () => {
   rightClickMenuIsEnabled.value = false;
 };
 
-let speed = 15;
+let speed = 10;
 let initialUserPosition = {
   x: 100,
   y: 100,
@@ -173,11 +185,12 @@ let initialUserPosition = {
 /******************
  * REALTIME
  ******************/
-const broadCastChannel = supabase.channel(roomId, {
+// FIXME: For some reason, the realtime is not working on local network if roomId is a string
+const broadCastChannel = supabase.channel(+roomId, {
   config: {
     broadcast: {
       self: false, // Listen to your own broadcast events: https://supabase.com/docs/guides/realtime/broadcast#self-send-messages
-      ack: true, // Acknowledge the event: https://supabase.com/docs/guides/realtime/broadcast#acknowledge-messages
+      ack: false, // Acknowledge the event: https://supabase.com/docs/guides/realtime/broadcast#acknowledge-messages
     },
   },
 });
@@ -283,9 +296,9 @@ const sendUserAction = async (x: number, y: number) => {
           top: rightClickMenuPosition.y + 'px',
         }"
       >
-        <div @click="moveUserToRightClickedPosition" class="right-click-menu__item"
-          >Move here</div
-        >
+        <div @click="moveUserToRightClickedPosition" class="right-click-menu__item">{{
+          t("room.userActions.moveHere")
+        }}</div>
       </div>
     </div>
   </div>

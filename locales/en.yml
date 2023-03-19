@@ -2,8 +2,8 @@
 
 buttons:
   # Using quotes to avoid conflict with the YAML syntax https://yaml.org/type/bool.html
-  textYes: 'Yes'
-  textNo: 'No'
+  textYes: "Yes"
+  textNo: "No"
   ok: OK
   close: Close
   save: Save
@@ -126,3 +126,8 @@ space:
 home:
   spaces:
     noSpacesMessage: You don't have any spaces yet. Create one now!
+
+##### ROOM #####
+room:
+  userActions:
+    moveHere: Move Here
