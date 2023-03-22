@@ -37,15 +37,31 @@
 
 // Slide up
 .slide-up-enter-active {
-  transition: all 100ms ease-out;
+  transition: all 80ms ease-out;
 }
 
 .slide-up-leave-active {
-  transition: all 100ms cubic-bezier(1, 0.5, 0.8, 1);
+  transition: all 80ms cubic-bezier(1, 0.5, 0.8, 1);
 }
 
 .slide-up-enter-from,
 .slide-up-leave-to {
   transform: translateY(10px);
+  opacity: 0;
+}
+
+
+// Slide left
+.slide-left-fast-enter-active {
+  transition: all 50ms ease-out;
+}
+
+.slide-left-fast-leave-active {
+  transition: all 50ms cubic-bezier(1, 0.5, 0.8, 1);
+}
+
+.slide-left-fast-enter-from,
+.slide-left-fast-leave-to {
+  transform: translateX(10px);
   opacity: 0;
 }

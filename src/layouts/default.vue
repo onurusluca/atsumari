@@ -1,4 +1,6 @@
-import BottomControl from '@/components/nav/room/BottomControl.vue';
+import BottomControl from '@/components/room/BottomControl.vue'; import BottomControl
+from '@/components/room/BottomControl.vue'; import BottomControl from
+'@/components/nav/room/BottomControl.vue';
 
 <template>
   <router-view v-slot="{ Component }">

@@ -1,14 +1,6 @@
 <script setup lang="ts">
-/******************
- * IMPORTS
- ******************/
-// Need to import images or put them into public folder: https://stackoverflow.com/questions/59632839/how-to-use-canvas-with-vue-in-component
-import WorldImage from "@/canvas/images/world-image.png";
-import CharacterDown from "@/canvas/images/char-down.png";
-
 import { createCanvasApp } from "@/canvas/canvas";
 import { emitter } from "@/composables/useEmit";
-
 import type { User } from "@/types/general";
 
 /******************
@@ -26,11 +18,24 @@ const canvasLocalStorage = useStorage("atsumari_canvas", {
   lastUserPosition: { x: 0, y: 0 },
 });
 let users = reactive<Array<User>>([]);
-let myPlayer = ref<User | null>(null);
 
-// Request animation frame every ..ms. Lowest is 30ms(30fps), highest is 10ms(60fps)
-// Need to change user speed based on this value
-let canvasFrameRate = ref<number>(10);
+// Request animation frame every ..ms. Lowest is 30ms(30fps), middle is 20(45fps) highest is 10ms(60fps)
+let canvasFrameRate = ref<number>(30);
+
+// Need to change user speed based on canvasFrameRate
+let speed =
+  canvasFrameRate.value === 10
+    ? 5
+    : canvasFrameRate.value === 20
+    ? 8
+    : canvasFrameRate.value === 30
+    ? 11
+    : 10;
+
+let initialUserPosition = {
+  x: 100,
+  y: 100,
+};
 
 let rightClickMenuIsEnabled = ref<boolean>(false);
 let rightClickMenuPosition = ref<{ x: number; y: number }>({
@@ -71,15 +76,7 @@ onMounted(async () => {
   );
 
   // Create canvas
-  createCanvasApp(
-    users,
-    userId,
-    speed,
-    canvas,
-    canvasFrameRate.value,
-    WorldImage,
-    CharacterDown
-  );
+  createCanvasApp(users, userId, speed, canvas, canvasFrameRate.value);
 
   // Focus canvas on click
   canvas.addEventListener("click", function () {
@@ -92,10 +89,11 @@ onMounted(async () => {
       if (user.id === userId) {
         user.x = myPlayer.x;
         user.y = myPlayer.y;
+        user.facingTo = myPlayer.facingTo;
+        user.isMoving = myPlayer.isMoving;
 
-        // TODO: Use bitmap to send data and send every 1 sec intervals for performance
-
-        await sendUserAction(user.x, user.y);
+        // TODO: Use bitmap to send data
+        await sendUserAction(user.x, user.y, user.facingTo, user.isMoving);
         // Save user position in localstorage
         canvasLocalStorage.value = {
           lastUserPosition: { x: user.x, y: user.y },
@@ -114,9 +112,11 @@ onMounted(async () => {
       if (user.id === userId) {
         user.x = clickedPosition.x;
         user.y = clickedPosition.y;
+        user.facingTo = clickedPosition.facingTo;
+        user.isMoving = clickedPosition.isMoving;
 
         // Send user position in realtime
-        await sendUserAction(user.x, user.y);
+        await sendUserAction(user.x, user.y, user.facingTo, user.isMoving);
 
         // Save user position in localstorage
         canvasLocalStorage.value = {
@@ -159,11 +159,15 @@ const moveUserToRightClickedPosition = async () => {
       user.x = rightClickWorldPosition.value.x;
       user.y = rightClickWorldPosition.value.y;
 
+      // Set to default
+      user.facingTo = "down";
+      user.isMoving = false;
+
       // Emit event to update canvas
       emitter.emit("rightClickPlayerMoveConfirmed", user);
 
       // Send user position in realtime
-      await sendUserAction(user.x, user.y);
+      await sendUserAction(user.x, user.y, user.facingTo, user.isMoving);
 
       // Save user position in localstorage
       canvasLocalStorage.value = {
@@ -174,12 +178,6 @@ const moveUserToRightClickedPosition = async () => {
   });
 
   rightClickMenuIsEnabled.value = false;
-};
-
-let speed = 10;
-let initialUserPosition = {
-  x: 100,
-  y: 100,
 };
 
 /******************
@@ -210,7 +208,9 @@ broadCastChannel
         : initialUserPosition.x,
       canvasLocalStorage.value.lastUserPosition
         ? canvasLocalStorage.value.lastUserPosition.y
-        : initialUserPosition.y
+        : initialUserPosition.y,
+      "down",
+      false
     );
 
     // Add user to users array
@@ -219,6 +219,8 @@ broadCastChannel
       id: newPresences[0].id,
       x: newPresences[0].lastPosition.x,
       y: newPresences[0].lastPosition.y,
+      facingTo: "down",
+      isMoving: false,
     });
   })
   .on("presence", { event: "leave" }, ({ key, leftPresences }) => {
@@ -258,12 +260,19 @@ broadCastChannel
     if (user) {
       user.x = payload.payload.x;
       user.y = payload.payload.y;
+      user.facingTo = payload.payload.facingTo;
+      user.isMoving = payload.payload.isMoving;
     }
   });
 
 // Send user position
 // TODO: add a tick rate so it doesn't send too many events
-const sendUserAction = async (x: number, y: number) => {
+const sendUserAction = async (
+  x: number,
+  y: number,
+  facingTo: string,
+  isMoving: boolean
+) => {
   broadCastChannel.send({
     type: "broadcast",
     event: "sendUserPositionEvent",
@@ -271,13 +280,15 @@ const sendUserAction = async (x: number, y: number) => {
       id: authStore.user?.id,
       x: x,
       y: y,
+      facingTo: facingTo,
+      isMoving: isMoving,
     },
   });
-  console.log("Sent broadcast event", { x, y });
+  console.log("Sent broadcast event", { x, y, facingTo, isMoving });
 };
 
 /******************
- * -end REALTIME
+ * - end REALTIME
  ******************/
 </script>
 

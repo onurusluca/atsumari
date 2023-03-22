@@ -53,12 +53,12 @@ button:disabled {
 .btn-icon {
   padding: 0.3rem .8rem;
 
-  line-height: 0;
   background: transparent;
   border: none;
   border-radius: 0.5rem;
   cursor: pointer;
   color: var(--text-100);
+  outline: max(1px, 0.15em) solid transparent;
 
   svg {
     color: var(--text-100);
@@ -127,4 +127,34 @@ button:disabled {
   &:hover {
     background: var(--warning-btn-bg-hover);
   }
+}
+
+.btn-bottom-control {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  padding: 0.3rem .8rem;
+
+  background: transparent;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  color: var(--text-100);
+  outline: max(1px, 0.15em) solid transparent;
+
+  svg {
+    color: var(--text-100);
+  }
+
+  &:hover {
+    background: var(--grey-hover);
+
+  }
+
+  &:focus {
+    outline: max(1px, 0.15em) solid var(--input-focus-border);
+  }
+
 }

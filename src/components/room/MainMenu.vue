@@ -1,0 +1,29 @@
+<script setup lang="ts">
+const { t } = useI18n();
+const authStore = useAuthStore();
+const route = useRouter();
+
+onMounted(() => {});
+</script>
+
+<template>
+  <div class="main-menu">
+    <p>MainMenusas</p>
+  </div>
+</template>
+
+<style scoped lang="scss">
+.main-menu {
+  position: absolute;
+  left: 1rem;
+  bottom: 4rem; // height of bottom control
+
+  width: 20rem;
+  height: 30rem;
+  background-color: var(--bg-300);
+  border-radius: $borderRadius;
+  border: 1px solid var(--border);
+
+  box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.23);
+}
+</style>
