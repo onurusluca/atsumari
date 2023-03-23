@@ -4,9 +4,10 @@ import { vOnClickOutside } from "@vueuse/components";
 
 const { t } = useI18n();
 const authStore = useAuthStore();
+const generalStore = useGeneralStore();
 const route = useRouter();
 
-let roomId = route.currentRoute.value.params;
+let spaceId = route.currentRoute.value.params;
 
 onMounted(() => {});
 
@@ -21,6 +22,29 @@ const onlineUsersMenuOpen = ref<Boolean>(false);
 let mainMenuOpen = ref<Boolean>(false);
 const mainMenuClickOutsideHandler: OnClickOutsideHandler = (event) => {
   mainMenuOpen.value = false;
+};
+
+const handleChatMenuOpen = () => {
+  onlineUsersMenuOpen.value = false;
+  chatMenuOpen.value = !chatMenuOpen.value;
+
+  // Set right side menu open on store to be used by Space.vue to update canvas size
+  if (chatMenuOpen.value) {
+    generalStore.rightSideMenuOpen = true;
+  } else {
+    generalStore.rightSideMenuOpen = false;
+  }
+};
+
+const handleOnlineUsersMenuOpen = () => {
+  chatMenuOpen.value = false;
+  onlineUsersMenuOpen.value = !onlineUsersMenuOpen.value;
+
+  if (onlineUsersMenuOpen.value) {
+    generalStore.rightSideMenuOpen = true;
+  } else {
+    generalStore.rightSideMenuOpen = false;
+  }
 };
 </script>
 
@@ -57,24 +81,21 @@ const mainMenuClickOutsideHandler: OnClickOutsideHandler = (event) => {
     <div class="bottom-control__right">
       <!-- Chat -->
       <div class="right__chat">
-        <button @click.stop="chatMenuOpen = !chatMenuOpen" class="btn-bottom-control">
+        <button @click.stop="handleChatMenuOpen" class="btn-bottom-control">
           <ph:chats-circle class="bottom-control__icon" />
           <span>Chat</span>
         </button>
         <Transition name="slide-left-fast">
-          <Chat v-if="chatMenuOpen" class="chat__chat-menu" />
+          <Chat v-show="chatMenuOpen" class="chat__chat-menu" />
         </Transition>
       </div>
       <div class="right__user-list">
-        <button
-          @click.stop="onlineUsersMenuOpen = !onlineUsersMenuOpen"
-          class="btn-bottom-control"
-        >
+        <button @click.stop="handleOnlineUsersMenuOpen" class="btn-bottom-control">
           <ph:users-three class="bottom-control__icon" />
           <span>Online</span>
         </button>
         <Transition name="slide-left-fast">
-          <Chat v-if="onlineUsersMenuOpen" class="chat__chat-menu" />
+          <OnlineUsers v-show="onlineUsersMenuOpen" class="chat__chat-menu" />
         </Transition>
       </div>
     </div>
@@ -99,7 +120,7 @@ const mainMenuClickOutsideHandler: OnClickOutsideHandler = (event) => {
   background-color: var(--bg-300);
   border-top: 1px solid var(--border);
 
-  z-index: $room-bottom-control-z-index;
+  z-index: $space-bottom-control-z-index;
 
   // create class names for each element with no styles
   .bottom-control__left {

@@ -1,11 +1,11 @@
 <script setup lang="ts">
-const { t } = useI18n()
+const { t } = useI18n();
 
 defineProps<{
-  toastType: String
-  toastTheme?: String
-  toastItem?: String
-}>()
+  toastType: String;
+  toastTheme?: String;
+  toastItem?: String;
+}>();
 </script>
 
 <template>
@@ -13,15 +13,15 @@ defineProps<{
     <div class="toast__content">
       <p class="toast__content__text">
         {{
-          toastType === 'savedNotification'
-            ? t('toasts.saved')
-            : toastType === 'createdNotification'
-            ? t('toasts.created')
-            : toastType === 'deletedNotification'
-            ? t('toasts.deleted')
-            : toastType === 'copiedNotification'
-            ? t('toasts.copied')
-            : ''
+          toastType === "savedNotification"
+            ? t("toasts.saved")
+            : toastType === "createdNotification"
+            ? t("toasts.created")
+            : toastType === "deletedNotification"
+            ? t("toasts.deleted")
+            : toastType === "copiedNotification"
+            ? t("toasts.copied")
+            : ""
         }}
       </p>
 
@@ -68,11 +68,11 @@ defineProps<{
   padding: 1rem 2rem;
 
   font-weight: 600;
-  background: var(--menu-bg-color);
+  background: var(--bg-100);
   border-radius: 0.5rem;
   box-shadow: 0px 10px 15px -3px var(--shadow);
   border: 1px solid var(--border);
-  z-index: 9999;
+  z-index: $toast-z-index;
 
   .toast__right {
     position: absolute;

@@ -86,10 +86,10 @@ const onClickShowMe = () => {
         @submit.prevent="handleClickOnConfirm"
         class="content__form"
       >
-        <h5 class="mb-xl">{{ t("space.createSpace.title") }}</h5>
+        <h5 class="mb-xl">{{ t("spaces.createSpace.title") }}</h5>
         <div class="form__input-single">
           <label for="spaceName" class="form__label">{{
-            t("space.createSpace.spaceName")
+            t("spaces.createSpace.spaceName")
           }}</label>
           <!-- autocomplete="new-password" is to override autofill -->
           <!-- @input is for mobile(v-model won't update until input loses focus): https://github.com/vuejs/vue/issues/8231 -->
@@ -101,7 +101,7 @@ const onClickShowMe = () => {
             id="spaceName"
             required
             maxlength="30"
-            :placeholder="t('space.createSpace.spaceNamePlaceholder')"
+            :placeholder="t('spaces.createSpace.spaceNamePlaceholder')"
             class="form__text-input"
           />
         </div>
@@ -109,7 +109,7 @@ const onClickShowMe = () => {
         <span class="toggle-container">
           <ri:lock-password-line class="mr-s" />
           <label class="toggle-container__text-left"
-            >{{ t("space.createSpace.passwordProtect") }}
+            >{{ t("spaces.createSpace.passwordProtect") }}
           </label>
           <input
             @input="togglePasswordProtect"
@@ -122,7 +122,7 @@ const onClickShowMe = () => {
 
         <div v-if="passwordProtectEnabled" class="form__input-single form__with-icon">
           <label for="spacePassword" class="form__label">{{
-            t("space.createSpace.spacePassword")
+            t("spaces.createSpace.spacePassword")
           }}</label>
 
           <input
@@ -181,7 +181,7 @@ const onClickShowMe = () => {
       <div v-else class="content__space-created">
         <ph:check-circle style="font-size: 3rem; color: var(--brand-green)" />
         <h5 class="mb-s" style="color: var(--brand-green)">{{
-          t("space.createSpace.spaceCreated")
+          t("spaces.createSpace.spaceCreated")
         }}</h5>
 
         <!-- Confetti -->
@@ -195,7 +195,7 @@ const onClickShowMe = () => {
         />
 
         <button @click.prevent="onClickShowMe" class="btn btn-outline mt-l">
-          {{ t("space.createSpace.showMe") }}
+          {{ t("spaces.createSpace.showMe") }}
         </button>
       </div>
     </div>
@@ -226,9 +226,8 @@ const onClickShowMe = () => {
     justify-content: center;
     align-items: center;
 
-    width: max-content;
-    min-width: 30rem;
-    max-width: 95vw; //mobile
+    width: 30rem;
+    max-width: 90vw; //mobile
     padding: 1.5rem 1rem;
 
     border-radius: $borderRadius;

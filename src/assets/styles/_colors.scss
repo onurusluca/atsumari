@@ -67,7 +67,7 @@
   --danger-btn-bg-hover: #e53b49;
   --warning-btn-bg: #f5be0b;
   --warning-btn-bg-hover: #e4b00a;
-  --grey-hover: #e2e2e2;
+  --grey-hover: #d1d1d1;
 
 
   // Toast
@@ -76,6 +76,10 @@
   --toast-warning: #f5be0b;
   --toast-info: #4F46E5;
 
+
+  // Content loading placeholder
+  --content-placeholder: #eee;
+  --content-placeholder-darker: #ddd;
 }
 
 .dark {
@@ -153,5 +157,9 @@
   --toast-error: #FF4755;
   --toast-warning: #f5be0b;
   --toast-info: #4F46E5;
+
+  // Content loading placeholder
+  --content-placeholder: #333;
+  --content-placeholder-darker: #444;
 
 }

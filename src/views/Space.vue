@@ -8,10 +8,11 @@ import type { User } from "@/types/general";
  ******************/
 const { t } = useI18n();
 const authStore = useAuthStore();
-const route = useRouter();
+const generalStore = useGeneralStore();
 
-const roomId = route.currentRoute.value.params.id;
-const roomName = route.currentRoute.value.params.name;
+const route = useRouter();
+const spaceId = String(route.currentRoute.value.params.id);
+const spaceName = String(route.currentRoute.value.params.name);
 const userId = authStore.user?.id;
 
 const canvasLocalStorage = useStorage("atsumari_canvas", {
@@ -61,6 +62,11 @@ window.addEventListener("resize", () => {
 });
 
 onMounted(async () => {
+  generalStore.spaceId = spaceId;
+  generalStore.spaceName = spaceName;
+  generalStore.userId = userId;
+  generalStore.users = users;
+
   // We need to do a lot of stuff in onMounted because we need to wait for the DOM to be ready because of canvas
 
   const canvas = document.getElementById("main-canvas") as HTMLCanvasElement;
@@ -71,6 +77,18 @@ onMounted(async () => {
     ([width, height]) => {
       canvas.width = width;
       canvas.height = height;
+    },
+    { immediate: true }
+  );
+  // Watch generalStore.rightSideMenuOpen and update canvas size accordingly
+  watch(
+    () => generalStore.rightSideMenuOpen,
+    (newValue) => {
+      if (newValue) {
+        canvas.width = windowWidth.value - 380;
+      } else {
+        canvas.width = windowWidth.value;
+      }
     },
     { immediate: true }
   );
@@ -183,8 +201,8 @@ const moveUserToRightClickedPosition = async () => {
 /******************
  * REALTIME
  ******************/
-// FIXME: For some reason, the realtime is not working on local network if roomId is a string
-const broadCastChannel = supabase.channel(+roomId, {
+// FIXME: For some reason, the realtime is not working on local network if spaceId is a string
+const broadCastChannel = supabase.channel(+spaceId, {
   config: {
     broadcast: {
       self: false, // Listen to your own broadcast events: https://supabase.com/docs/guides/realtime/broadcast#self-send-messages
@@ -287,13 +305,22 @@ const sendUserAction = async (
   console.log("Sent broadcast event", { x, y, facingTo, isMoving });
 };
 
+// Unsubscribe from channel when component is unmounted
+onUnmounted(() => {
+  broadCastChannel.unsubscribe();
+});
+
 /******************
  * - end REALTIME
+ ******************/
+
+/******************
+ * UI
  ******************/
 </script>
 
 <template>
-  <div class="room">
+  <div class="space">
     <div class="canvas-container">
       <!-- tabindex is there to be able to focus the canvas and listen to key events only on canvas-->
       <canvas id="main-canvas" class="canvas-container__canvas" tabindex="0"></canvas>
@@ -308,7 +335,7 @@ const sendUserAction = async (
         }"
       >
         <div @click="moveUserToRightClickedPosition" class="right-click-menu__item">{{
-          t("room.userActions.moveHere")
+          t("space.userActions.moveHere")
         }}</div>
       </div>
     </div>
@@ -316,7 +343,7 @@ const sendUserAction = async (
 </template>
 
 <style scoped lang="scss">
-.room {
+.space {
   background-color: #222;
   .canvas-container {
     .canvas-container__canvas {

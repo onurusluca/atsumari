@@ -158,12 +158,12 @@ let generateRandomSeeds = computed(() => {
                       },
                     }"
                   >
-                    {{ t("space.menu.manageSpace") }}
+                    {{ t("spaces.menu.manageSpace") }}
                   </router-link>
                 </li>
                 <li class="dropdown-menu__item">
                   <router-link :to="`/space-edit/${item.id}`">
-                    {{ t("space.menu.editMap") }}
+                    {{ t("spaces.menu.editMap") }}
                   </router-link>
                 </li>
               </ul>
@@ -175,23 +175,23 @@ let generateRandomSeeds = computed(() => {
         <div class="space__image-container">
           <img
             :src="`https://picsum.photos/seed/${generateRandomSeeds[index]}/600/300`"
-            :alt="t('space.spaceImageAlt')"
+            :alt="t('spaces.spaceImageAlt')"
             class="image-container__image"
           />
 
           <!-- Go to space -->
-          <!-- :to="`/room/${item.id}`" -->
+          <!-- :to="`/space/${item.id}`" -->
           <router-link
             class="btn btn-save image-container__enter-btn"
             :to="{
-              name: 'Room',
+              name: 'Space',
               params: {
                 id: item.id,
                 name: slugify(item.name),
               },
             }"
           >
-            {{ t("space.enterSpace") }}
+            {{ t("spaces.enterSpace") }}
             <radix-icons:enter class="ml-s" />
           </router-link>
         </div>
@@ -206,7 +206,7 @@ let generateRandomSeeds = computed(() => {
                 margin-right: 0.2rem;
               "
             />
-            <p>30 {{ t("space.onlineCount") }}</p>
+            <p>30 {{ t("spaces.onlineCount") }}</p>
           </div>
           <div class="bottom__right">
             <!-- Copy space URL -->
@@ -214,7 +214,7 @@ let generateRandomSeeds = computed(() => {
             <button
               @click="
                 onCopyToClipboard(
-                  `http://localhost:5173/room/${item.id}/${slugify(item.name)}`
+                  `http://localhost:5173/space/${item.id}/${slugify(item.name)}`
                 )
               "
               class="btn btn-icon"
@@ -222,7 +222,7 @@ let generateRandomSeeds = computed(() => {
               <carbon:copy
                 style="font-size: 1rem; color: var(--text-100); margin-right: 0.5rem"
               />
-              {{ t("space.copySpaceUrl") }}
+              {{ t("spaces.copySpaceUrl") }}
             </button>
           </div>
         </div>
@@ -230,12 +230,12 @@ let generateRandomSeeds = computed(() => {
     >
     <!-- clp -->
     <!-- TODO: Enable if it takes too much time to load spaces -->
-    <!--  <div v-if="showContentLoadingPlaceholder" class="clp-container">
+    <div v-if="showContentLoadingPlaceholder" class="clp-container">
       <div class="clp"></div>
       <div class="clp"></div>
       <div class="clp"></div>
       <div class="clp"></div>
-    </div> -->
+    </div>
 
     <!-- No spaces -->
     <div v-if="showNoSpacesMessage" class="home__no-spaces">
@@ -259,6 +259,7 @@ let generateRandomSeeds = computed(() => {
     display: flex;
     flex-wrap: wrap;
     gap: 1rem;
+    overflow-y: auto;
 
     .spaces__space {
       position: relative;
@@ -286,6 +287,7 @@ let generateRandomSeeds = computed(() => {
             position: absolute;
             top: 2.2rem;
             right: 0;
+            z-index: $menu-z-index;
           }
         }
       }
@@ -329,8 +331,8 @@ let generateRandomSeeds = computed(() => {
         .bottom__left {
           display: flex;
         }
-        .bottom__right {
-        }
+        /*     .bottom__right {
+        } */
       }
     }
   }

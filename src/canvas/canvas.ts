@@ -11,7 +11,7 @@ import characterImageRight from "./images/char-right.png";
 import characterImageUp from "./images/char-up.png";
 
 export function createCanvasApp(
-  // Data from Room.vue
+  // Data from Space.vue
   users: User[],
   myPlayerId: string,
   speed: number,
@@ -19,28 +19,6 @@ export function createCanvasApp(
   canvasFrameRate: number
 ) {
   const ctx = canvas.getContext("2d")!;
-
-  // Draw collisions
-  /*   const collisionsMap = [];
-  for (let index = 0; index < collisions.length; index += 90) {
-    collisionsMap.push(collisions.slice(index, 90 + index));
-  }
-
-  const boundaries = [] as any;
-
-  collisionsMap.forEach((row, y) => {
-    row.forEach((col, x) => {
-      if (col === 1025) {
-        boundaries.push({
-          x: x * 48 - 930,
-          y: y * 48 - 1200,
-          width: 48,
-          height: 48,
-        });
-      }
-    });
-  });
- */
 
   // Draw background image
   const worldImg = new Image();
@@ -87,6 +65,28 @@ export function createCanvasApp(
   let frameX = 0;
   let maxFrame = 3;
   let elapsed = 0;
+
+  // Draw collisions
+  /*   const collisionsMap = [];
+  for (let index = 0; index < collisions.length; index += 90) {
+    collisionsMap.push(collisions.slice(index, 90 + index));
+  }
+
+  const boundaries = [] as any;
+
+  collisionsMap.forEach((row, y) => {
+    row.forEach((col, x) => {
+      if (col === 1025) {
+        boundaries.push({
+          x: x * 48 - 930,
+          y: y * 48 - 1200,
+          width: 48,
+          height: 48,
+        });
+      }
+    });
+  });
+ */
 
   // Animate canvass
   const animate = () => {
@@ -153,16 +153,26 @@ export function createCanvasApp(
         frameX = 0;
       }
 
+      let img;
+      switch (user.facingTo) {
+        case "up":
+          img = characterImgUp;
+          break;
+        case "down":
+          img = characterImgDown;
+          break;
+        case "left":
+          img = characterImgLeft;
+          break;
+        case "right":
+          img = characterImgRight;
+          break;
+        default:
+          img = characterImgDown;
+      }
+
       ctx.drawImage(
-        user.facingTo === "up"
-          ? characterImgUp
-          : user.facingTo === "down"
-          ? characterImgDown
-          : user.facingTo === "left"
-          ? characterImgLeft
-          : user.facingTo === "right"
-          ? characterImgRight
-          : characterImgDown,
+        img,
         (frameX * characterImg.width) / 4,
         0,
         characterImg.width / 4,
@@ -304,7 +314,7 @@ export function createCanvasApp(
    * Keyboard inputs *
    ******************/
 
-  window.addEventListener("keydown", (e: KeyboardEvent) => {
+  canvas.addEventListener("keydown", (e: KeyboardEvent) => {
     // Listen to both lower and upper case
     switch (e.key.toLowerCase()) {
       case "w":
@@ -336,7 +346,7 @@ export function createCanvasApp(
     } */
   });
 
-  window.addEventListener("keyup", (e: KeyboardEvent) => {
+  canvas.addEventListener("keyup", (e: KeyboardEvent) => {
     switch (e.key.toLowerCase()) {
       case "w":
         inputs.w = false;

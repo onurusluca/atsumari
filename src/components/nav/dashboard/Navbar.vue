@@ -75,7 +75,7 @@ let showModal = ref<boolean>(false);
     <div class="navbar__right">
       <button @click.stop="showModal = !showModal" class="btn btn-create mr-xxl">
         <ri:add-circle-line class="mr-xs" style="font-size: 1.3rem" />
-        {{ t("space.createSpace.title") }}
+        {{ t("spaces.createSpace.title") }}
       </button>
 
       <!--  <button class="btn-icon mr-l">

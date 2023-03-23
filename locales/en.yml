@@ -98,7 +98,7 @@ user:
   editCharacter: Edit Character
 
 ##### SPACES #####
-space:
+spaces:
   createSpace:
     title: Create Space
     passwordProtect: Password Protect
@@ -127,7 +127,7 @@ home:
   spaces:
     noSpacesMessage: You don't have any spaces yet. Create one now!
 
-##### ROOM #####
-room:
+##### SPACE #####
+space:
   userActions:
     moveHere: Move Here

@@ -3,7 +3,7 @@ const { t } = useI18n();
 const authStore = useAuthStore();
 const route = useRouter();
 
-let roomId = route.currentRoute.value.params;
+let spaceId = route.currentRoute.value.params;
 
 onMounted(() => {});
 
@@ -27,7 +27,7 @@ const handleDeleteSpace = async (spaceId: string) => {
 <template>
   <div class="space-settings">
     <p>spaceSettings</p>
-    <p> {{ roomId }} </p>
+    <p> {{ spaceId }} </p>
   </div>
 </template>
 

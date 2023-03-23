@@ -5,7 +5,6 @@ import NoLayout from "./layouts/noLayout.vue";
 
 const router = useRouter();
 const route = useRouter();
-
 const authStore = useAuthStore();
 
 let session = ref();
@@ -38,14 +37,14 @@ watch(
 );
 
 // Layout logic based on the route
-// Dashboard and default usage(in-room) have different layouts
+// Dashboard and default usage(in-space) have different layouts
 const layoutLogic = computed(() => {
   if (
     route.currentRoute.value.name === "Login" ||
     route.currentRoute.value.name === "Register"
   ) {
     return "no-layout";
-  } else if (route.currentRoute.value.name === "Room") {
+  } else if (route.currentRoute.value.name === "Space") {
     return "default";
   } else if (session.value) {
     return "dashboard";

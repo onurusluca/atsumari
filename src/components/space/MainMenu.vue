@@ -3,12 +3,15 @@ const { t } = useI18n();
 const authStore = useAuthStore();
 const route = useRouter();
 
+const emit = defineEmits(["closeModal"]);
+
 onMounted(() => {});
 </script>
 
 <template>
   <div class="main-menu">
     <p>MainMenusas</p>
+    <router-link :to="{ name: 'Home' }">Home</router-link>
   </div>
 </template>
 
