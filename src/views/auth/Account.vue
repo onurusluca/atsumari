@@ -20,7 +20,7 @@ async function getProfile() {
 
     let { data, error, status } = await supabase
       .from("profiles")
-      .select(`username, website, avatar_url`)
+      .select(`user_name, website, avatar_url`)
       .eq("id", user.id)
       .single();
 

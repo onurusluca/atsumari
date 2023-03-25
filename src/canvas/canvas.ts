@@ -33,6 +33,7 @@ export function createCanvasApp(
 
   // Get my player(the current user)
   let myPlayer = {
+    userName: "",
     x: 0,
     y: 0,
     facingTo: "down",
@@ -142,6 +143,29 @@ export function createCanvasApp(
     users.forEach((user) => {
       if (user.id === myPlayerId) return;
 
+      // Prevent the players from colliding with each other:
+      if (myPlayer.x + 20 > user.x - 20 && myPlayer.x - 20 < user.x + 20) {
+        if (myPlayer.y + 20 > user.y - 20 && myPlayer.y - 20 < user.y + 20) {
+          // If collision detected, don't move the player
+          switch (lastKey) {
+            case "w":
+              myPlayer.y += speed;
+              break;
+            case "a":
+              myPlayer.x += speed;
+              break;
+            case "s":
+              myPlayer.y -= speed;
+              break;
+            case "d":
+              myPlayer.x -= speed;
+              break;
+            default:
+              break;
+          }
+        }
+      }
+
       if (user.isMoving) {
         elapsed += 1;
         if (elapsed > 3) {
@@ -182,6 +206,16 @@ export function createCanvasApp(
         characterImg.width / 4,
         characterImg.height
       );
+
+      // Draw player name
+      ctx.fillStyle = "white";
+      ctx.font = "20px Arial";
+      const userNameTextWidth = ctx.measureText(myPlayer.userName).width;
+      ctx.fillText(
+        user.userName,
+        user.x - cameraX - userNameTextWidth / 2,
+        user.y - cameraY - characterImg.height / 8 - 20
+      );
     });
 
     // Animate my player
@@ -209,6 +243,16 @@ export function createCanvasApp(
       characterImg.height
     );
 
+    // Draw my player name and center the text based on the length of the name
+    ctx.fillStyle = "white";
+    ctx.font = "20px Arial";
+    const userNameTextWidth = ctx.measureText(myPlayer.userName).width;
+    ctx.fillText(
+      myPlayer.userName,
+      myPlayer.x - cameraX - userNameTextWidth / 2,
+      myPlayer.y - cameraY - characterImg.height / 8 - 20
+    );
+
     // Calculate elapsed time since last frame
     const currentTime = performance.now();
     const deltaTime = currentTime - lastTime;
@@ -223,22 +267,22 @@ export function createCanvasApp(
     ctx.fillText(`FPS: ${fps}`, 10, 20);
 
     // Move my player
-    if (inputs.w && lastKey === "w") {
+    if (inputs.w) {
       myPlayer.y -= speed;
       characterImgMyPlayer = characterImgUp;
       myPlayer.facingTo = "up";
     }
-    if (inputs.a && lastKey === "a") {
+    if (inputs.a) {
       myPlayer.x -= speed;
       characterImgMyPlayer = characterImgLeft;
       myPlayer.facingTo = "left";
     }
-    if (inputs.s && lastKey === "s") {
+    if (inputs.s) {
       myPlayer.y += speed;
       characterImgMyPlayer = characterImgDown;
       myPlayer.facingTo = "down";
     }
-    if (inputs.d && lastKey === "d") {
+    if (inputs.d) {
       myPlayer.x += speed;
       characterImgMyPlayer = characterImgRight;
       myPlayer.facingTo = "right";

@@ -17,19 +17,20 @@
 .form__text-input {
   width: 100%;
   line-height: 0.5rem;
-
-  background-color: var(--text-input-bg);
   padding: 0.5rem;
-  font-size: 1rem;
+
+
   color: var(--f-color);
-  box-shadow: 0 0px 2px 0 var(--shadow);
+  background-color: var(--text-input-bg);
+  font-size: 1rem;
 
   border: 1px solid var(--border-darker);
   border-radius: 0.5rem;
   outline: 2px solid transparent;
+  box-shadow: 0 0px 2px 0 var(--shadow);
 
   &:focus {
-    transition: 0.3s;
+    transition: 0.2s;
     outline: 1px solid var(--input-focus-border);
   }
 

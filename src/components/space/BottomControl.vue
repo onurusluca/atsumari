@@ -9,7 +9,21 @@ const route = useRouter();
 
 let spaceId = route.currentRoute.value.params;
 
-onMounted(() => {});
+const spaceLocalStorage = useStorage("atsumari_space", {
+  chatOpen: false,
+  onlineUsersOpen: false,
+});
+
+onMounted(() => {
+  if (spaceLocalStorage.value.chatOpen) {
+    chatMenuOpen.value = true;
+    generalStore.rightSideMenuOpen = true;
+  }
+  if (spaceLocalStorage.value.onlineUsersOpen) {
+    onlineUsersMenuOpen.value = true;
+    generalStore.rightSideMenuOpen = true;
+  }
+});
 
 /****************************************
  * UI
@@ -29,10 +43,13 @@ const handleChatMenuOpen = () => {
   chatMenuOpen.value = !chatMenuOpen.value;
 
   // Set right side menu open on store to be used by Space.vue to update canvas size
+  // Also set local storage to be used on page reload
   if (chatMenuOpen.value) {
     generalStore.rightSideMenuOpen = true;
+    spaceLocalStorage.value.chatOpen = true;
   } else {
     generalStore.rightSideMenuOpen = false;
+    spaceLocalStorage.value.chatOpen = false;
   }
 };
 
@@ -42,8 +59,10 @@ const handleOnlineUsersMenuOpen = () => {
 
   if (onlineUsersMenuOpen.value) {
     generalStore.rightSideMenuOpen = true;
+    spaceLocalStorage.value.onlineUsersOpen = true;
   } else {
     generalStore.rightSideMenuOpen = false;
+    spaceLocalStorage.value.onlineUsersOpen = false;
   }
 };
 </script>
@@ -126,14 +145,17 @@ const handleOnlineUsersMenuOpen = () => {
   .bottom-control__left {
     .left__main-menu {
       .main-menu__btn {
-        background-color: var(--primary-100);
+        background-color: rgb(221, 192, 255);
         transition: background-color 50ms ease-in-out;
+
+        width: 3rem;
+        height: 3rem;
         &:hover {
-          background-color: rgb(6, 148, 127);
+          background-color: rgb(201, 154, 255);
         }
         .btn__icon {
-          width: 2.2rem;
-          height: 2.2rem;
+          width: 2rem;
+          height: 2rem;
           margin: 0.2rem 0;
         }
       }
@@ -158,9 +180,11 @@ const handleOnlineUsersMenuOpen = () => {
     }
   }
 
-  .bottom-control__icon {
-    width: 2rem;
-    height: 2rem;
+  .btn-bottom-control {
+    .bottom-control__icon {
+      width: 1.5rem;
+      height: 1.5rem;
+    }
   }
 }
 </style>

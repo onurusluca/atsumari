@@ -91,7 +91,6 @@ const onClickShowMe = () => {
           <label for="spaceName" class="form__label">{{
             t("spaces.createSpace.spaceName")
           }}</label>
-          <!-- autocomplete="new-password" is to override autofill -->
           <!-- @input is for mobile(v-model won't update until input loses focus): https://github.com/vuejs/vue/issues/8231 -->
           <input
             v-model="spaceName"

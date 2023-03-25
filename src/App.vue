@@ -27,31 +27,25 @@ onMounted(async () => {
 
 // If the user is not logged in, redirect to login page
 
-watch(
+/* watch(
   () => session.value,
   (session) => {
     if (!session) {
       router.push({ name: "Login" });
     }
   }
-);
+); */
 
 // Layout logic based on the route
 // Dashboard and default usage(in-space) have different layouts
 const layoutLogic = computed(() => {
-  if (
-    route.currentRoute.value.name === "Login" ||
-    route.currentRoute.value.name === "Register"
-  ) {
-    return "no-layout";
-  } else if (route.currentRoute.value.name === "Space") {
+  if (route.currentRoute.value.name === "Space") {
     return "default";
   } else if (session.value) {
     return "dashboard";
+  } else {
+    return "no-layout";
   }
-  /*  else if (route.currentRoute.value.name === 'Home') {
-    return 'dashboard'
-  } */
 });
 </script>
 

@@ -7,6 +7,7 @@ export const useGeneralStore = defineStore("generalStore", {
       spaceId: "",
       spaceName: "",
       userId: "",
+      userName: "",
       users: [] as User[],
 
       rightSideMenuOpen: false as boolean,

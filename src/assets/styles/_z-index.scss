@@ -3,8 +3,9 @@ $menu-z-index: 2;
 $sidebar-z-index: 97;
 $navbar-z-index: 98;
 $dropdown-z-index: 99;
-$modal-z-index: 999;
-$toast-z-index: 1000;
+$modal-z-index: 9999;
+$toast-z-index: 10000;
 
 // Space
 $space-bottom-control-z-index: 1000;
+$space-sidebar-z-index: 88;

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { createCanvasApp } from "@/canvas/canvas";
+import InitialCharacterSetupModal from "@/components/global/InitialCharacterSetupModal.vue";
 import { emitter } from "@/composables/useEmit";
 import type { User } from "@/types/general";
 
@@ -49,6 +50,8 @@ let rightClickWorldPosition = ref<{ x: number; y: number }>({
   y: 0,
 });
 
+let canvasZoom = ref<number>(1);
+
 /******************
  * INITIALIZATION
  ******************/
@@ -67,6 +70,8 @@ onMounted(async () => {
   generalStore.userId = userId;
   generalStore.users = users;
 
+  await handleReadProfile();
+
   // We need to do a lot of stuff in onMounted because we need to wait for the DOM to be ready because of canvas
 
   const canvas = document.getElementById("main-canvas") as HTMLCanvasElement;
@@ -76,7 +81,7 @@ onMounted(async () => {
     () => [windowWidth.value, windowHeight.value],
     ([width, height]) => {
       canvas.width = width;
-      canvas.height = height;
+      canvas.height = height - 10;
     },
     { immediate: true }
   );
@@ -95,6 +100,23 @@ onMounted(async () => {
 
   // Create canvas
   createCanvasApp(users, userId, speed, canvas, canvasFrameRate.value);
+
+  // Listen to zoom events ctrl + mouse wheel
+  canvas.addEventListener("wheel", (e) => {
+    if (e.ctrlKey) {
+      console.log("Zooming");
+
+      e.preventDefault();
+      if (e.deltaY < 0) {
+        canvasZoom.value += 0.1;
+      } else {
+        canvasZoom.value -= 0.1;
+      }
+      // Smooth zoom
+      canvas.style.transition = "transform 0.1s ease-in-out";
+      canvas.style.transform = `scale(${canvasZoom.value})`;
+    }
+  });
 
   // Focus canvas on click
   canvas.addEventListener("click", function () {
@@ -170,8 +192,8 @@ onMounted(async () => {
   });
 });
 
+// Update user position with the clicked position
 const moveUserToRightClickedPosition = async () => {
-  // Update user position with the clicked position
   users.forEach(async (user) => {
     if (user.id === userId) {
       user.x = rightClickWorldPosition.value.x;
@@ -198,6 +220,32 @@ const moveUserToRightClickedPosition = async () => {
   rightClickMenuIsEnabled.value = false;
 };
 
+// Initial setups
+let initialSetupCompleted = ref<boolean>(true);
+let userName = ref<string>("");
+const handleReadProfile = async () => {
+  try {
+    let { data: profiles, error } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", authStore?.session?.user?.id);
+    if (profiles[0].user_name) {
+      console.log("READ PROFILES: ", profiles);
+      initialSetupCompleted.value = true;
+      userName.value = profiles[0].user_name;
+      generalStore.userName = userName.value;
+    }
+    if (error) throw error;
+  } catch (error: any) {
+    console.log("READ PROFILES CATCH ERROR: ", error.message);
+  }
+};
+
+const handleInitialSetupCompleted = async () => {
+  initialSetupCompleted.value = true;
+  await handleReadProfile();
+};
+
 /******************
  * REALTIME
  ******************/
@@ -210,6 +258,9 @@ const broadCastChannel = supabase.channel(+spaceId, {
     },
   },
 });
+
+if (initialSetupCompleted) {
+}
 
 broadCastChannel
   /*   .on('presence', { event: 'sync' }, () => {
@@ -234,6 +285,7 @@ broadCastChannel
     // Add user to users array
     //if (newPresences[0].id !== userId) {
     users.push({
+      userName: newPresences[0].userName,
       id: newPresences[0].id,
       x: newPresences[0].lastPosition.x,
       y: newPresences[0].lastPosition.y,
@@ -256,6 +308,7 @@ broadCastChannel
     if (status === "SUBSCRIBED") {
       const presenceTrackStatus = await broadCastChannel.track({
         id: authStore.user?.id,
+        userName: userName.value,
         online_at: new Date().toISOString(),
         lastPosition: {
           x: canvasLocalStorage.value.lastUserPosition
@@ -296,13 +349,14 @@ const sendUserAction = async (
     event: "sendUserPositionEvent",
     payload: {
       id: authStore.user?.id,
+      userName: userName.value,
       x: x,
       y: y,
       facingTo: facingTo,
       isMoving: isMoving,
     },
   });
-  console.log("Sent broadcast event", { x, y, facingTo, isMoving });
+  console.log("Sent broadcast event", { x, y, userName, facingTo, isMoving });
 };
 
 // Unsubscribe from channel when component is unmounted
@@ -339,6 +393,11 @@ onUnmounted(() => {
         }}</div>
       </div>
     </div>
+
+    <InitialCharacterSetupModal
+      v-if="!initialSetupCompleted"
+      @initial-setup-completed="handleInitialSetupCompleted"
+    />
   </div>
 </template>
 

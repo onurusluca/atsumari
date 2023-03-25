@@ -9,8 +9,11 @@ buttons:
   save: Save
   create: Create
   cancel: Cancel
+  change: Change
   signUp: Sign up
   signIn: Sign in
+  next: Next
+  complete: Complete
   createAccount: Create Account
 
 language:
@@ -96,6 +99,11 @@ auth:
 ##### USER #####
 user:
   editCharacter: Edit Character
+  setUserName:
+    userName: User Name
+    userNamePlaceholder: Enter your user name
+    changeUserName: Change User Name
+    setAUserNameForThisSpace: Set your user name for this space
 
 ##### SPACES #####
 spaces:
