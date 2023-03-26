@@ -16,8 +16,7 @@ onMounted(async () => {
 });
 
 let messagesContainerRef = ref<HTMLElement | null>(null);
-const { arrivedState, y, directions } = useScroll(messagesContainerRef, {
-  // Smooth scrolling
+const { y /* ,arrivedState,directions */ } = useScroll(messagesContainerRef, {
   behavior: "smooth",
   /* offset: { bottom: 100 } ,*/
 });

@@ -224,7 +224,7 @@ let showModal = ref<boolean>(false);
     // User menu dropdown
     .user-menu-dropdown {
       position: absolute;
-      top: 5rem;
+      top: 4.5rem;
       right: 1rem;
 
       display: flex;
@@ -244,8 +244,6 @@ let showModal = ref<boolean>(false);
         background-color: var(--brand-green);
       }
 
-      .user-menu-dropdown__name {
-      }
       .user-menu-dropdown__email {
         margin-top: 0.5rem;
         font-size: 0.9rem;

@@ -342,10 +342,12 @@ let generateRandomSeeds = computed(() => {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    text-align: center;
     width: 100%;
     height: 60vh;
     .no-spaces__message {
-      font-size: 1.5rem;
+      margin-top: 1rem;
+      font-size: 1.4rem;
       font-weight: 600;
       color: var(--text-300);
     }

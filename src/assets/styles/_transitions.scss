@@ -1,7 +1,7 @@
 // Fade
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.1s ease;
+  transition: opacity 100ms ease;
 }
 
 .fade-enter-from,
@@ -12,7 +12,7 @@
 // Fade and scale
 .scale-enter-active,
 .scale-leave-active {
-  transition: all 0.2s ease;
+  transition: all 100ms ease;
 }
 
 .scale-enter-from,

@@ -1,12 +1,11 @@
 :root {
   // Primary
-  --primary-100: #00ebc7;
-  --primary-200: #ff5470;
-  --primary-300: #19725D;
+  --primary-100: #01ff70;
+  --primary-200: #e63956;
 
   // Accent
-  --accent-100: #f5be0b;
-  --accent-200: #fef1c7;
+  --accent-100: #d946ef;
+  --accent-200: #fdf6c3;
 
   // Brand
   --brand-red: #FF4755;
@@ -43,7 +42,7 @@
   --shadow: #d4d4d4bf;
   --shadow-darker: #b3b3b3bf;
   --shadow-darkest: #8c8c8cbf;
-  --modal-overlay: #202020bf;
+  --modal-overlay: #2020204d;
 
   // Others
   --place-holder: #BDBDBD;
@@ -55,10 +54,9 @@
   --link-color-hover: #4139d8;
 
   // Buttons
-  --main-btn-bg: #00ebc7;
-  --main-btn-bg-hover: #3dc2b5;
-  --outline-btn: #ffffff;
-  --outline-btn-hover: #f5f5f5;
+  --main-btn-bg: #01ff70;
+  --main-btn-bg-hover: #00d35b;
+  --outline-btn-hover: #252525;
   --create-btn-bg: #2CC56F;
   --create-btn-bg-hover: #20b661;
   --save-btn-bg: #4F46E5;
@@ -84,12 +82,11 @@
 
 .dark {
   // Primary
-  --primary-100: #00b3a8;
+  --primary-100: #01ff70;
   --primary-200: #e63956;
-  --primary-300: #0e594f;
 
   // Accent
-  --accent-100: #f0ae0a;
+  --accent-100: #d946ef;
   --accent-200: #fdf6c3;
 
   // Brand
@@ -111,22 +108,22 @@
   --anti-color: #111; // for dark or light mode change
 
   // Backgrounds
-  --bg-100: #181818;
-  --bg-200: #1C1C1C;
-  --bg-300: #2e2e2e;
+  --bg-100: #222831;
+  --bg-200: #393E46;
+  --bg-300: #454e59;
   --text-input-bg: #212121;
   --toggle-input-bg: #1e88e5;
 
   // Borders
-  --border: #333;
+  --border: #444;
   --border-darker: #555;
   --input-focus-border: var(--primary-100);
 
   // Shadows
-  --shadow: #222222bf;
+  --shadow: #2020208e;
   --shadow-darker: #111111bf;
   --shadow-darkest: #000000bf;
-  --modal-overlay: #474747bf;
+  --modal-overlay: #505050b7;
 
   // Others
   --place-holder: #757575;
@@ -137,10 +134,9 @@
   --link-color-hover: #4139d8;
 
   // Buttons
-  --main-btn-bg: #00ebc7;
-  --main-btn-bg-hover: #3dc2b5;
-  --outline-btn: #ffffff;
-  --outline-btn-hover: #f5f5f5;
+  --main-btn-bg: #01ff70;
+  --main-btn-bg-hover: #00d35b;
+  --outline-btn-hover: #2c2c2c;
   --create-btn-bg: #2CC56F;
   --create-btn-bg-hover: #20b661;
   --save-btn-bg: #4F46E5;

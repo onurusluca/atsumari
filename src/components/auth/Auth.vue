@@ -1,96 +1,96 @@
 <script setup lang="ts">
-const router = useRouter()
-const { t } = useI18n()
-const authStore = useAuthStore()
+const router = useRouter();
+const { t } = useI18n();
+const authStore = useAuthStore();
 
 const props = defineProps({
   authType: String,
-})
+});
 
-const emit = defineEmits(['change', 'delete'])
+const emit = defineEmits(["change", "delete"]);
 
-let email = ref<string>('')
-let password = ref<any>(null)
-let loading = ref(false)
-let errorUi = ref<string>('')
-let errorUiSecond = ref<string>('')
-let checkYourEmail = ref<string>('')
-let showEmailVerification = ref<boolean>(false)
+let email = ref<string>("");
+let password = ref<any>(null);
+let loading = ref(false);
+let errorUi = ref<string>("");
+let errorUiSecond = ref<string>("");
+let checkYourEmail = ref<string>("");
+let showEmailVerification = ref<boolean>(false);
 
-onMounted(() => {})
+onMounted(() => {});
 
 /****************************************
  * API CALLS
  ****************************************/
 const handleLogin = async () => {
   try {
-    loading.value = true
+    loading.value = true;
     const { error } = await supabase.auth.signInWithPassword({
       email: email.value,
       password: password.value,
-    })
+    });
     if (error) {
-      console.log('err')
+      console.log("err");
 
-      errorUi.value = t('auth.login.invalidCredentials')
-      errorUiSecond.value = t('auth.login.tryAgain')
+      errorUi.value = t("auth.login.invalidCredentials");
+      errorUiSecond.value = t("auth.login.tryAgain");
     } else {
-      router.push({ name: 'Home' })
+      router.push({ name: "Home" });
     }
   } catch (error) {
     if (error instanceof Error) {
-      console.log(error.message)
+      console.log(error.message);
     }
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 const handleRegister = async () => {
   try {
-    loading.value = true
+    loading.value = true;
 
     let { data, error } = await supabase.auth.signUp({
       email: email.value,
       password: password.value,
-    })
+    });
     if (data) {
-      showEmailVerification.value = true
+      showEmailVerification.value = true;
     }
     if (error) {
-      checkYourEmail.value = t('auth.register.checkEmail')
+      checkYourEmail.value = t("auth.register.checkEmail");
     }
-    return
+    return;
   } catch (error) {
     if (error instanceof Error) {
-      alert(error.message)
+      alert(error.message);
     }
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 /****************************************
  * UI EVENTS
  ****************************************/
 // Reveal password button
-let revealPasswordButtonRef = ref<HTMLElement>()
-const { pressed } = useMousePressed({ target: revealPasswordButtonRef })
+let revealPasswordButtonRef = ref<HTMLElement>();
+const { pressed } = useMousePressed({ target: revealPasswordButtonRef });
 
 // Remember me
-let rememberMeChecked = ref<boolean>(false)
+let rememberMeChecked = ref<boolean>(false);
 
 /* const authLocalStorage = useStorage('atsumari_auth', { rememberMeEmail: '' }) */
 watch(
   () => email.value,
   (newValue) => {
     if (newValue.length) {
-      rememberMeChecked.value = true
+      rememberMeChecked.value = true;
     } else {
-      rememberMeChecked.value = false
+      rememberMeChecked.value = false;
     }
   }
-)
+);
 </script>
 
 <template>
@@ -103,11 +103,11 @@ watch(
         class="top__icon"
       />
       <h4 class="top__title">{{
-        authType === 'login' ? t('auth.login.topTitle') : t('auth.register.topTitle')
+        authType === "login" ? t("auth.login.topTitle") : t("auth.register.topTitle")
       }}</h4>
       <p class="top__subtitle">
         {{
-          authType === 'login' ? t('auth.login.subTitle') : t('auth.register.subTitle')
+          authType === "login" ? t("auth.login.subTitle") : t("auth.register.subTitle")
         }}
       </p>
     </div>
@@ -116,10 +116,10 @@ watch(
     <div class="auth__oauth">
       <button class="btn btn-outline oauth__signin-button">
         <logos:google-icon class="mr-s" />
-        {{ t('auth.shared.signInWithGoogle') }}
+        {{ t("auth.shared.signInWithGoogle") }}
       </button>
       <p>
-        {{ t('auth.shared.or') }}
+        {{ t("auth.shared.or") }}
       </p>
     </div>
 
@@ -129,7 +129,7 @@ watch(
       @submit.prevent="authType === 'login' ? handleLogin() : handleRegister()"
     >
       <div class="form__input-single">
-        <label class="form__label">{{ t('forms.inputs.email') }}</label>
+        <label class="form__label">{{ t("forms.inputs.email") }}</label>
         <input
           v-model="email"
           autofocus
@@ -142,7 +142,7 @@ watch(
       </div>
 
       <div class="form__input-single form__with-icon">
-        <label class="form__label">{{ t('forms.inputs.password') }}</label>
+        <label class="form__label">{{ t("forms.inputs.password") }}</label>
         <input
           v-model="password"
           :type="pressed ? 'text' : 'password'"
@@ -182,11 +182,11 @@ watch(
           />
 
           <label for="rememberMe" class="ml-s">{{
-            t('forms.inputs.rememberMe')
+            t("forms.inputs.rememberMe")
           }}</label>
         </div>
         <router-link to="" class="auth__link">
-          {{ t('auth.shared.forgotPassword') }}
+          {{ t("auth.shared.forgotPassword") }}
         </router-link>
       </div>
 
@@ -199,12 +199,12 @@ watch(
       </div>
 
       <!-- Submit button -->
-      <button type="submit" class="btn form__submit-btn" :disabled="loading">
+      <button type="submit" class="btn btn-main form__submit-btn" :disabled="loading">
         <span v-if="!loading">
           <teenyicons:lock-solid class="submit-btn__lock-icon" />
 
           {{
-            authType === 'login' ? t('buttons.signIn') : t('buttons.createAccount')
+            authType === "login" ? t("buttons.signIn") : t("buttons.createAccount")
           }}</span
         >
         <svg-spinners:90-ring-with-bg v-else />
@@ -214,15 +214,15 @@ watch(
     <div class="auth__bottom">
       <p>
         {{
-          authType === 'login'
-            ? t('auth.shared.dontHaveAccount')
-            : t('auth.shared.alreadyHaveAccount')
+          authType === "login"
+            ? t("auth.shared.dontHaveAccount")
+            : t("auth.shared.alreadyHaveAccount")
         }}
         <router-link
           :to="{ name: `${authType === 'login' ? 'Register' : 'Login'}` }"
           class="auth__link"
         >
-          {{ authType === 'login' ? t('auth.shared.signUp') : t('auth.shared.signIn') }}
+          {{ authType === "login" ? t("auth.shared.signUp") : t("auth.shared.signIn") }}
         </router-link></p
       >
     </div>
@@ -280,19 +280,15 @@ watch(
 
       margin-top: 2rem;
 
-      color: #fff;
-      background: var(--main-btn-bg);
+      color: #222;
       border: none;
 
-      &:hover {
-        background-color: #00d6b6;
-      }
       .submit-btn__lock-icon {
         position: absolute;
         left: 0.5rem;
         top: 50%;
         transform: translate(0%, -50%);
-        color: rgba(255, 255, 255, 0.582);
+        color: #222;
       }
     }
   }

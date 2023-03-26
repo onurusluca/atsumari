@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import Dashboard from "./layouts/dashboard.vue";
-import Default from "./layouts/default.vue";
 import NoLayout from "./layouts/noLayout.vue";
 
 const router = useRouter();
@@ -39,9 +38,7 @@ onMounted(async () => {
 // Layout logic based on the route
 // Dashboard and default usage(in-space) have different layouts
 const layoutLogic = computed(() => {
-  if (route.currentRoute.value.name === "Space") {
-    return "default";
-  } else if (session.value) {
+  if (session.value) {
     return "dashboard";
   } else {
     return "no-layout";
@@ -52,7 +49,6 @@ const layoutLogic = computed(() => {
 <template>
   <NoLayout v-if="layoutLogic === 'no-layout'" />
   <Dashboard v-if="layoutLogic === 'dashboard'" />
-  <Default v-if="layoutLogic === 'default'" />
 </template>
 
 <style lang="scss"></style>

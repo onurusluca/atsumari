@@ -38,8 +38,12 @@ const handleCreateSpace = async () => {
 };
 
 /****************************************
- * UI EVENTS
+ * UI
  ****************************************/
+// Step logic
+let activeStep = ref<number>(0);
+let firstStepCompleted = ref<boolean>(false);
+let secondStepCompleted = ref<boolean>(false);
 
 let showButtonLoading = ref<boolean>(false);
 let buttonsActive = ref<boolean>(true);
@@ -207,7 +211,7 @@ const onClickShowMe = () => {
   align-items: center;
 
   // Glassmorphism
-  backdrop-filter: blur(2px);
+  backdrop-filter: blur(4px);
 
   position: fixed;
   left: 0;
@@ -233,7 +237,7 @@ const onClickShowMe = () => {
     border: 1px solid var(--border);
     background-color: var(--bg-100);
 
-    box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.23);
+    box-shadow: 0px 3px 10px 2px var(--shadow);
 
     .content__form {
       display: flex;

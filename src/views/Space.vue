@@ -22,7 +22,7 @@ const canvasLocalStorage = useStorage("atsumari_canvas", {
 let users = reactive<Array<User>>([]);
 
 // Request animation frame every ..ms. Lowest is 30ms(30fps), middle is 20(45fps) highest is 10ms(60fps)
-let canvasFrameRate = ref<number>(30);
+let canvasFrameRate = ref<number>(20);
 
 // Need to change user speed based on canvasFrameRate
 let speed =
