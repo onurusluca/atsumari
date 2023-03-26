@@ -78,6 +78,18 @@ const onClickShowMe = () => {
   emit("closeModal");
   router.push({ name: "Home" });
 };
+
+const spaceNamePatternNotMatched = computed(() => {
+  if (spaceName.value !== "") {
+    return !spaceName.value.match(/^[a-zA-Z0-9 _,-]+$/) ? true : false;
+  }
+});
+
+const passwordLengthIsTooShort = computed(() => {
+  if (spacePassword.value !== "") {
+    return spacePassword.value.length < 4 ? true : false;
+  }
+});
 </script>
 <template>
   <div class="create-space-modal">
@@ -92,9 +104,12 @@ const onClickShowMe = () => {
       >
         <h5 class="mb-xl">{{ t("spaces.createSpace.title") }}</h5>
         <div class="form__input-single">
-          <label for="spaceName" class="form__label">{{
-            t("spaces.createSpace.spaceName")
-          }}</label>
+          <label for="spaceName" class="form__label"
+            >{{ t("spaces.createSpace.spaceName") }}
+            <span style="font-size: 0.9rem; color: var(--paler-font)"
+              >({{ t("spaces.createSpace.thisWillAppearInURL") }})</span
+            ></label
+          >
           <!-- @input is for mobile(v-model won't update until input loses focus): https://github.com/vuejs/vue/issues/8231 -->
           <input
             v-model="spaceName"
@@ -103,10 +118,18 @@ const onClickShowMe = () => {
             name="spaceName"
             id="spaceName"
             required
+            pattern="^[a-zA-Z0-9 _,-]+$"
             maxlength="30"
             :placeholder="t('spaces.createSpace.spaceNamePlaceholder')"
             class="form__text-input"
           />
+          <p
+            v-if="spaceNamePatternNotMatched"
+            class="warning-text mt-m"
+            style="font-size: 0.95rem"
+          >
+            {{ t("spaces.createSpace.matchThePattern") }}
+          </p>
         </div>
 
         <span class="toggle-container">
@@ -151,6 +174,15 @@ const onClickShowMe = () => {
           >
             <ri:eye-line />
           </button>
+
+          <!-- Password le -->
+          <p
+            v-if="passwordLengthIsTooShort"
+            class="warning-text mt-m"
+            style="font-size: 0.95rem"
+          >
+            {{ t("spaces.createSpace.passwordLengthWarning") }}
+          </p>
         </div>
 
         <!-- Buttons -->
@@ -168,6 +200,8 @@ const onClickShowMe = () => {
           <button
             :disabled="
               !buttonsActive ||
+              passwordLengthIsTooShort ||
+              spaceNamePatternNotMatched ||
               spaceName === '' ||
               (passwordProtectEnabled === true && spacePassword === '')
             "
@@ -229,7 +263,7 @@ const onClickShowMe = () => {
     justify-content: center;
     align-items: center;
 
-    width: 30rem;
+    width: 32rem;
     max-width: 90vw; //mobile
     padding: 1.5rem 1rem;
 

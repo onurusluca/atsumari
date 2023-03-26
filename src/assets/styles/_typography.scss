@@ -66,7 +66,7 @@ p {
 
 a {
   text-decoration: none;
-  color: var(--link);
+  color: var(--text-100);
 
 }
 
@@ -80,6 +80,4 @@ a {
   &:hover {
     filter: brightness(1.5);
   }
-
-
 }

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { isDark } from "@/utils/dark";
+
 const router = useRouter();
 const { t } = useI18n();
 const authStore = useAuthStore();
@@ -96,12 +98,29 @@ watch(
 <template>
   <div class="auth">
     <div class="auth__top">
-      <img
-        src="@/assets/images/icons/icon-64.png"
-        alt="Atsumari Icon 🍉"
-        title="Atsumari Icon 🍉"
-        class="top__icon"
-      />
+      <div class="top__icon-logo">
+        <img
+          src="@/assets/images/icons/icon-64.png"
+          alt="Atsumari Icon 🍉"
+          title="Atsumari Icon 🍉"
+          class="icon-logo__icon"
+        />
+        <img
+          v-if="isDark"
+          src="@/assets/images/logos/atsumari_white.svg"
+          alt="Atsumari Logo"
+          title="Atsumari Logo"
+          class="icon-logo__logo"
+        />
+        <img
+          v-else
+          src="@/assets/images/logos/astumari_black.svg"
+          alt="Atsumari Logo"
+          title="Atsumari Logo"
+          class="icon-logo__logo"
+        />
+      </div>
+
       <h4 class="top__title">{{
         authType === "login" ? t("auth.login.topTitle") : t("auth.register.topTitle")
       }}</h4>
@@ -244,9 +263,28 @@ watch(
     align-items: center;
 
     margin-bottom: 1.5rem;
-    .top__icon {
-      margin-bottom: 1rem;
+    .top__icon-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      margin-bottom: 2rem;
+      .icon-logo__icon {
+        height: 3rem;
+        width: auto;
+
+        filter: drop-shadow(5px 5px 15px var(--shadow-darker));
+      }
+      .icon-logo__logo {
+        height: 2.5rem;
+        width: auto;
+
+        margin-left: 1rem;
+
+        filter: drop-shadow(5px 5px 15px var(--shadow-darker));
+      }
     }
+
     .top__title {
       color: var(--primary-100);
     }

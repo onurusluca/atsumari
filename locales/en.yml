@@ -111,10 +111,12 @@ spaces:
     title: Create Space
     passwordProtect: Password Protect
     spaceName: Space Name
-    thisWillAppearInURL: This will appear in the URL
+    thisWillAppearInURL: This will appear at the end of the URL
     spaceNamePlaceholder: Enter a name for your space
+    matchThePattern: Only use letters(a-z), numbers(0-9) and (-,_) without spaces
     spacePassword: Password
     spaceCreated: Space created!
+    passwordLengthWarning: Password must be at least 4 characters
     showMe: Show me
     onlyUseLettersNumbers: Only use letters and numbers. No spaces or special characters.
   deleteSpace:

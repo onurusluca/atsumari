@@ -84,7 +84,7 @@ let showModal = ref<boolean>(false);
 
       <button
         @click.stop="userMenuDropdownOpen = !userMenuDropdownOpen"
-        class="btn btn-no-style right__avatar"
+        class="btn btn-icon right__avatar"
       >
         <img src="@/assets/images/mockup/avatar.png" class="avatar__img" />
         <!--   <ri:account-circle-line style="font-size: 3rem; color: #5b5b5b" /> -->
@@ -110,7 +110,7 @@ let showModal = ref<boolean>(false);
           <p class="user-menu-dropdown__email">{{ authStore?.session?.user.email }}</p>
 
           <!-- Edit character -->
-          <router-link to="" class="btn btn-no-style mt-s">
+          <router-link to="" class="btn btn-icon mt-s">
             <gridicons:customize class="mr-s" style="font-size: 1rem" />
             {{ t("user.editCharacter") }}
           </router-link>
@@ -118,7 +118,7 @@ let showModal = ref<boolean>(false);
           <span class="user-menu-dropdown__divider"></span>
 
           <!-- Dark&light mode -->
-          <button @click="changeThemeDarkMode" class="btn btn-no-style mb-xs">
+          <button @click="changeThemeDarkMode" class="btn btn-icon mb-xs">
             <carbon:moon v-if="!isDark" class="mr-s" style="font-size: 1rem" />
             <carbon:sun v-else class="mr-s" style="font-size: 1rem" />
             {{ t("appearance.appearance") }}
@@ -127,7 +127,7 @@ let showModal = ref<boolean>(false);
           <!-- Language -->
           <button
             @click.stop="languageMenuDropdownOpen = !languageMenuDropdownOpen"
-            class="btn btn-no-style ml-s"
+            class="btn btn-icon ml-s"
           >
             <carbon:ibm-watson-language-translator
               class="mr-s"
@@ -144,10 +144,10 @@ let showModal = ref<boolean>(false);
               v-on-click-outside.bubble="clickOutsideHandlerLanguageDrowpdown"
               class="language-menu-dropdown__user-menu-dropdown dropdown-menu"
             >
-              <button class="btn btn-no-style" @click="changeLanguage('en')">
+              <button class="btn btn-icon" @click="changeLanguage('en')">
                 {{ t("language.english") }}
               </button>
-              <button class="btn btn-no-style" @click="changeLanguage('ja')">
+              <button class="btn btn-icon" @click="changeLanguage('ja')">
                 {{ t("language.japanese") }}
               </button>
             </div>
@@ -250,7 +250,7 @@ let showModal = ref<boolean>(false);
         color: var(--text-200);
       }
       .user-menu-dropdown__divider {
-        margin: 1rem 0;
+        margin: 0.5rem 0;
         width: 60%;
         height: 1px;
         background-color: var(--border);

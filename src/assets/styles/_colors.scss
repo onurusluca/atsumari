@@ -1,6 +1,6 @@
 :root {
   // Primary
-  --primary-100: #01ff70;
+  --primary-100: #61DAFB;
   --primary-200: #e63956;
 
   // Accent
@@ -54,8 +54,8 @@
   --link-color-hover: #4139d8;
 
   // Buttons
-  --main-btn-bg: #01ff70;
-  --main-btn-bg-hover: #00d35b;
+  --main-btn-bg: #61DAFB;
+  --main-btn-bg-hover: #3cd5ff;
   --outline-btn-hover: #252525;
   --create-btn-bg: #2CC56F;
   --create-btn-bg-hover: #20b661;
@@ -65,7 +65,7 @@
   --danger-btn-bg-hover: #e53b49;
   --warning-btn-bg: #f5be0b;
   --warning-btn-bg-hover: #e4b00a;
-  --grey-hover: #d1d1d1;
+  --gray-hover: #d1d1d1;
 
 
   // Toast
@@ -73,6 +73,10 @@
   --toast-error: #FF4755;
   --toast-warning: #f5be0b;
   --toast-info: #4F46E5;
+
+  // Errors and warnings
+  --error-text: #ff3f4d;
+  --warning-text: #f5be0b;
 
 
   // Content loading placeholder
@@ -82,7 +86,7 @@
 
 .dark {
   // Primary
-  --primary-100: #01ff70;
+  --primary-100: #61DAFB;
   --primary-200: #e63956;
 
   // Accent
@@ -134,8 +138,8 @@
   --link-color-hover: #4139d8;
 
   // Buttons
-  --main-btn-bg: #01ff70;
-  --main-btn-bg-hover: #00d35b;
+  --main-btn-bg: #61DAFB;
+  --main-btn-bg-hover: #3cd5ff;
   --outline-btn-hover: #2c2c2c;
   --create-btn-bg: #2CC56F;
   --create-btn-bg-hover: #20b661;
@@ -145,7 +149,7 @@
   --danger-btn-bg-hover: #e53b49;
   --warning-btn-bg: #f5be0b;
   --warning-btn-bg-hover: #e4b00a;
-  --grey-hover: #444444;
+  --gray-hover: #333;
 
 
   // Toast
@@ -153,6 +157,11 @@
   --toast-error: #FF4755;
   --toast-warning: #f5be0b;
   --toast-info: #4F46E5;
+
+  // Errors and warnings
+  --error: #ff3f4d;
+  --warning-text: #f5be0b;
+
 
   // Content loading placeholder
   --content-placeholder: #333;

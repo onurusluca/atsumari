@@ -36,8 +36,6 @@ const handleReadSpace = async () => {
 
       // Show no spaces message if user has no spaces
       if (userSpaces.value.length <= 0) {
-        console.log("userSpaces.value.length: ", userSpaces.value.length);
-
         showNoSpacesMessage.value = true;
       } else {
         showNoSpacesMessage.value = false;
@@ -149,23 +147,25 @@ let generateRandomSeeds = computed(() => {
                 v-on-click-outside.bubble="clickOutsideHandlersettingsMenuDrowpdown"
                 class="space-settings__menu-dropdown dropdown-menu"
               >
-                <li class="dropdown-menu__item">
-                  <router-link
-                    :to="{
-                      name: 'SpaceSettings',
-                      params: {
-                        id: item.id,
-                      },
-                    }"
-                  >
-                    {{ t("spaces.menu.manageSpace") }}
-                  </router-link>
-                </li>
-                <li class="dropdown-menu__item">
-                  <router-link :to="`/space-edit/${item.id}`">
-                    {{ t("spaces.menu.editMap") }}
-                  </router-link>
-                </li>
+                <router-link
+                  :to="{
+                    name: 'SpaceSettings',
+                    params: {
+                      id: item.id,
+                    },
+                  }"
+                  tag="li"
+                  class="dropdown-menu__item"
+                >
+                  {{ t("spaces.menu.manageSpace") }}
+                </router-link>
+                <!--     <router-link
+                  :to="`/space-edit/${item.id}`"
+                  tag="li"
+                  class="dropdown-menu__item"
+                >
+                  {{ t("spaces.menu.editMap") }}
+                </router-link> -->
               </ul>
             </Transition>
           </div>
@@ -288,6 +288,8 @@ let generateRandomSeeds = computed(() => {
             top: 2.2rem;
             right: 0;
             z-index: $menu-z-index;
+            .dropdown-menu__item {
+            }
           }
         }
       }
@@ -300,7 +302,7 @@ let generateRandomSeeds = computed(() => {
           .image-container__image {
             transition: filter 100ms ease;
 
-            filter: brightness(0.9);
+            filter: brightness(0.6);
           }
           .image-container__enter-btn {
             transition: visibility 100ms ease;
@@ -326,7 +328,7 @@ let generateRandomSeeds = computed(() => {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 0 0.5rem 0.3rem 0.5rem;
+        padding: 0.5rem 0.5rem 0.3rem 0.5rem;
 
         .bottom__left {
           display: flex;

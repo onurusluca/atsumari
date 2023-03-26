@@ -1,5 +1,3 @@
-import Navbar from '@/components/nav/dashboard/Navbar.vue';
-
 <template>
   <Navbar />
   <Sidebar />

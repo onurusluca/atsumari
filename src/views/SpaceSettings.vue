@@ -8,7 +8,6 @@ let spaceId = route.currentRoute.value.params;
 onMounted(() => {});
 
 // Delete space
-
 const handleDeleteSpace = async (spaceId: string) => {
   try {
     let { data: spaces, error } = await supabase

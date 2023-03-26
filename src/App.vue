@@ -25,20 +25,21 @@ onMounted(async () => {
 });
 
 // If the user is not logged in, redirect to login page
-
-/* watch(
+watch(
   () => session.value,
   (session) => {
-    if (!session) {
+    if (!session && route.currentRoute.value.name !== "Space") {
       router.push({ name: "Login" });
+    } else {
+      router.push({ name: "Home" });
     }
   }
-); */
+);
 
 // Layout logic based on the route
 // Dashboard and default usage(in-space) have different layouts
 const layoutLogic = computed(() => {
-  if (session.value) {
+  if (session && route.currentRoute.value.path === "/") {
     return "dashboard";
   } else {
     return "no-layout";
