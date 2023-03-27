@@ -1,12 +1,14 @@
 <script setup lang="ts">
+import type { OnClickOutsideHandler } from "@vueuse/core";
+import { vOnClickOutside } from "@vueuse/components";
 import { createCanvasApp } from "@/canvas/canvas";
 import InitialCharacterSetupModal from "@/components/global/InitialCharacterSetupModal.vue";
 import { emitter } from "@/composables/useEmit";
 import type { User } from "@/types/general";
 
-/******************
+/****************************************
  * DECLARATIONS
- ******************/
+ ****************************************/
 const { t } = useI18n();
 const authStore = useAuthStore();
 const generalStore = useGeneralStore();
@@ -19,11 +21,13 @@ const userId = authStore.user?.id;
 const canvasLocalStorage = useStorage("atsumari_canvas", {
   lastUserPosition: { x: 0, y: 0 },
 });
+
 let users = reactive<Array<User>>([]);
 
 // Request animation frame every ..ms. Lowest is 30ms(30fps), middle is 20(45fps) highest is 10ms(60fps)
 let canvasFrameRate = ref<number>(20);
 
+let canvasLoaded = ref<boolean>(false);
 // Need to change user speed based on canvasFrameRate
 let speed =
   canvasFrameRate.value === 10
@@ -52,10 +56,6 @@ let rightClickWorldPosition = ref<{ x: number; y: number }>({
 
 let canvasZoom = ref<number>(1);
 
-/******************
- * INITIALIZATION
- ******************/
-
 // Windows size to canvas size
 let windowWidth = ref(window.innerWidth);
 let windowHeight = ref(window.innerHeight);
@@ -64,6 +64,9 @@ window.addEventListener("resize", () => {
   windowHeight.value = window.innerHeight;
 });
 
+/****************************************
+ * INITIALIZATION
+ ****************************************/
 onMounted(async () => {
   generalStore.spaceId = spaceId;
   generalStore.spaceName = spaceName;
@@ -76,6 +79,12 @@ onMounted(async () => {
 
   const canvas = document.getElementById("main-canvas") as HTMLCanvasElement;
 
+  // Listen to canvasLoaded event
+  emitter.on("canvasLoaded", () => {
+    console.log("Canvas loaded");
+    canvasLoaded.value = true;
+  });
+
   // Change canvas size to window size dynamically
   watch(
     () => [windowWidth.value, windowHeight.value],
@@ -87,7 +96,7 @@ onMounted(async () => {
   );
   // Watch generalStore.rightSideMenuOpen and update canvas size accordingly
   watch(
-    () => generalStore.rightSideMenuOpen,
+    () => chatMenuOpen.value || onlineUsersMenuOpen.value,
     (newValue) => {
       if (newValue) {
         canvas.width = windowWidth.value - 380;
@@ -123,7 +132,7 @@ onMounted(async () => {
     canvas.focus();
   });
 
-  // Listen to emit events sent from canvas
+  // Listen to emit move events sent from canvas
   emitter.on("playerMove", async (myPlayer) => {
     users.forEach(async (user) => {
       if (user.id === userId) {
@@ -144,16 +153,18 @@ onMounted(async () => {
   });
 
   // Listen to double click emit event sent from canvas
-  emitter.on("doubleClick", async (clickedPosition) => {
+  /*   emitter.on("doubleClick", async (clickedPosition) => {
     console.log("Double click received", clickedPosition);
 
     // Update user position with the clicked position
     users.forEach(async (user) => {
       if (user.id === userId) {
-        user.x = clickedPosition.x;
-        user.y = clickedPosition.y;
-        user.facingTo = clickedPosition.facingTo;
-        user.isMoving = clickedPosition.isMoving;
+        setTimeout(() => {
+          user.x = clickedPosition.x;
+          user.y = clickedPosition.y;
+          user.facingTo = clickedPosition.facingTo;
+          user.isMoving = clickedPosition.isMoving;
+        }, 200);
 
         // Send user position in realtime
         await sendUserAction(user.x, user.y, user.facingTo, user.isMoving);
@@ -165,7 +176,7 @@ onMounted(async () => {
         console.log("User move received,saved and updated");
       }
     });
-  });
+  }); */
 
   // Listen to right click emit event sent from canvas
   emitter.on("rightClick", async (positions) => {
@@ -196,9 +207,9 @@ onMounted(async () => {
 const moveUserToRightClickedPosition = async () => {
   users.forEach(async (user) => {
     if (user.id === userId) {
+      // Update user position
       user.x = rightClickWorldPosition.value.x;
       user.y = rightClickWorldPosition.value.y;
-
       // Set to default
       user.facingTo = "down";
       user.isMoving = false;
@@ -246,9 +257,9 @@ const handleInitialSetupCompleted = async () => {
   await handleReadProfile();
 };
 
-/******************
+/****************************************
  * REALTIME
- ******************/
+ ****************************************/
 // FIXME: For some reason, the realtime is not working on local network if spaceId is a string
 const broadCastChannel = supabase.channel(+spaceId, {
   config: {
@@ -363,34 +374,111 @@ const sendUserAction = async (
 onUnmounted(() => {
   broadCastChannel.unsubscribe();
 });
+/****************************************
+ * end REALTIME
+ ****************************************/
 
-/******************
- * - end REALTIME
- ******************/
-
-/******************
+/****************************************
  * UI
- ******************/
+ ****************************************/
+
+const chatMenuOpen = ref<Boolean>(false);
+const onlineUsersMenuOpen = ref<Boolean>(false);
+
+// Main menu
+let mainMenuOpen = ref<Boolean>(false);
+const mainMenuClickOutsideHandler: OnClickOutsideHandler = (event) => {
+  mainMenuOpen.value = false;
+};
+
+const handleOnlineUsersMenuOpen = () => {
+  chatMenuOpen.value = false;
+  onlineUsersMenuOpen.value = !onlineUsersMenuOpen.value;
+};
+const handleChatMenuOpen = () => {
+  onlineUsersMenuOpen.value = false;
+  chatMenuOpen.value = !chatMenuOpen.value;
+};
 </script>
 
 <template>
+  <!-- Loading animation to show until app mount -->
+  <section v-if="!canvasLoaded" class="route-loading-overlay">
+    <span class="loader"></span>
+  </section>
+
   <div class="space">
     <div class="canvas-container">
       <!-- tabindex is there to be able to focus the canvas and listen to key events only on canvas-->
       <canvas id="main-canvas" class="canvas-container__canvas" tabindex="0"></canvas>
 
-      <!-- Right-click menu  -->
-      <div
+      <!-- Right-click   -->
+      <button
+        @click="moveUserToRightClickedPosition"
         v-show="rightClickMenuIsEnabled"
-        class="canvas-container__right-click-menu"
+        class="btn canvas-container__right-click-menu"
         :style="{
           left: rightClickMenuPosition.x + 'px',
           top: rightClickMenuPosition.y + 'px',
         }"
+        >{{ t("space.userActions.moveHere") }}</button
       >
-        <div @click="moveUserToRightClickedPosition" class="right-click-menu__item">{{
-          t("space.userActions.moveHere")
-        }}</div>
+    </div>
+
+    <!-- Bottom control -->
+    <div class="bottom-control">
+      <div class="bottom-control__left">
+        <div class="left__main-menu">
+          <button
+            @click.stop="mainMenuOpen = !mainMenuOpen"
+            class="btn-bottom-control main-menu__btn"
+          >
+            <img
+              src="@/assets/images/icons/icon-64.png"
+              alt="Atsumari 🍉"
+              title="Atsumari 🍉"
+              class="btn__icon"
+            />
+          </button>
+
+          <!-- Main menu -->
+          <Transition name="slide-up">
+            <MainMenu
+              v-if="mainMenuOpen"
+              class="left__main-menu"
+              ref="mainMenu"
+              v-on-click-outside.bubble="mainMenuClickOutsideHandler"
+            />
+          </Transition>
+        </div>
+        <div class="left__user-menu"></div>
+        <div class="left__media-sharing"></div>
+        <div class="left__emotes"></div>
+      </div>
+      <div class="bottom-control__right">
+        <!-- Chat -->
+        <div class="right__chat">
+          <button @click.stop="handleChatMenuOpen" class="btn-bottom-control">
+            <ph:chats-circle class="bottom-control__icon" />
+            <span>Chat</span>
+          </button>
+          <Transition name="slide-left-fast">
+            <Chat
+              v-show="chatMenuOpen"
+              :chat-opened="chatMenuOpen"
+              class="chat__chat-menu"
+            />
+          </Transition>
+        </div>
+        <div class="right__user-list">
+          <button @click.stop="handleOnlineUsersMenuOpen" class="btn-bottom-control">
+            <ph:users-three class="bottom-control__icon" />
+            <span>Online</span>
+          </button>
+          <Transition name="slide-left-fast">
+            <OnlineUsers v-show="onlineUsersMenuOpen" class="chat__chat-menu" />
+          </Transition>
+        </div>
       </div>
     </div>
 
@@ -413,19 +501,79 @@ onUnmounted(() => {
 
     .canvas-container__right-click-menu {
       position: absolute;
-      background-color: #fff;
-      border: 1px solid #000;
-      border-radius: 5px;
-      padding: 5px;
       z-index: 1000;
+      background-color: var(--bg-300);
+      color: #fff;
+      outline: 2px solid var(--border);
 
-      .right-click-menu__item {
-        padding: 5px;
-        cursor: pointer;
-        &:hover {
-          background-color: #000;
-          color: #fff;
+      &:hover {
+        background-color: var(--outline-btn-hover);
+      }
+    }
+  }
+
+  .bottom-control {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    height: 4rem;
+    margin: 0;
+    padding: 0 1rem;
+
+    background-color: var(--bg-300);
+    border-top: 1px solid var(--border);
+
+    z-index: $space-bottom-control-z-index;
+
+    // create class names for each element with no styles
+    .bottom-control__left {
+      .left__main-menu {
+        .main-menu__btn {
+          background-color: rgb(221, 192, 255);
+          transition: background-color 50ms ease-in-out;
+
+          width: 3rem;
+          height: 3rem;
+          &:hover {
+            background-color: rgb(201, 154, 255);
+          }
+          .btn__icon {
+            width: 2rem;
+            height: 2rem;
+            margin: 0.2rem 0;
+          }
         }
+      }
+      .left__user-menu {
+      }
+      .left__media-sharing {
+      }
+      .left__emotes {
+      }
+    }
+
+    .bottom-control__right {
+      display: flex;
+      align-items: center;
+      .right__chat {
+        .chat__chat-menu {
+        }
+      }
+      .right__user-list {
+        margin-left: 1rem;
+      }
+    }
+
+    .btn-bottom-control {
+      .bottom-control__icon {
+        width: 1.5rem;
+        height: 1.5rem;
       }
     }
   }

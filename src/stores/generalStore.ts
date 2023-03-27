@@ -9,8 +9,6 @@ export const useGeneralStore = defineStore("generalStore", {
       userId: "",
       userName: "",
       users: [] as User[],
-
-      rightSideMenuOpen: false as boolean,
     };
   },
 });

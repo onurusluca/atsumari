@@ -19,6 +19,7 @@
     "@vueuse/head": "^1.1.23",
     "emittery": "^1.0.1",
     "nanoid": "^4.0.1",
+    "picmo": "^5.8.1",
     "pinia": "^2.0.33",
     "vue": "^3.2.47",
     "vue-confetti-explosion": "^1.0.2",

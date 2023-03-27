@@ -48,7 +48,7 @@ $xx-large-devices: 1400px;
 /*
 Usage:
 
- @include medium-devices-768 {
+ @include s-576 {
     .class-name {
       style-name: value;
     }

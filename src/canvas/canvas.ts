@@ -305,6 +305,9 @@ export function createCanvasApp(
       if (users.length > 0) {
         animate();
         clearInterval(checkUsers);
+
+        // Emit canvas loaded event
+        emitter.emit("canvasLoaded");
       }
     }, 1000);
   }
@@ -313,7 +316,7 @@ export function createCanvasApp(
    * Mouse events *
    ******************/
   // Listen to double click
-  canvas.addEventListener("dblclick", (e: MouseEvent) => {
+  /*   canvas.addEventListener("dblclick", (e: MouseEvent) => {
     const x = e.clientX + cameraX - 8;
     const y = e.clientY + cameraY - 25;
 
@@ -322,7 +325,7 @@ export function createCanvasApp(
 
     myPlayer.x = x;
     myPlayer.y = y;
-  });
+  }); */
 
   // Listen to right click
   canvas.addEventListener("contextmenu", (e: MouseEvent) => {

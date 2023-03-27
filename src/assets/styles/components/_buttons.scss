@@ -35,7 +35,7 @@ button:disabled {
   padding: .3rem .5rem;
 
   color: var(--text-100);
-  background: transparent;
+  background-color: transparent;
 
   svg {
     color: var(--text-100);
@@ -43,7 +43,7 @@ button:disabled {
 
 
   &:hover {
-    background: var(--gray-hover);
+    background-color: var(--gray-hover);
 
 
   }
@@ -53,7 +53,7 @@ button:disabled {
 .btn-icon {
   padding: 0.5rem 1rem;
 
-  background: transparent;
+  background-color: transparent;
   border: none;
   border-radius: 0.5rem;
   cursor: pointer;
@@ -65,7 +65,7 @@ button:disabled {
   }
 
   &:hover {
-    background: var(--gray-hover);
+    background-color: var(--gray-hover);
 
   }
 }
@@ -73,21 +73,21 @@ button:disabled {
 // General use
 .btn-outline {
   color: var(--text-100);
-  background: transparent;
+  background-color: transparent;
   outline: 2px solid var(--border);
 
   &:hover {
-    background: var(--outline-btn-hover);
+    background-color: var(--outline-btn-hover);
   }
 }
 
 .btn-main {
 
   color: #fff;
-  background: var(--main-btn-bg);
+  background-color: var(--main-btn-bg);
 
   &:hover {
-    background: var(--main-btn-bg-hover);
+    background-color: var(--main-btn-bg-hover);
   }
 }
 
@@ -95,37 +95,37 @@ button:disabled {
 .btn-create {
 
   color: #fff;
-  background: var(--create-btn-bg);
+  background-color: var(--create-btn-bg);
 
   &:hover {
-    background: var(--create-btn-bg-hover);
+    background-color: var(--create-btn-bg-hover);
   }
 }
 
 .btn-save {
   color: #fff;
-  background: var(--save-btn-bg);
+  background-color: var(--save-btn-bg);
 
   &:hover {
-    background: var(--save-btn-bg-hover);
+    background-color: var(--save-btn-bg-hover);
   }
 }
 
 .btn-danger {
   color: #fff;
-  background: var(--danger-btn-bg);
+  background-color: var(--danger-btn-bg);
 
   &:hover {
-    background: var(--danger-btn-bg-hover);
+    background-color: var(--danger-btn-bg-hover);
   }
 }
 
 .btn-warning {
   color: #fff;
-  background: var(--warning-btn-bg);
+  background-color: var(--warning-btn-bg);
 
   &:hover {
-    background: var(--warning-btn-bg-hover);
+    background-color: var(--warning-btn-bg-hover);
   }
 }
 
@@ -137,7 +137,7 @@ button:disabled {
 
   padding: 0.3rem .8rem;
 
-  background: transparent;
+  background-color: transparent;
   border: none;
   border-radius: 0.5rem;
   cursor: pointer;
@@ -149,7 +149,7 @@ button:disabled {
   }
 
   &:hover {
-    background: var(--gray-hover);
+    background-color: var(--gray-hover);
 
   }
 

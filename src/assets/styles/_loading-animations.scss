@@ -1,3 +1,5 @@
+// https://cssloaders.github.io/
+
 // clp: content loading placeholder
 .clp {
   height: 205px;
@@ -26,7 +28,57 @@
   100% {
     background-position: 90rem 0;
   }
+}
 
 
 
+.route-loading-overlay {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: var(--bg-100) !important;
+  backdrop-filter: blur(2px);
+  z-index: 9910;
+
+  .loader {
+    position: relative;
+    width: 6rem;
+    height: 6rem;
+  }
+
+  .loader {
+    &:before {
+      content: '';
+      border-radius: 50%;
+      position: absolute;
+      inset: 0;
+      box-shadow: 0 0 8px 2px rgba(0, 0, 0, 0.3) inset;
+    }
+
+    &:after {
+      content: '';
+      border-radius: 50%;
+      position: absolute;
+      inset: 0;
+      box-shadow: 0 0 10px 2px rgba(0, 0, 0, 0.3) inset;
+      box-shadow: 0 4px 0 var(--primary-100) inset;
+      animation: rotate 1s linear infinite;
+    }
+
+    @keyframes rotate {
+      0% {
+        transform: rotate(0);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+  }
 }

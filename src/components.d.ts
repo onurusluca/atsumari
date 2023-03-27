@@ -14,6 +14,7 @@ declare module '@vue/runtime-core' {
     'Carbon:copy': typeof import('~icons/carbon/copy')['default']
     'Carbon:dotMark': typeof import('~icons/carbon/dot-mark')['default']
     'Carbon:email': typeof import('~icons/carbon/email')['default']
+    'Carbon:faceAdd': typeof import('~icons/carbon/face-add')['default']
     'Carbon:ibmWatsonLanguageTranslator': typeof import('~icons/carbon/ibm-watson-language-translator')['default']
     'Carbon:language': typeof import('~icons/carbon/language')['default']
     'Carbon:locked': typeof import('~icons/carbon/locked')['default']

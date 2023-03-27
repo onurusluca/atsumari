@@ -1,17 +1,56 @@
 <script setup lang="ts">
+import { createPicker, NativeRenderer, i18n, lightTheme, darkTheme } from "picmo";
+import { isDark } from "@/utils/dark";
+import { vOnClickOutside } from "@vueuse/components";
+import type { OnClickOutsideHandler } from "@vueuse/core";
+
 import type { MessagesType } from "@/api/types";
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const authStore = useAuthStore();
 const generalStore = useGeneralStore();
 
 const route = useRouter();
 
+const props = defineProps({
+  chatOpened: {
+    type: Boolean,
+    required: true,
+  },
+});
+let chatOpenedOnce = ref<boolean>(false);
+let emojiPicker = ref<any>(null);
 onMounted(async () => {
-  await handleReadMessages();
+  //await handleReadMessages();
   // Scroll to bottom of messagesContainerRef
   if ((y.value, messagesContainerRef.value)) {
     y.value = messagesContainerRef.value?.scrollHeight;
+  }
+
+  // Emoji picker
+  const container = document.querySelector(".pickerContainer");
+  emojiPicker = createPicker({
+    rootElement: container,
+    i18n: i18n,
+    locale: locale.value === "en" ? "en" : "ja",
+    theme: isDark.value ? darkTheme : lightTheme,
+    renderer: new NativeRenderer(),
+    className: "emoji-picker",
+    animate: true,
+    emojisPerRow: 8,
+    visibleRows: 8,
+  });
+
+  // Listen for emoji selection
+  emojiPicker.addEventListener("emoji:select", (selection) => {
+    message.value += selection.emoji;
+  });
+});
+
+watchEffect(async () => {
+  if (props.chatOpened && !chatOpenedOnce.value) {
+    chatOpenedOnce.value = true;
+    await handleReadMessages();
   }
 });
 
@@ -24,7 +63,6 @@ const { y /* ,arrivedState,directions */ } = useScroll(messagesContainerRef, {
 /****************************************
  * API CALLS
  ****************************************/
-
 let spaceMessages = ref<MessagesType[]>([]);
 
 const handleReadMessages = async () => {
@@ -74,7 +112,7 @@ const handleCreateMessage = async () => {
       {
         message: message.value,
         user_id: authStore?.session?.user?.id,
-        user_name: generalStore.userName,
+        user_name: generalStore.userName || "onur",
         space_id: generalStore.spaceId,
       },
     ]);
@@ -87,6 +125,22 @@ const handleCreateMessage = async () => {
   } catch (error: any) {
     console.log("CREATE MESSAGE CATCH ERROR: ", error.message);
   }
+};
+
+/****************************************
+ * UI
+ ****************************************/
+
+// Emoji Picker
+
+let showEmojiPicker = ref<boolean>(false);
+/* emojiPicker.addEventListener("emoji:select", (selection) => {
+  console.log("Selected emoji: ", selection.emoji);
+  message.value += selection.emoji.native;
+}); */
+
+const clickOutsideHandlerEmojiPicker: OnClickOutsideHandler = (event) => {
+  showEmojiPicker.value = false;
 };
 </script>
 
@@ -114,13 +168,22 @@ const handleCreateMessage = async () => {
           @keyup.enter="handleCreateMessage"
           class="input-container__input"
         />
-        <button @click="handleCreateMessage" class="input-container__send-button">
-          <carbon:send v-show="!showMessageSendingLoading" style="font-size: 1.8rem" />
-          <svg-spinners:90-ring-with-bg
-            style="font-size: 1.8rem"
-            v-show="showMessageSendingLoading"
-          />
+        <button
+          @click.stop="showEmojiPicker = !showEmojiPicker"
+          class="btn btn-no-style input-container__icon"
+        >
+          <carbon:face-add />
         </button>
+
+        <!-- Emoji Picker -->
+        <div
+          v-show="showEmojiPicker"
+          v-on-click-outside.bubble="clickOutsideHandlerEmojiPicker"
+          class="input-container__emoji-picker"
+          id="emoji-picker-container"
+        >
+          <div class="pickerContainer"></div>
+        </div>
       </div> </div
   ></div>
 </template>
@@ -150,7 +213,10 @@ const handleCreateMessage = async () => {
       border-radius: 0.2rem;
       background-color: var(--bg-200);
       color: var(--f-color);
+      font-size: 1.2rem;
     }
+
+    // My message bubble
     .messages__my-message {
       background-color: var(--brand-green);
     }
@@ -172,7 +238,7 @@ const handleCreateMessage = async () => {
       width: 100%;
       height: 100%;
       .input-container__input {
-        width: 86%;
+        width: 100%;
         height: 100%;
         padding: 0 0.5rem;
 
@@ -181,6 +247,7 @@ const handleCreateMessage = async () => {
         outline: 2px solid transparent;
 
         font-weight: 500;
+        font-size: 1.2rem;
         background-color: var(--text-input-bg);
         color: var(--f-color);
 
@@ -189,26 +256,29 @@ const handleCreateMessage = async () => {
           outline: 2px solid var(--input-focus-border);
         }
       }
-
-      .input-container__send-button {
+      .input-container__icon {
         position: absolute;
-        right: 0rem;
-        top: 0em;
+        right: 0.5rem;
+        top: 0.5em;
 
-        height: 100%;
-        width: 13%;
-
-        color: var(--text-100);
-        background-color: var(--shadow);
-        border: none;
-        font-size: 1.1rem;
-        cursor: pointer;
-
-        &:hover {
-          background-color: var(--shadow-darker);
+        svg {
+          width: 1.8rem;
+          height: 1.8rem;
         }
       }
+
+      .input-container__emoji-picker {
+        position: absolute;
+        bottom: 4rem;
+        right: 1rem;
+        z-index: 100;
+      }
     }
+  }
+
+  @include s-576 {
+    width: 100vw;
+    height: 100vh;
   }
 }
 </style>

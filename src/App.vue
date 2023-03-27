@@ -25,7 +25,7 @@ onMounted(async () => {
 });
 
 // If the user is not logged in, redirect to login page
-watch(
+/*  watch(
   () => session.value,
   (session) => {
     if (!session && route.currentRoute.value.name !== "Space") {
@@ -34,7 +34,7 @@ watch(
       router.push({ name: "Home" });
     }
   }
-);
+);  */
 
 // Layout logic based on the route
 // Dashboard and default usage(in-space) have different layouts
