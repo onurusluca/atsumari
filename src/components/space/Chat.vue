@@ -278,7 +278,6 @@ const clickOutsideHandlerEmojiPicker: OnClickOutsideHandler = (event) => {
 
   @include s-576 {
     width: 100vw;
-    height: 100vh;
   }
 }
 </style>
