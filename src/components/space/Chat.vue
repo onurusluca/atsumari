@@ -51,7 +51,7 @@ onMounted(async () => {
     emojiPickerVisible.value = false;
     messageInputRef.value?.focus();
   });
-
+  /*
   // message reaction emoji picker
   const messageReactionEmojiPickerContainer = document.querySelector(
     ".messageReactionEmojiPickerContainerRef"
@@ -82,7 +82,7 @@ onMounted(async () => {
       await handleAddmessageReaction(selection.emoji);
       //messageReactionMenuVisible.value = false;
     }
-  );
+  ); */
 });
 
 let messagesContainerRef = ref<HTMLElement | null>(null);
@@ -119,7 +119,7 @@ watchEffect(async () => {
   if (props.chatOpened && !chatOpenedOnce.value) {
     chatOpenedOnce.value = true;
     await handleReadMessages();
-    await handleReadReactions();
+    //await handleReadReactions();
   }
 });
 
@@ -151,6 +151,7 @@ const handleSendMessage = async () => {
   }
 };
 
+/*
 // Read reactions of a message
 let messageReactions = ref<any[]>([]);
 const handleReadReactions = async () => {
@@ -171,7 +172,7 @@ const handleReadReactions = async () => {
 };
 
 // message reactions by message id
-const messageReactionsByMessageId = (messageId: string) => {
+ const messageReactionsByMessageId = (messageId: string) => {
   const messageRactionsById = messageReactions.value
     .filter((messageReaction) => messageReaction.id === messageId)
     .map((messageReaction) => messageReaction.reactions);
@@ -202,7 +203,7 @@ const handleAddmessageReaction = async (emoji: string) => {
   } catch (error: any) {
     console.log("CREATE message REACTION CATCH ERROR: ", error.message);
   }
-};
+}; */
 
 // Realtime
 supabase
@@ -288,6 +289,7 @@ const handleHoverMessage = (index: number) => {
   messageActionsVisible.value = true;
 };
 
+/*
 let messageReactionMenuVisible = ref<boolean>(false);
 let messageIdToAddReaction = ref<string>();
 
@@ -299,7 +301,7 @@ const clickOutsideHandlerMessageRactionEmojiPicker: OnClickOutsideHandler = () =
 const handleOpenMessageReactionEmojiMenu = (messageId: string) => {
   messageIdToAddReaction.value = messageId;
   messageReactionMenuVisible.value = !messageReactionMenuVisible.value;
-};
+}; */
 </script>
 
 <template>
@@ -341,10 +343,10 @@ const handleOpenMessageReactionEmojiMenu = (messageId: string) => {
         </p>
 
         <!-- message reactions -->
-        <div class="message__message-reactions">
+        <!--      <div class="message__message-reactions">
           <div
             v-for="(reactions, index) in messageReactionsByMessageId(message.id)"
-            mars
+
             :key="index"
             class="message-reactions__reaction"
           >
@@ -355,11 +357,11 @@ const handleOpenMessageReactionEmojiMenu = (messageId: string) => {
               >reactions:{{ reaction.emoji }}</span
             >
           </div>
-        </div>
+        </div> -->
 
         <!-- React, edit and more -->
 
-        <div
+        <!--         <div
           v-show="messageActionsVisible && visibleMessageIndex === index"
           class="message__actions"
         >
@@ -377,16 +379,15 @@ const handleOpenMessageReactionEmojiMenu = (messageId: string) => {
           </button>
         </div>
       </li>
-      <!-- Message reaction emoji picker -->
       <div
         v-show="messageReactionMenuVisible"
         v-on-click-outside.bubble="clickOutsideHandlerMessageRactionEmojiPicker"
         class="message__message-reaction-emoji-picker"
       >
-        <h1>fsdfsd</h1>
-        <div class="messageReactionEmojiPickerContainerRef"> </div>
-      </div>
-    </ul>
+        <div class="messageReactionEmojiPickerContainerRef"></div>
+      </div> -->
+      </li></ul
+    >
 
     <div class="chat__send-message">
       <div class="send-message__input-container">
@@ -402,7 +403,7 @@ const handleOpenMessageReactionEmojiMenu = (messageId: string) => {
         <!-- Emoji button -->
         <button
           @click.stop="handleOpenSendMessageEmojiPicker"
-          class="btn btn-no-style input-container__icon"
+          class="btn btn-no-style input-container__icon input-container__icon--emoji"
         >
           <carbon:face-add />
         </button>
@@ -476,14 +477,17 @@ const handleOpenMessageReactionEmojiMenu = (messageId: string) => {
       }
 
       .message__message-reactions {
-        display: flex;
-        align-items: center;
-        margin-top: 0.5rem;
-
         .message-reactions__reaction {
           display: flex;
           align-items: center;
-          margin-right: 0.5rem;
+
+          margin: 1rem 0.5rem 0 0;
+
+          background-color: var(--bg-300);
+          padding: 0.2rem;
+          border-radius: 0.2rem;
+
+          width: max-content;
 
           .reaction__emoji {
           }
@@ -530,18 +534,14 @@ const handleOpenMessageReactionEmojiMenu = (messageId: string) => {
     // My message bubble
     .messages__my-message {
       background-color: var(--my-message-bg);
-      // text-align: right;
+      text-align: right;
 
       &:hover {
         background-color: var(--my-message-hover-bg);
       }
       .message__top {
         display: flex;
-        // justify-content: flex-end;
-      }
-
-      .message__actions-container {
-        // display: none;
+        justify-content: flex-end;
       }
     }
   }
@@ -602,11 +602,14 @@ const handleOpenMessageReactionEmojiMenu = (messageId: string) => {
 
     .chat__send-message {
       .send-message__input-container {
-        .input-container__icon {
-          display: none;
+        .input-container__input {
+          padding-right: 6rem;
         }
         .input-container__icon--send {
           display: block;
+        }
+        .input-container__icon--emoji {
+          right: 3rem;
         }
       }
     }

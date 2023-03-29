@@ -122,6 +122,7 @@ const passwordLengthIsTooShort = computed(() => {
             maxlength="30"
             :placeholder="t('spaces.createSpace.spaceNamePlaceholder')"
             class="form__text-input"
+            @keypress.enter.native.prevent
           />
           <p
             v-if="spaceNamePatternNotMatched"
@@ -160,6 +161,7 @@ const passwordLengthIsTooShort = computed(() => {
             minlength="8"
             required
             class="form__text-input"
+            @keypress.enter.native.prevent
           />
           <button
             v-if="!pressed"

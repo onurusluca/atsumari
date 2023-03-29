@@ -11,9 +11,9 @@ let userSpaces = ref<SpacesType[]>([]);
 let showContentLoadingPlaceholder = ref<boolean>(true);
 let showNoSpacesMessage = ref<boolean>(false);
 onMounted(async () => {
-  if (!authStore.session) {
+  /*   if (!authStore.session) {
     router.push({ name: "Login" });
-  }
+  } */
 
   await handleReadSpace();
 });
@@ -159,6 +159,25 @@ let generateRandomSeeds = computed(() => {
                 >
                   {{ t("spaces.menu.manageSpace") }}
                 </router-link>
+                <!-- Copy space URL -->
+                <!-- TODO: change to real root route -->
+                <button
+                  @click="
+                    onCopyToClipboard(
+                      `http://localhost:5173/space/${item.id}/${slugify(item.name)}`
+                    )
+                  "
+                  class="btn btn-icon"
+                >
+                  <carbon:copy
+                    style="
+                      font-size: 1rem;
+                      color: var(--text-100);
+                      margin-right: 0.5rem;
+                    "
+                  />
+                  {{ t("spaces.copySpaceUrl") }}
+                </button>
                 <!--     <router-link
                   :to="`/space-edit/${item.id}`"
                   tag="li"
@@ -198,7 +217,8 @@ let generateRandomSeeds = computed(() => {
 
         <!-- Bottom -->
         <div class="space__bottom">
-          <div class="bottom__left">
+          <!--     <div class="bottom__left">
+        // Online count
             <carbon:dot-mark
               style="
                 font-size: 1.2rem;
@@ -207,27 +227,10 @@ let generateRandomSeeds = computed(() => {
               "
             />
             <p>30 {{ t("spaces.onlineCount") }}</p>
-          </div>
-          <div class="bottom__right">
-            <!-- Copy space URL -->
-            <!-- TODO: change to real root route -->
-            <button
-              @click="
-                onCopyToClipboard(
-                  `http://localhost:5173/space/${item.id}/${slugify(item.name)}`
-                )
-              "
-              class="btn btn-icon"
-            >
-              <carbon:copy
-                style="font-size: 1rem; color: var(--text-100); margin-right: 0.5rem"
-              />
-              {{ t("spaces.copySpaceUrl") }}
-            </button>
-          </div>
-        </div>
-      </li></ul
-    >
+          </div> -->
+          <div class="bottom__right"> </div>
+        </div> </li
+    ></ul>
     <!-- clp -->
     <!-- TODO: Enable if it takes too much time to load spaces -->
     <div v-if="showContentLoadingPlaceholder" class="clp-container">

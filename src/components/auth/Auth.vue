@@ -287,6 +287,7 @@ watch(
 
     .top__title {
       color: var(--primary-100);
+      margin-bottom: 0.5rem;
     }
   }
   .auth__oauth {
