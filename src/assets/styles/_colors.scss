@@ -33,6 +33,7 @@
   --text-input-bg: #fff;
   --toggle-input-bg: #2196f3;
 
+
   // Borders
   --border: #E5E5E5;
   --border-darker: #cccccc;
@@ -65,7 +66,7 @@
   --danger-btn-bg-hover: #e53b49;
   --warning-btn-bg: #f5be0b;
   --warning-btn-bg-hover: #e4b00a;
-  --gray-hover: #d1d1d1;
+  --gray-hover: #e6e6e6;
 
 
   // Toast
@@ -82,6 +83,9 @@
   // Content loading placeholder
   --content-placeholder: #eee;
   --content-placeholder-darker: #ddd;
+
+  // Chat
+  --my-message-bg: rgb(232, 234, 255);
 }
 
 .dark {
@@ -112,9 +116,10 @@
   --anti-color: #111; // for dark or light mode change
 
   // Backgrounds
-  --bg-100: #222831;
-  --bg-200: #393E46;
-  --bg-300: #454e59;
+  --bg-100: #24272c;
+  --bg-200: #222831;
+  --bg-300: #393E46;
+  --bg-400: #454e59;
   --text-input-bg: #212121;
   --toggle-input-bg: #1e88e5;
 
@@ -167,4 +172,10 @@
   --content-placeholder: #333;
   --content-placeholder-darker: #444;
 
+  // Chat
+  --my-message-bg: #41499e;
+  --my-message-hover-bg: #3a418f;
+  --others-message-bg: #3e3f52;
+  --others-message-hover-bg: #363749;
+  --actions-bg: #4c4e66;
 }

@@ -62,6 +62,13 @@ times:
   hours: Hours
   minutes: Minutes
   seconds: Seconds
+  chatTime:
+    now: just now
+    oneMinuteAgo: 1 minute ago
+    minutesAgo: minutes ago
+    oneHourAgo: 1 hour ago
+    hoursAgo: hours ago
+    oneDayAgo: 1 day ago
 
 modals:
   askSaveConfirm: Do you want to save these changes?
@@ -141,3 +148,7 @@ home:
 space:
   userActions:
     moveHere: Move Here
+
+##### CHAT #####
+chat:
+  typeAMessage: Type a message...

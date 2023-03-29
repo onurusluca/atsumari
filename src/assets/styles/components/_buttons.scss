@@ -21,9 +21,9 @@
     color: #fff;
   }
 
-  &:focus {
+  /*   &:focus {
     outline: max(1px, 0.15em) solid var(--input-focus-border);
-  }
+  } */
 }
 
 button:disabled {
@@ -44,8 +44,6 @@ button:disabled {
 
   &:hover {
     background-color: var(--gray-hover);
-
-
   }
 
 }

@@ -260,8 +260,7 @@ const handleInitialSetupCompleted = async () => {
 /****************************************
  * REALTIME
  ****************************************/
-// FIXME: For some reason, the realtime is not working on local network if spaceId is a string
-const broadCastChannel = supabase.channel(+spaceId, {
+const broadCastChannel = supabase.channel(spaceId, {
   config: {
     broadcast: {
       self: false, // Listen to your own broadcast events: https://supabase.com/docs/guides/realtime/broadcast#self-send-messages
@@ -522,7 +521,7 @@ const handleChatMenuOpen = () => {
     justify-content: space-between;
     align-items: center;
 
-    height: 4rem;
+    height: 3.5rem;
     margin: 0;
     padding: 0 1rem;
 
@@ -535,13 +534,13 @@ const handleChatMenuOpen = () => {
     .bottom-control__left {
       .left__main-menu {
         .main-menu__btn {
-          background-color: rgb(221, 192, 255);
+          background-color: var(--primary-100);
           transition: background-color 50ms ease-in-out;
 
-          width: 3rem;
-          height: 3rem;
+          width: 2.5rem;
+          height: 2.5rem;
           &:hover {
-            background-color: rgb(201, 154, 255);
+            background-color: #3ecbf1;
           }
           .btn__icon {
             width: 2rem;
@@ -550,12 +549,12 @@ const handleChatMenuOpen = () => {
           }
         }
       }
-      .left__user-menu {
+      /*    .left__user-menu {
       }
       .left__media-sharing {
       }
       .left__emotes {
-      }
+      } */
     }
 
     .bottom-control__right {
@@ -571,6 +570,8 @@ const handleChatMenuOpen = () => {
     }
 
     .btn-bottom-control {
+      padding: 0.2rem 0.5rem;
+      font-size: 0.9rem;
       .bottom-control__icon {
         width: 1.5rem;
         height: 1.5rem;
