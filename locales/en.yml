@@ -149,6 +149,11 @@ space:
   userActions:
     moveHere: Move Here
 
-##### CHAT #####
+# Chat
 chat:
+  title: Chat
   typeAMessage: Type a message...
+
+# Online Users
+onlineUsers:
+  title: Online Users

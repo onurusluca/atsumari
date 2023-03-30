@@ -3,7 +3,7 @@ name: Update database types
 on:
   schedule:
     # sets the action to run daily. You can modify this to run the action more or less frequently
-    - cron: '0 0 * * *'
+    - cron: "0 0 * * *"
 
 jobs:
   update:

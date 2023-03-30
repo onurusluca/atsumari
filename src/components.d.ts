@@ -24,6 +24,7 @@ declare module '@vue/runtime-core' {
     'Carbon:overflowMenuHorizontal': typeof import('~icons/carbon/overflow-menu-horizontal')['default']
     'Carbon:send': typeof import('~icons/carbon/send')['default']
     'Carbon:settings': typeof import('~icons/carbon/settings')['default']
+    'Carbon:settingsServices': typeof import('~icons/carbon/settings-services')['default']
     'Carbon:share': typeof import('~icons/carbon/share')['default']
     'Carbon:sun': typeof import('~icons/carbon/sun')['default']
     'Carbon:thumbsUp': typeof import('~icons/carbon/thumbs-up')['default']

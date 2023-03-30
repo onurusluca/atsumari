@@ -155,8 +155,15 @@ let generateRandomSeeds = computed(() => {
                     },
                   }"
                   tag="li"
-                  class="dropdown-menu__item"
+                  class="btn btn-icon"
                 >
+                  <carbon:settings-services
+                    style="
+                      font-size: 1rem;
+                      color: var(--text-100);
+                      margin-right: 0.5rem;
+                    "
+                  />
                   {{ t("spaces.menu.manageSpace") }}
                 </router-link>
                 <!-- Copy space URL -->
@@ -181,7 +188,6 @@ let generateRandomSeeds = computed(() => {
                 <!--     <router-link
                   :to="`/space-edit/${item.id}`"
                   tag="li"
-                  class="dropdown-menu__item"
                 >
                   {{ t("spaces.menu.editMap") }}
                 </router-link> -->
@@ -291,8 +297,6 @@ let generateRandomSeeds = computed(() => {
             top: 2.2rem;
             right: 0;
             z-index: $menu-z-index;
-            .dropdown-menu__item {
-            }
           }
         }
       }

@@ -31,7 +31,7 @@ watch(
     if (!session && route.currentRoute.value.name !== "Space") {
       router.push({ name: "Login" });
     } else {
-      router.push({ name: "Home" });
+      //router.push({ name: "Home" });
     }
   }
 );

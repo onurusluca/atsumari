@@ -158,7 +158,7 @@ const passwordLengthIsTooShort = computed(() => {
             autocomplete="new-password"
             name="spacePassword"
             id="spacePassword"
-            minlength="8"
+            minlength="4"
             required
             class="form__text-input"
             @keypress.enter.native.prevent

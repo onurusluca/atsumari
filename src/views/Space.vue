@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { OnClickOutsideHandler } from "@vueuse/core";
 import { vOnClickOutside } from "@vueuse/components";
-import { createCanvasApp } from "@/canvas/canvas";
+import { createCanvasApp } from "@/canvas/Game";
 import InitialCharacterSetupModal from "@/components/global/InitialCharacterSetupModal.vue";
 import { emitter } from "@/composables/useEmit";
 import type { User } from "@/types/general";
@@ -24,10 +24,11 @@ const canvasLocalStorage = useStorage("atsumari_canvas", {
 
 let users = reactive<Array<User>>([]);
 
-// Request animation frame every ..ms. Lowest is 30ms(30fps), middle is 20(45fps) highest is 10ms(60fps)
-let canvasFrameRate = ref<number>(20);
+// Request animation frame every ..ms (1000 / 30 = 30fps, 1000 / 45 = 45fps)
 
-let canvasLoaded = ref<boolean>(false);
+let canvasFrameRate = ref<number>(75);
+
+let canvasLoaded = ref<boolean>(true);
 // Need to change user speed based on canvasFrameRate
 let speed =
   canvasFrameRate.value === 10
@@ -457,9 +458,12 @@ const handleChatMenuOpen = () => {
       <div class="bottom-control__right">
         <!-- Chat -->
         <div class="right__chat">
-          <button @click.stop="handleChatMenuOpen" class="btn-bottom-control">
+          <button
+            @click.stop="handleChatMenuOpen"
+            class="btn-bottom-control"
+            :title="t('chat.title')"
+          >
             <ph:chats-circle class="bottom-control__icon" />
-            <span>Chat</span>
           </button>
           <Transition name="slide-left-fast">
             <Chat
@@ -470,12 +474,19 @@ const handleChatMenuOpen = () => {
           </Transition>
         </div>
         <div class="right__user-list">
-          <button @click.stop="handleOnlineUsersMenuOpen" class="btn-bottom-control">
+          <button
+            @click.stop="handleOnlineUsersMenuOpen"
+            class="btn-bottom-control"
+            :title="t('onlineUsers.title')"
+          >
             <ph:users-three class="bottom-control__icon" />
-            <span>Online</span>
           </button>
           <Transition name="slide-left-fast">
-            <OnlineUsers v-show="onlineUsersMenuOpen" class="chat__chat-menu" />
+            <OnlineUsers
+              v-show="onlineUsersMenuOpen"
+              :online-users="users"
+              class="chat__chat-menu"
+            />
           </Transition>
         </div>
       </div>
@@ -492,6 +503,13 @@ const handleChatMenuOpen = () => {
 .space {
   background-color: #222;
   .canvas-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    height: 100vh;
+
     .canvas-container__canvas {
       image-rendering: pixelated;
       margin-left: 0;
@@ -573,8 +591,8 @@ const handleChatMenuOpen = () => {
       padding: 0.2rem 0.5rem;
       font-size: 0.9rem;
       .bottom-control__icon {
-        width: 1.5rem;
-        height: 1.5rem;
+        width: 1.8rem;
+        height: 1.8rem;
       }
     }
   }
