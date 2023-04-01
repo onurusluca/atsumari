@@ -39,7 +39,7 @@ watch(
 // Layout logic based on the route
 // Dashboard and default usage(in-space) have different layouts
 const layoutLogic = computed(() => {
-  if (session && route.currentRoute.value.path === "/") {
+  if (route.currentRoute.value.name === "Home") {
     return "dashboard";
   } else {
     return "no-layout";
