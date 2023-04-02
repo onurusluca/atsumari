@@ -81,7 +81,7 @@ const clickOutsideHandlersettingsMenuDrowpdown: OnClickOutsideHandler = () => {
   settingsMenuDropDownOpen.value = false;
 };
 
-// Space name as slug logic
+// Make space name URL friendly
 const slugify = (string: string) => {
   return string
     .toString()
@@ -239,12 +239,12 @@ let generateRandomSeeds = computed(() => {
     ></ul>
     <!-- clp -->
     <!-- TODO: Enable if it takes too much time to load spaces -->
-    <div v-if="showContentLoadingPlaceholder" class="clp-container">
+    <!--     <div v-if="showContentLoadingPlaceholder" class="clp-container">
       <div class="clp"></div>
       <div class="clp"></div>
       <div class="clp"></div>
       <div class="clp"></div>
-    </div>
+    </div> -->
 
     <!-- No spaces -->
     <div v-if="showNoSpacesMessage" class="home__no-spaces">
