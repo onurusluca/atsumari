@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { OnClickOutsideHandler } from "@vueuse/core";
 import { vOnClickOutside } from "@vueuse/components";
-import { createCanvasApp } from "@/canvas/Game";
+import { createCanvasApp } from "@/canvas/ts/Game";
 import InitialCharacterSetupModal from "@/components/global/InitialCharacterSetupModal.vue";
 import { emitter } from "@/composables/useEmit";
 import type { User } from "@/types/general";
