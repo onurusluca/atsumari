@@ -25,18 +25,16 @@ const canvasLocalStorage = useStorage("atsumari_canvas", {
 let users = reactive<Array<User>>([]);
 
 // Request animation frame every ..ms (1000 / 30 = 30fps, 1000 / 45 = 45fps)
-
-let canvasFrameRate = ref<number>(75);
-
+let canvasFrameRate = ref<number>(60);
 let canvasLoaded = ref<boolean>(true);
 // Need to change user speed based on canvasFrameRate
 let speed =
-  canvasFrameRate.value === 10
-    ? 5
-    : canvasFrameRate.value === 20
-    ? 8
-    : canvasFrameRate.value === 30
-    ? 11
+  canvasFrameRate.value === 30
+    ? 2
+    : canvasFrameRate.value === 45
+    ? 4
+    : canvasFrameRate.value === 60
+    ? 6
     : 10;
 
 let initialUserPosition = {
@@ -49,7 +47,6 @@ let rightClickMenuPosition = ref<{ x: number; y: number }>({
   x: 0,
   y: 0,
 });
-
 let rightClickWorldPosition = ref<{ x: number; y: number }>({
   x: 0,
   y: 0,
@@ -69,6 +66,8 @@ window.addEventListener("resize", () => {
  * INITIALIZATION
  ****************************************/
 onMounted(async () => {
+  // We need to do a lot of stuff in onMounted because we need to wait for the DOM to be ready because of canvas
+
   generalStore.spaceId = spaceId;
   generalStore.spaceName = spaceName;
   generalStore.userId = userId;
@@ -77,7 +76,6 @@ onMounted(async () => {
   await handleReadProfile();
   await downloadSpaceMap();
   await downloadmyCharacterSpriteSheet();
-  // We need to do a lot of stuff in onMounted because we need to wait for the DOM to be ready because of canvas
 
   const canvas = document.getElementById("main-canvas") as HTMLCanvasElement;
 
@@ -149,10 +147,9 @@ onMounted(async () => {
         user.x = myPlayer.x;
         user.y = myPlayer.y;
         user.facingTo = myPlayer.facingTo;
-        user.isMoving = myPlayer.isMoving;
 
         // TODO: Use bitmap to send data
-        await sendUserAction(user.x, user.y, user.facingTo, user.isMoving);
+        await sendUserAction(user.x, user.y, user.facingTo);
         // Save user position in localstorage
         canvasLocalStorage.value = {
           lastUserPosition: { x: user.x, y: user.y },
@@ -173,11 +170,10 @@ onMounted(async () => {
           user.x = clickedPosition.x;
           user.y = clickedPosition.y;
           user.facingTo = clickedPosition.facingTo;
-          user.isMoving = clickedPosition.isMoving;
         }, 200);
 
         // Send user position in realtime
-        await sendUserAction(user.x, user.y, user.facingTo, user.isMoving);
+        await sendUserAction(user.x, user.y, user.facingTo);
 
         // Save user position in localstorage
         canvasLocalStorage.value = {
@@ -222,13 +218,12 @@ const moveUserToRightClickedPosition = async () => {
       user.y = rightClickWorldPosition.value.y;
       // Set to default
       user.facingTo = "down";
-      user.isMoving = false;
 
       // Emit event to update canvas
       emitter.emit("rightClickPlayerMoveConfirmed", user);
 
       // Send user position in realtime
-      await sendUserAction(user.x, user.y, user.facingTo, user.isMoving);
+      await sendUserAction(user.x, user.y, user.facingTo);
 
       // Save user position in localstorage
       canvasLocalStorage.value = {
@@ -350,7 +345,6 @@ broadCastChannel
       x: newPresences[0].lastPosition.x,
       y: newPresences[0].lastPosition.y,
       facingTo: "down",
-      isMoving: false,
     });
   })
   .on("presence", { event: "leave" }, ({ key, leftPresences }) => {
@@ -392,18 +386,12 @@ broadCastChannel
       user.x = payload.payload.x;
       user.y = payload.payload.y;
       user.facingTo = payload.payload.facingTo;
-      user.isMoving = payload.payload.isMoving;
     }
   });
 
 // Send user position
 // TODO: add a tick rate so it doesn't send too many events
-const sendUserAction = async (
-  x: number,
-  y: number,
-  facingTo: string,
-  isMoving: boolean
-) => {
+const sendUserAction = async (x: number, y: number, facingTo: string) => {
   broadCastChannel.send({
     type: "broadcast",
     event: "sendUserPositionEvent",
@@ -413,10 +401,9 @@ const sendUserAction = async (
       x: x,
       y: y,
       facingTo: facingTo,
-      isMoving: isMoving,
     },
   });
-  console.log("Sent broadcast event", { x, y, userName, facingTo, isMoving });
+  console.log("Sent broadcast event", { x, y, userName, facingTo });
 };
 
 // Unsubscribe from channel when component is unmounted

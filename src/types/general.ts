@@ -5,5 +5,4 @@ export interface User {
   x: number;
   y: number;
   facingTo: string;
-  isMoving: boolean;
 }
