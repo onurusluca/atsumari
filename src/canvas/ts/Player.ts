@@ -1,30 +1,71 @@
-export default class Pacman {
-  x: number;
-  y: number;
-  tileSize: number;
-  velocity: number;
-  tileMap: any;
-  pacmanImages: HTMLImageElement[] = [];
-  pacmanImageIndex: number = 0;
+export default class Character {
+  private x: number;
+  private y: number;
+  private direction: string;
+  private isMoving: boolean;
+  private img: HTMLImageElement;
+  private frameX: number;
+  private maxFrame: number;
+  private elapsed: number;
 
-  constructor(x: number, y: number, tileSize: number, velocity: number, tileMap: any) {
+  constructor(x: number, y: number, img: HTMLImageElement) {
     this.x = x;
     this.y = y;
-    this.tileSize = tileSize;
-    this.velocity = velocity;
-    this.tileMap = tileMap;
-
-    document.addEventListener("keydown", this.#handleKeyDown);
-
-    this.#loadPacmanImage();
+    this.direction = "down";
+    this.isMoving = false;
+    this.img = img;
+    this.frameX = 0;
+    this.maxFrame = 3;
+    this.elapsed = 0;
   }
 
-  draw(ctx: CanvasRenderingContext2D) {}
+  public move(x: number, y: number) {
+    this.x += x;
+    this.y += y;
+  }
 
-  #loadPacmanImage() {}
-  #handleKeyDown = (event: KeyboardEvent) => {};
+  public setDirection(direction: string) {
+    this.direction = direction;
+  }
 
-  #move() {}
+  public setIsMoving(isMoving: boolean) {
+    this.isMoving = isMoving;
+  }
 
-  #animate() {}
+  public draw(ctx: CanvasRenderingContext2D, cameraX: number, cameraY: number) {
+    if (this.isMoving) {
+      this.elapsed += 1;
+      if (this.elapsed > 3) {
+        this.elapsed = 0;
+        if (this.frameX < this.maxFrame) this.frameX++;
+        else this.frameX = 0;
+      }
+    } else {
+      this.frameX = 0;
+    }
+
+    ctx.drawImage(
+      this.img,
+      (this.frameX * this.img.width) / 4,
+      0,
+      this.img.width / 4,
+      this.img.height,
+      this.x - cameraX - this.img.width / 8,
+      this.y - cameraY - this.img.height / 8,
+      this.img.width / 4,
+      this.img.height
+    );
+  }
+
+  public getX() {
+    return this.x;
+  }
+
+  public getY() {
+    return this.y;
+  }
+
+  public getDirection() {
+    return this.direction;
+  }
 }

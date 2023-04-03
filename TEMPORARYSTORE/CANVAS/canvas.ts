@@ -1,14 +1,13 @@
 import { emitter } from "@/composables/useEmit";
-import { collisions } from "./images/collisions";
-import canvasImage from "./images/world-image.png";
+import canvasImage from "../images/world-image.png";
 
 import type { User } from "@/types/general";
 
 // Character images
-import characterImageDown from "./images/char-down.png";
-import characterImageLeft from "./images/char-left.png";
-import characterImageRight from "./images/char-right.png";
-import characterImageUp from "./images/char-up.png";
+import characterImageDown from "../images/char-down.png";
+import characterImageLeft from "../images/char-left.png";
+import characterImageRight from "../images/char-right.png";
+import characterImageUp from "../images/char-up.png";
 
 export function createCanvasApp(
   // Data from Space.vue
@@ -67,28 +66,6 @@ export function createCanvasApp(
   let maxFrame = 3;
   let elapsed = 0;
 
-  // Draw collisions
-  /*   const collisionsMap = [];
-  for (let index = 0; index < collisions.length; index += 90) {
-    collisionsMap.push(collisions.slice(index, 90 + index));
-  }
-
-  const boundaries = [] as any;
-
-  collisionsMap.forEach((row, y) => {
-    row.forEach((col, x) => {
-      if (col === 1025) {
-        boundaries.push({
-          x: x * 48 - 930,
-          y: y * 48 - 1200,
-          width: 48,
-          height: 48,
-        });
-      }
-    });
-  });
- */
-
   // Animate canvass
   const animate = () => {
     // Request next frame
@@ -117,27 +94,6 @@ export function createCanvasApp(
       worldImg.width,
       worldImg.height
     );
-    /*
-    // Draw boundaries based on collisions map
-    boundaries.forEach((boundary) => {
-      ctx.fillStyle = "red";
-      ctx.fillRect(
-        boundary.x - cameraX,
-        boundary.y - cameraY,
-        boundary.width,
-        boundary.height
-      );
-    });
-
-    // Detect collisions
-    const collision = boundaries.some((boundary) => {
-      return (
-        myPlayer.x + 20 > boundary.x &&
-        myPlayer.x - 20 < boundary.x + boundary.width &&
-        myPlayer.y + 20 > boundary.y &&
-        myPlayer.y - 20 < boundary.y + boundary.height
-      );
-    }); */
 
     // Draw and animate other players except my player
     users.forEach((user) => {

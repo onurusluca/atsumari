@@ -27,7 +27,7 @@
     "vue-router": "^4.1.6"
   },
   "devDependencies": {
-    "@iconify/json": "^2.2.43",
+    "@iconify/json": "^2.2.44",
     "@rushstack/eslint-patch": "^1.2.0",
     "@types/node": "^18.15.11",
     "@vitejs/plugin-vue": "^4.1.0",

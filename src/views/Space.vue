@@ -75,7 +75,8 @@ onMounted(async () => {
   generalStore.users = users;
 
   await handleReadProfile();
-
+  await downloadSpaceMap();
+  await downloadmyCharacterSpriteSheet();
   // We need to do a lot of stuff in onMounted because we need to wait for the DOM to be ready because of canvas
 
   const canvas = document.getElementById("main-canvas") as HTMLCanvasElement;
@@ -109,7 +110,15 @@ onMounted(async () => {
   );
 
   // Create canvas
-  createCanvasApp(users, userId, speed, canvas, canvasFrameRate.value);
+  createCanvasApp(
+    users,
+    userId,
+    speed,
+    canvas,
+    canvasFrameRate.value,
+    spaceMap.value,
+    myCharacterSprite.value
+  );
 
   // Listen to zoom events ctrl + mouse wheel
   canvas.addEventListener("wheel", (e) => {
@@ -256,6 +265,46 @@ const handleReadProfile = async () => {
 const handleInitialSetupCompleted = async () => {
   initialSetupCompleted.value = true;
   await handleReadProfile();
+};
+
+// Get space map
+let spaceMap = ref<string>("");
+const downloadSpaceMap = async () => {
+  try {
+    const { data, error } = await supabase.storage
+      .from("space-maps")
+      .download("newworld.png");
+
+    if (data) {
+      console.log("DOWNLOAD SPACE MAP: ", data);
+      // Get the URL of the image
+      const url = URL.createObjectURL(data);
+      spaceMap.value = url;
+    }
+    if (error) throw error;
+  } catch (error: any) {
+    console.log("DOWNLOAD SPACE MAP CATCH ERROR: ", error.message);
+  }
+};
+
+// Get characters
+let myCharacterSprite = ref<string>("");
+const downloadmyCharacterSpriteSheet = async () => {
+  try {
+    const { data, error } = await supabase.storage
+      .from("character-images")
+      .download("myuser/walk.png");
+
+    if (data) {
+      console.log("DOWNLOAD CHARACTER SPRITE SHEET: ", data);
+      // Get the URL of the image
+      const url = URL.createObjectURL(data);
+      myCharacterSprite.value = url;
+    }
+    if (error) throw error;
+  } catch (error: any) {
+    console.log("DOWNLOAD CHARACTER SPRITE SHEET CATCH ERROR: ", error.message);
+  }
 };
 
 /****************************************
