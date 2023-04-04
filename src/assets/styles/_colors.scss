@@ -67,6 +67,7 @@
   --warning-btn-bg: #f5be0b;
   --warning-btn-bg-hover: #e4b00a;
   --gray-hover: #e6e6e6;
+  --soft-hover: #b3b3b3;
 
 
   // Toast
@@ -85,7 +86,12 @@
   --content-placeholder-darker: #ddd;
 
   // Chat
-  --my-message-bg: rgb(232, 234, 255);
+  --my-message-bg: #cdd1f8;
+  --my-message-hover-bg: #a3abf5;
+  --others-message-bg: #d8d8d8;
+  --others-message-hover-bg: #b6b6b6;
+  --actions-bg: #4c4e66;
+
 }
 
 .dark {
@@ -155,6 +161,7 @@
   --warning-btn-bg: #f5be0b;
   --warning-btn-bg-hover: #e4b00a;
   --gray-hover: #333;
+  --soft-hover: #111111;
 
 
   // Toast

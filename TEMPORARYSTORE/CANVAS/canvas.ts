@@ -1,13 +1,5 @@
 import { emitter } from "@/composables/useEmit";
-import canvasImage from "../images/world-image.png";
-
 import type { User } from "@/types/general";
-
-// Character images
-import characterImageDown from "../images/char-down.png";
-import characterImageLeft from "../images/char-left.png";
-import characterImageRight from "../images/char-right.png";
-import characterImageUp from "../images/char-up.png";
 
 export function createCanvasApp(
   // Data from Space.vue
@@ -15,64 +7,76 @@ export function createCanvasApp(
   myPlayerId: string,
   speed: number,
   canvas: HTMLCanvasElement,
-  canvasFrameRate: number
+  canvasFrameRate: number,
+  spaceMap: string,
+  myCharacterSprite: string
 ) {
   const ctx = canvas.getContext("2d")!;
 
-  // Draw background image
   const worldImg = new Image();
-  worldImg.src = canvasImage;
+  worldImg.src = spaceMap;
 
   let cameraX = 0;
   let cameraY = 0;
-
-  // Fps related
-  let lastTime = performance.now();
-  let fps = 0;
 
   // Get my player(the current user)
   let myPlayer = {
     userName: "",
     x: 0,
     y: 0,
-    facingTo: "down",
-    isMoving: false,
   };
 
-  // Keyboard inputs
-  const inputs = {
+  // Keyboard keyPress
+  const keyPress = {
     w: false,
     a: false,
     s: false,
     d: false,
   };
-  let lastKey = "";
 
-  const characterImgUp = new Image();
-  characterImgUp.src = characterImageUp;
-  const characterImgDown = new Image();
-  characterImgDown.src = characterImageDown;
-  const characterImgLeft = new Image();
-  characterImgLeft.src = characterImageLeft;
-  const characterImgRight = new Image();
-  characterImgRight.src = characterImageRight;
+  let lastKeyPress = "null";
 
-  let characterImg = characterImgDown;
-  let characterImgMyPlayer = characterImgDown;
+  // Character images
+  const characterImg = new Image();
+  characterImg.src = myCharacterSprite;
+  const characterImgMyPlayer = new Image();
+  characterImgMyPlayer.src = myCharacterSprite;
 
-  // Change character images based on keyboard inputs
+  // 72x96 sprite sheet(3 rows, 4 columns)
+  const characterAnimations = {
+    "walk-down": [
+      [0, 0],
+      [24, 1],
+      [48, 0],
+    ],
+    "walk-left": [
+      [0, 24],
+      [24, 25],
+      [48, 24],
+    ],
+    "walk-right": [
+      [0, 48],
+      [24, 49],
+      [48, 48],
+    ],
+    "walk-up": [
+      [0, 72],
+      [24, 73],
+      [48, 72],
+    ],
+  } as const;
 
-  let frameX = 0;
-  let maxFrame = 3;
-  let elapsed = 0;
+  // Sprite sheet animation related
+  let animationState = "walk-down";
+  let animationFrame = 0;
+  let animationTick = 0;
 
-  // Animate canvass
+  // Fps related
+  let lastTime = performance.now();
+  let fps = 0;
+
+  // Animation loop
   const animate = () => {
-    // Request next frame
-    setTimeout(() => {
-      requestAnimationFrame(animate);
-    }, canvasFrameRate);
-
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -95,109 +99,60 @@ export function createCanvasApp(
       worldImg.height
     );
 
-    // Draw and animate other players except my player
-    users.forEach((user) => {
-      if (user.id === myPlayerId) return;
-
-      // Prevent the players from colliding with each other:
-      if (myPlayer.x + 20 > user.x - 20 && myPlayer.x - 20 < user.x + 20) {
-        if (myPlayer.y + 20 > user.y - 20 && myPlayer.y - 20 < user.y + 20) {
-          // If collision detected, don't move the player
-          switch (lastKey) {
-            case "w":
-              myPlayer.y += speed;
-              break;
-            case "a":
-              myPlayer.x += speed;
-              break;
-            case "s":
-              myPlayer.y -= speed;
-              break;
-            case "d":
-              myPlayer.x -= speed;
-              break;
-            default:
-              break;
-          }
-        }
-      }
-
-      if (user.isMoving) {
-        elapsed += 1;
-        if (elapsed > 3) {
-          elapsed = 0;
-          if (frameX < maxFrame) frameX++;
-          else frameX = 0;
-        }
-      } else {
-        frameX = 0;
-      }
-
-      let img;
-      switch (user.facingTo) {
-        case "up":
-          img = characterImgUp;
-          break;
-        case "down":
-          img = characterImgDown;
-          break;
-        case "left":
-          img = characterImgLeft;
-          break;
-        case "right":
-          img = characterImgRight;
-          break;
-        default:
-          img = characterImgDown;
-      }
-
-      ctx.drawImage(
-        img,
-        (frameX * characterImg.width) / 4,
-        0,
-        characterImg.width / 4,
-        characterImg.height,
-        user.x - cameraX - characterImg.width / 8,
-        user.y - cameraY - characterImg.height / 8,
-        characterImg.width / 4,
-        characterImg.height
-      );
-
-      // Draw player name
-      ctx.fillStyle = "white";
-      ctx.font = "20px Arial";
-      const userNameTextWidth = ctx.measureText(myPlayer.userName).width;
-      ctx.fillText(
-        user.userName,
-        user.x - cameraX - userNameTextWidth / 2,
-        user.y - cameraY - characterImg.height / 8 - 20
-      );
-    });
-
-    // Animate my player
-    if (myPlayer.isMoving) {
-      elapsed += 1;
-      if (elapsed > 3) {
-        elapsed = 0;
-        if (frameX < maxFrame) frameX++;
-        else frameX = 0;
-      }
-    } else {
-      frameX = 0;
+    // Move my player
+    if (keyPress.w) {
+      myPlayer.y -= speed;
+      animationState = "walk-up";
+    }
+    if (keyPress.a) {
+      myPlayer.x -= speed;
+      animationState = "walk-left";
+    }
+    if (keyPress.s) {
+      myPlayer.y += speed;
+      animationState = "walk-down";
+    }
+    if (keyPress.d) {
+      myPlayer.x += speed;
+      animationState = "walk-right";
     }
 
     // Draw my player
+    const frameCoords =
+      characterAnimations[animationState as keyof typeof characterAnimations][
+        animationFrame
+      ];
     ctx.drawImage(
       characterImgMyPlayer,
-      (frameX * characterImgMyPlayer.width) / 4,
-      0,
-      characterImg.width / 4,
-      characterImg.height,
-      myPlayer.x - cameraX - characterImg.width / 8,
-      myPlayer.y - cameraY - characterImg.height / 8,
-      characterImg.width / 4,
-      characterImg.height
+      frameCoords[0],
+      frameCoords[1],
+      24,
+      24,
+      myPlayer.x - cameraX - 8,
+      myPlayer.y - cameraY - 8,
+      96,
+      96
     );
+
+    // Update animation frame
+    if (keyPress.w || keyPress.a || keyPress.s || keyPress.d) {
+      animationTick++;
+    } else {
+      // Reset to idle animation
+      animationFrame = 1;
+    }
+
+    // Animation speed
+    if (animationTick >= 7) {
+      animationFrame++;
+      if (
+        animationFrame >=
+        characterAnimations[animationState as keyof typeof characterAnimations].length
+      ) {
+        animationFrame = 0;
+      }
+      animationTick = 0;
+    }
 
     // Draw my player name and center the text based on the length of the name
     ctx.fillStyle = "white";
@@ -209,63 +164,35 @@ export function createCanvasApp(
       myPlayer.y - cameraY - characterImg.height / 8 - 20
     );
 
+    // Draw other players
+
     // Calculate elapsed time since last frame
     const currentTime = performance.now();
     const deltaTime = currentTime - lastTime;
     lastTime = currentTime;
 
-    // Update frame count and FPS value
+    // Update frame count and FPS value. Draw FPS value
     fps = Math.round(1000 / deltaTime);
-
-    // Draw FPS value
     ctx.fillStyle = "black";
     ctx.font = "16px Arial";
     ctx.fillText(`FPS: ${fps}`, 10, 20);
-
-    // Move my player
-    if (inputs.w) {
-      myPlayer.y -= speed;
-      characterImgMyPlayer = characterImgUp;
-      myPlayer.facingTo = "up";
-    }
-    if (inputs.a) {
-      myPlayer.x -= speed;
-      characterImgMyPlayer = characterImgLeft;
-      myPlayer.facingTo = "left";
-    }
-    if (inputs.s) {
-      myPlayer.y += speed;
-      characterImgMyPlayer = characterImgDown;
-      myPlayer.facingTo = "down";
-    }
-    if (inputs.d) {
-      myPlayer.x += speed;
-      characterImgMyPlayer = characterImgRight;
-      myPlayer.facingTo = "right";
-      ("right");
-    }
-
-    if (inputs.w || inputs.a || inputs.s || inputs.d) {
-      myPlayer.isMoving = true;
-    } else {
-      myPlayer.isMoving = false;
-    }
   };
+  // ----- end Animation loop -----
 
   // Start drawing after users array is populated
-  if (users.length > 0 && myPlayerId !== "" && speed !== 0 && canvasImage !== "") {
-    animate();
+  if (users.length > 0 && myPlayerId !== "" && speed !== 0 && spaceMap !== "") {
+    setInterval(animate, 1000 / canvasFrameRate);
   } else {
     // Check if users array is empty
     const checkUsers = setInterval(() => {
       if (users.length > 0) {
-        animate();
+        setInterval(animate, 1000 / canvasFrameRate);
         clearInterval(checkUsers);
 
         // Emit canvas loaded event
         emitter.emit("canvasLoaded");
       }
-    }, 1000);
+    }, 0);
   }
 
   /******************
@@ -314,54 +241,65 @@ export function createCanvasApp(
   });
 
   /******************
-   * Keyboard inputs *
+   * Keyboard keyPress *
    ******************/
-
   canvas.addEventListener("keydown", (e: KeyboardEvent) => {
+    // TODO: Prevent diagonal movement
+
     // Listen to both lower and upper case
     switch (e.key.toLowerCase()) {
       case "w":
-        inputs.w = true;
-        lastKey = "w";
+        keyPress.w = true;
+        lastKeyPress = "w";
         break;
       case "a":
-        inputs.a = true;
-        lastKey = "a";
+        keyPress.a = true;
+        lastKeyPress = "a";
         break;
       case "s":
-        inputs.s = true;
-        lastKey = "s";
+        keyPress.s = true;
+        lastKeyPress = "s";
         break;
       case "d":
-        inputs.d = true;
-        lastKey = "d";
+        keyPress.d = true;
+        lastKeyPress = "d";
         break;
     }
-
-    // Only emit if key is w,a,s,d or W,A,S,D and after user has stopped moving
-    const validKeys = ["w", "a", "s", "d"];
-
-    // FIXME: Decide if we need to emit player move event on keydown. This will eat a lot of bandwidth
-    // Send player move event. This will show other players that I am moving and to you other players will look like they are moving
-    /*   if (validKeys.includes(e.key.toLocaleLowerCase())) {
-      // Emit player move event
-      emitter.emit("playerMove", myPlayer);
-    } */
   });
 
   canvas.addEventListener("keyup", (e: KeyboardEvent) => {
     switch (e.key.toLowerCase()) {
       case "w":
-        inputs.w = false;
+        keyPress.w = false;
         break;
       case "a":
-        inputs.a = false;
+        keyPress.a = false;
         break;
       case "s":
-        inputs.s = false;
+        keyPress.s = false;
         break;
       case "d":
-        inputs.d = false;
+        keyPress.d = false;
+        break;
+    }
+
+    // Go back to the last key pressed after the second key is released
+    switch (lastKeyPress as string) {
+      case "w":
+        myPlayer.y -= speed;
+        animationState = "walk-up";
+        break;
+      case "a":
+        myPlayer.x -= speed;
+        animationState = "walk-left";
+        break;
+      case "s":
+        myPlayer.y += speed;
+        animationState = "walk-down";
+        break;
+      case "d":
+        myPlayer.x += speed;
+        animationState = "walk-right";
         break;
     }
 
@@ -370,7 +308,6 @@ export function createCanvasApp(
 
     if (validKeys.includes(e.key.toLocaleLowerCase())) {
       // Emit player move event
-      myPlayer.isMoving = false;
       emitter.emit("playerMove", myPlayer);
     }
   });

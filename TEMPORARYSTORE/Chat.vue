@@ -318,12 +318,23 @@ const handleOpenMessageReactionEmojiMenu = (messageId: string) => {
       >
         <!-- Don't show the name if the previous message is from the same user -->
         <p class="message__top">
-          <span class="top__user-name">
+          <span
+            v-if="index === 0 || spaceMessages[index - 1].user_id !== message.user_id"
+            class="top__user-name"
+          >
             {{ message.user_name }}
           </span>
           <!-- Sent time -->
           <!-- Don't show if the sent time between the previous message is under 1 minutes-->
-          <span class="message__sent-time">
+          <span
+            v-if="
+            index === 0 ||
+            spaceMessages[index - 1].user_id !== message.user_id ||
+            formattedMessageSentTime(spaceMessages[index - 1].created_at!) !==
+              formattedMessageSentTime(message.created_at!)
+          "
+            class="message__sent-time"
+          >
             {{ formattedMessageSentTime(message.created_at!) }}
           </span>
         </p>
@@ -448,21 +459,20 @@ const handleOpenMessageReactionEmojiMenu = (messageId: string) => {
       }
       .message__top {
         display: flex;
-        gap: 0.5rem;
         align-items: center;
         .top__user-name {
-          color: var(--pale-font);
-          line-height: 0;
+          font-weight: 500;
+          color: var(--f-color);
         }
 
         .message__sent-time {
+          margin-left: 0.5rem;
           font-size: 0.8rem;
           color: var(--paler-font);
         }
       }
 
       .message__content {
-        margin: 1rem 0 0.5rem 0;
         color: var(--f-color);
       }
 
@@ -531,8 +541,7 @@ const handleOpenMessageReactionEmojiMenu = (messageId: string) => {
       }
       .message__top {
         display: flex;
-        flex-direction: row-reverse;
-        justify-content: flex-start;
+        justify-content: flex-end;
       }
     }
   }

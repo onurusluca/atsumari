@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { OnClickOutsideHandler } from "@vueuse/core";
 import { vOnClickOutside } from "@vueuse/components";
-import { createCanvasApp } from "@/canvas/ts/Game";
+import { createCanvasApp } from "@/canvas/ts/CanvasEngine";
 import InitialCharacterSetupModal from "@/components/global/InitialCharacterSetupModal.vue";
 import { emitter } from "@/composables/useEmit";
 import type { User } from "@/types/general";
@@ -26,7 +26,7 @@ let users = reactive<Array<User>>([]);
 
 // Request animation frame every ..ms (1000 / 30 = 30fps, 1000 / 45 = 45fps)
 let canvasFrameRate = ref<number>(60);
-let canvasLoaded = ref<boolean>(true);
+let canvasLoaded = ref<boolean>(false);
 // Need to change user speed based on canvasFrameRate
 let speed =
   canvasFrameRate.value === 30
@@ -51,8 +51,6 @@ let rightClickWorldPosition = ref<{ x: number; y: number }>({
   x: 0,
   y: 0,
 });
-
-let canvasZoom = ref<number>(1);
 
 // Windows size to canvas size
 let windowWidth = ref(window.innerWidth);
@@ -94,7 +92,7 @@ onMounted(async () => {
     },
     { immediate: true }
   );
-  // Watch generalStore.rightSideMenuOpen and update canvas size accordingly
+  // Watch menu open and update canvas size accordingly
   watch(
     () => chatMenuOpen.value || onlineUsersMenuOpen.value,
     (newValue) => {
@@ -117,23 +115,6 @@ onMounted(async () => {
     spaceMap.value,
     myCharacterSprite.value
   );
-
-  // Listen to zoom events ctrl + mouse wheel
-  canvas.addEventListener("wheel", (e) => {
-    if (e.ctrlKey) {
-      console.log("Zooming");
-
-      e.preventDefault();
-      if (e.deltaY < 0) {
-        canvasZoom.value += 0.1;
-      } else {
-        canvasZoom.value -= 0.1;
-      }
-      // Smooth zoom
-      canvas.style.transition = "transform 0.1s ease-in-out";
-      canvas.style.transform = `scale(${canvasZoom.value})`;
-    }
-  });
 
   // Focus canvas on click
   canvas.addEventListener("click", function () {
@@ -240,6 +221,8 @@ const moveUserToRightClickedPosition = async () => {
 let initialSetupCompleted = ref<boolean>(true);
 let userName = ref<string>("");
 const handleReadProfile = async () => {
+  // TODO: Fix after implementing user name
+  userName.value = Math.random().toString(36).substring(2, 12);
   try {
     let { data: profiles, error } = await supabase
       .from("profiles")
@@ -248,8 +231,7 @@ const handleReadProfile = async () => {
     if (profiles[0].user_name) {
       console.log("READ PROFILES: ", profiles);
       initialSetupCompleted.value = true;
-      userName.value = profiles[0].user_name;
-      generalStore.userName = userName.value;
+      // Random 10 letters username
     }
     if (error) throw error;
   } catch (error: any) {
@@ -287,8 +269,8 @@ let myCharacterSprite = ref<string>("");
 const downloadmyCharacterSpriteSheet = async () => {
   try {
     const { data, error } = await supabase.storage
-      .from("character-images")
-      .download("myuser/walk.png");
+      .from("character-sprites")
+      .download("dummy/walk.png");
 
     if (data) {
       console.log("DOWNLOAD CHARACTER SPRITE SHEET: ", data);
@@ -314,9 +296,6 @@ const broadCastChannel = supabase.channel(spaceId, {
   },
 });
 
-if (initialSetupCompleted) {
-}
-
 broadCastChannel
   /*   .on('presence', { event: 'sync' }, () => {
     const state = broadCastChannel.presenceState()
@@ -333,8 +312,7 @@ broadCastChannel
       canvasLocalStorage.value.lastUserPosition
         ? canvasLocalStorage.value.lastUserPosition.y
         : initialUserPosition.y,
-      "down",
-      false
+      "down"
     );
 
     // Add user to users array
@@ -344,6 +322,7 @@ broadCastChannel
       id: newPresences[0].id,
       x: newPresences[0].lastPosition.x,
       y: newPresences[0].lastPosition.y,
+      characterSprite: myCharacterSprite.value,
       facingTo: "down",
     });
   })
@@ -539,10 +518,6 @@ const handleChatMenuOpen = () => {
 .space {
   background-color: #222;
   .canvas-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
     width: 100%;
     height: 100vh;
 
@@ -556,11 +531,11 @@ const handleChatMenuOpen = () => {
       position: absolute;
       z-index: 1000;
       background-color: var(--bg-300);
-      color: #fff;
+      color: var(--text-100);
       outline: 2px solid var(--border);
 
       &:hover {
-        background-color: var(--outline-btn-hover);
+        background-color: var(--soft-hover);
       }
     }
   }
