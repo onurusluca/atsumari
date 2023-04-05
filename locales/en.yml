@@ -13,6 +13,7 @@ buttons:
   signUp: Sign up
   signIn: Sign in
   next: Next
+  back: Back
   complete: Complete
   createAccount: Create Account
 
@@ -120,12 +121,11 @@ spaces:
     spaceName: Space Name
     thisWillAppearInURL: This will appear at the end of the URL
     spaceNamePlaceholder: Enter a name for your space
-    matchThePattern: Only use letters(a-z), numbers(0-9) and (-,_) without spaces
+    matchThePattern: Use letters(a-z), numbers(0-9) and (-,_) without spaces
     spacePassword: Password
     spaceCreated: Space created!
     passwordLengthWarning: Password must be at least 4 characters
     showMe: Show me
-    onlyUseLettersNumbers: Only use letters and numbers. No spaces or special characters.
   deleteSpace:
     title: Delete Space
     message: Are you sure you want to delete this space?

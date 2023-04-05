@@ -418,9 +418,9 @@ const handleChatMenuOpen = () => {
 
 <template>
   <!-- Loading animation to show until app mount -->
-  <section v-if="!canvasLoaded" class="route-loading-overlay">
+  <!--   <section v-if="!canvasLoaded" class="route-loading-overlay">
     <span class="loader"></span>
-  </section>
+  </section> -->
 
   <div class="space">
     <div class="canvas-container">

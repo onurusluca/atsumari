@@ -28,6 +28,13 @@
 
 button:disabled {
   background-color: var(--disabled) !important;
+  color: var(--paler-font) !important;
+
+  svg {
+    color: var(--paler-font) !important;
+  }
+
+  cursor: not-allowed;
 }
 
 .btn-no-style {

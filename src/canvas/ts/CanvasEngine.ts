@@ -345,6 +345,7 @@ export function createCanvasApp(
     }
   });
 
+  // FIXME: Zooming is not working properly
   /******************
    * ZOOM EVENTS *
    * **************/
@@ -356,7 +357,7 @@ export function createCanvasApp(
 
       e.preventDefault();
       // Zoom in
-      if (e.deltaY < 0) {
+      /*  if (e.deltaY < 0) {
         scale = Math.max(0.1, Math.min(scale + zoomSpeed, 10));
         const x = e.offsetX / scale;
         const y = e.offsetY / scale;
@@ -365,13 +366,8 @@ export function createCanvasApp(
         ctx.translate(-x, -y);
         // Zoom out
       } else {
-        scale = Math.max(0.1, Math.min(scale - zoomSpeed, 10));
-        const x = e.offsetX / scale;
-        const y = e.offsetY / scale;
-        ctx.translate(x, y);
-        ctx.scale(scale, scale);
-        ctx.translate(-x, -y);
-      }
+
+      } */
       // Smooth zoom
       canvas.style.transition = "transform 0.1s ease-in-out";
     }

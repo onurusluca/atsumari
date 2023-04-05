@@ -17,7 +17,7 @@ let spaceName = ref<string>("");
 let spacePassword = ref<string>("");
 const handleCreateSpace = async () => {
   try {
-    const { data, error } = await supabase.from("spaces").insert([
+    const { error } = await supabase.from("spaces").insert([
       {
         name: spaceName.value,
         user_id: authStore?.session?.user?.id,
@@ -41,9 +41,6 @@ const handleCreateSpace = async () => {
  * UI
  ****************************************/
 // Step logic
-let activeStep = ref<number>(0);
-let firstStepCompleted = ref<boolean>(false);
-let secondStepCompleted = ref<boolean>(false);
 
 let showButtonLoading = ref<boolean>(false);
 let buttonsActive = ref<boolean>(true);
@@ -90,6 +87,19 @@ const passwordLengthIsTooShort = computed(() => {
     return spacePassword.value.length < 4 ? true : false;
   }
 });
+
+// Tabs logic
+let activeStep = ref<number>(0);
+let animationType = ref<string>("");
+const onClickBack = (step: number) => {
+  animationType.value = "slide-right-fade";
+  activeStep.value = step;
+};
+const onClickNext = (step: number) => {
+  animationType.value = "slide-left-fade";
+
+  activeStep.value = step;
+};
 </script>
 <template>
   <div class="create-space-modal">
@@ -97,127 +107,155 @@ const passwordLengthIsTooShort = computed(() => {
       class="create-space-modal__content"
       v-on-click-outside.bubble="clickOutsideHandlerModal"
     >
-      <form
-        v-if="!spaceCreated"
-        @submit.prevent="handleClickOnConfirm"
-        class="content__form"
-      >
-        <h5 class="mb-xl">{{ t("spaces.createSpace.title") }}</h5>
-        <div class="form__input-single">
-          <label for="spaceName" class="form__label"
-            >{{ t("spaces.createSpace.spaceName") }}
-            <span style="font-size: 0.9rem; color: var(--paler-font)"
-              >({{ t("spaces.createSpace.thisWillAppearInURL") }})</span
-            ></label
-          >
-          <!-- @input is for mobile(v-model won't update until input loses focus): https://github.com/vuejs/vue/issues/8231 -->
-          <input
-            v-model="spaceName"
-            @input="(e) => (spaceName = e?.target?.value)"
-            type="text"
-            name="spaceName"
-            id="spaceName"
-            required
-            pattern="^[a-zA-Z0-9 _,-]+$"
-            maxlength="30"
-            :placeholder="t('spaces.createSpace.spaceNamePlaceholder')"
-            class="form__text-input"
-            @keypress.enter.native.prevent
-          />
-          <p
-            v-if="spaceNamePatternNotMatched"
-            class="warning-text mt-m"
-            style="font-size: 0.95rem"
-          >
-            {{ t("spaces.createSpace.matchThePattern") }}
-          </p>
-        </div>
+      <div class="steps">
+        <!-- Steps -->
+        <Transition :name="animationType" mode="out-in">
+          <!-- Step 1 -->
+          <section v-if="activeStep === 0" class="steps__step">
+            <form v-if="!spaceCreated" class="content__form">
+              <h5 class="mb-xl">{{ t("spaces.createSpace.title") }}</h5>
+              <div class="form__input-single">
+                <label for="spaceName" class="form__label"
+                  >{{ t("spaces.createSpace.spaceName") }}
+                  <span style="font-size: 0.9rem; color: var(--paler-font)"
+                    >({{ t("spaces.createSpace.thisWillAppearInURL") }})</span
+                  ></label
+                >
+                <!-- @input is for mobile(v-model won't update until input loses focus): https://github.com/vuejs/vue/issues/8231 -->
+                <input
+                  v-model="spaceName"
+                  @input="(e) => (spaceName = e?.target?.value)"
+                  type="text"
+                  name="spaceName"
+                  id="spaceName"
+                  required
+                  pattern="^[a-zA-Z0-9 _,-]+$"
+                  maxlength="30"
+                  :placeholder="t('spaces.createSpace.spaceNamePlaceholder')"
+                  class="form__text-input"
+                  @keypress.enter.native.prevent
+                />
+                <p
+                  v-if="spaceNamePatternNotMatched"
+                  class="warning-text mt-m"
+                  style="font-size: 0.9rem"
+                >
+                  {{ t("spaces.createSpace.matchThePattern") }}
+                </p>
+              </div>
 
-        <span class="toggle-container">
-          <ri:lock-password-line class="mr-s" />
-          <label class="toggle-container__text-left"
-            >{{ t("spaces.createSpace.passwordProtect") }}
-          </label>
-          <input
-            @input="togglePasswordProtect"
-            class="toggle-switch toggle-switch-style"
-            id="toggle1"
-            type="checkbox"
-          />
-          <label class="toggle-switch-btn" for="toggle1"></label>
-        </span>
+              <span class="toggle-container">
+                <ri:lock-password-line class="mr-s" />
+                <label class="toggle-container__text-left"
+                  >{{ t("spaces.createSpace.passwordProtect") }}
+                </label>
+                <input
+                  @input="togglePasswordProtect"
+                  class="toggle-switch toggle-switch-style"
+                  id="toggle1"
+                  type="checkbox"
+                />
+                <label class="toggle-switch-btn" for="toggle1"></label>
+              </span>
 
-        <div v-if="passwordProtectEnabled" class="form__input-single form__with-icon">
-          <label for="spacePassword" class="form__label">{{
-            t("spaces.createSpace.spacePassword")
-          }}</label>
+              <div
+                v-if="passwordProtectEnabled"
+                class="form__input-single form__with-icon"
+              >
+                <label for="spacePassword" class="form__label">{{
+                  t("spaces.createSpace.spacePassword")
+                }}</label>
 
-          <input
-            v-model="spacePassword"
-            :type="pressed ? 'text' : 'password'"
-            autocomplete="new-password"
-            name="spacePassword"
-            id="spacePassword"
-            minlength="4"
-            required
-            class="form__text-input"
-            @keypress.enter.native.prevent
-          />
-          <button
-            v-if="!pressed"
-            ref="revealPasswordButtonRef"
-            class="btn-no-style input-single__icon input-single__clickable-icon"
-          >
-            <ri:eye-close-line />
-          </button>
-          <button
-            v-else
-            class="btn-no-style input-single__icon input-single__clickable-icon"
-          >
-            <ri:eye-line />
-          </button>
+                <input
+                  v-model="spacePassword"
+                  :type="pressed ? 'text' : 'password'"
+                  autocomplete="new-password"
+                  name="spacePassword"
+                  id="spacePassword"
+                  minlength="4"
+                  required
+                  class="form__text-input"
+                  @keypress.enter.native.prevent
+                />
+                <button
+                  v-if="!pressed"
+                  ref="revealPasswordButtonRef"
+                  class="btn-no-style input-single__icon input-single__clickable-icon"
+                >
+                  <ri:eye-close-line />
+                </button>
+                <button
+                  v-else
+                  class="btn-no-style input-single__icon input-single__clickable-icon"
+                >
+                  <ri:eye-line />
+                </button>
 
-          <!-- Password le -->
-          <p
-            v-if="passwordLengthIsTooShort"
-            class="warning-text mt-m"
-            style="font-size: 0.95rem"
-          >
-            {{ t("spaces.createSpace.passwordLengthWarning") }}
-          </p>
-        </div>
+                <!-- Password length warning -->
+                <p
+                  v-show="passwordLengthIsTooShort"
+                  class="warning-text mt-m"
+                  style="font-size: 0.9rem"
+                >
+                  {{ t("spaces.createSpace.passwordLengthWarning") }}
+                </p>
+              </div>
 
-        <!-- Buttons -->
-        <div class="form__bottom mt-xxl">
-          <!-- Cancel -->
-          <button
-            @click.prevent="onClickCancel"
-            :disabled="!buttonsActive"
-            class="btn btn-outline mr-l"
-          >
-            {{ t("buttons.cancel") }}
-          </button>
+              <!-- Buttons -->
+              <div class="form__bottom mt-xxl">
+                <!-- Cancel -->
+                <button @click.prevent="onClickCancel" class="btn btn-outline mr-l">
+                  {{ t("buttons.cancel") }}
+                </button>
 
-          <!-- Confirmation -->
-          <button
-            :disabled="
-              !buttonsActive ||
-              passwordLengthIsTooShort ||
-              spaceNamePatternNotMatched ||
-              spaceName === '' ||
-              (passwordProtectEnabled === true && spacePassword === '')
-            "
-            class="btn btn-create"
-            type="submit"
-          >
-            <ph:check-circle v-if="!showButtonLoading" class="mr-s" />
-            <div v-if="!showButtonLoading">{{ t("buttons.create") }}</div>
-            <svg-spinners:90-ring-with-bg v-show="showButtonLoading" />
-          </button>
-        </div>
-      </form>
+                <!-- Confirmation -->
+                <button
+                  :disabled="
+                    !buttonsActive ||
+                    passwordLengthIsTooShort ||
+                    spaceNamePatternNotMatched ||
+                    spaceName === '' ||
+                    (passwordProtectEnabled === true && spacePassword === '')
+                  "
+                  @click.prevent="onClickNext(1)"
+                  class="btn btn-create"
+                >
+                  <div v-if="!showButtonLoading">{{ t("buttons.next") }}</div>
+                  <carbon:chevron-right v-if="!showButtonLoading" class="ml-s" />
+                </button>
+              </div>
+            </form>
+          </section>
+
+          <!-- Step 2 -->
+          <section v-else-if="activeStep === 1" class="steps__step">
+            <p>fsdfsd</p>
+            <br /><p>fsdfsd</p> <br /><p>fsdfsd</p> <br /><p>fsdfsd</p> <br /><p
+              >fsdfsd</p
+            >
+            <br /><p>fsdfsd</p> <br /><p>fsdfsd</p> <br /><p>fsdfsd</p> <br /><p
+              >fsdfsd</p
+            >
+            <!-- Buttons -->
+            <div class="form__bottom mt-xxl">
+              <!-- Cancel -->
+              <button @click.prevent="onClickBack(0)" class="btn btn-outline mr-l">
+                <carbon:chevron-left class="mr-s" />
+
+                {{ t("buttons.back") }}
+              </button>
+
+              <!-- Confirmation -->
+              <button @click.prevent="onClickNext(2)" class="btn btn-create">
+                <div v-if="!showButtonLoading">{{ t("buttons.next") }}</div>
+                <carbon:chevron-right v-if="!showButtonLoading" class="ml-s" />
+              </button>
+            </div>
+          </section>
+        </Transition>
+      </div>
       <!-- Space created -->
-      <div v-else class="content__space-created">
+      <div v-if="activeStep === 4" class="content__space-created">
         <ph:check-circle style="font-size: 3rem; color: var(--brand-green)" />
         <h5 class="mb-s" style="color: var(--brand-green)">{{
           t("spaces.createSpace.spaceCreated")
@@ -239,6 +277,8 @@ const passwordLengthIsTooShort = computed(() => {
       </div>
     </div>
   </div>
+
+  <!--   <svg-spinners:90-ring-with-bg v-show="showButtonLoading" /> -->
 </template>
 <style scoped lang="scss">
 .create-space-modal {
@@ -265,7 +305,7 @@ const passwordLengthIsTooShort = computed(() => {
     justify-content: center;
     align-items: center;
 
-    width: 32rem;
+    min-width: 35rem;
     max-width: 90vw; //mobile
     padding: 1.5rem 1rem;
 
@@ -280,21 +320,18 @@ const passwordLengthIsTooShort = computed(() => {
       flex-direction: column;
       justify-content: center;
       align-items: center;
+    }
+    .form__bottom {
       width: 100%;
-
-      .form__bottom {
-        display: flex;
-        align-items: center;
-        justify-content: start;
-      }
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
     .content__space-created {
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-
-      width: 100%;
     }
   }
 }
