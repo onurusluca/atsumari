@@ -24,18 +24,11 @@ const canvasLocalStorage = useStorage("atsumari_canvas", {
 
 let users = reactive<Array<User>>([]);
 
-// Request animation frame every ..ms (1000 / 30 = 30fps, 1000 / 45 = 45fps)
+// Request animation frame every ..ms
 let canvasFrameRate = ref<number>(60);
 let canvasLoaded = ref<boolean>(false);
 // Need to change user speed based on canvasFrameRate
-let speed =
-  canvasFrameRate.value === 30
-    ? 2
-    : canvasFrameRate.value === 45
-    ? 4
-    : canvasFrameRate.value === 60
-    ? 6
-    : 10;
+let speed = canvasFrameRate.value === 30 ? 4 : canvasFrameRate.value === 60 ? 6 : 6;
 
 let initialUserPosition = {
   x: 100,

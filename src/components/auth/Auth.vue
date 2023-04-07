@@ -31,6 +31,14 @@ const handleLogin = async () => {
       email: email.value,
       password: password.value,
     });
+
+    // Set session if remember me is checked
+    if (rememberMeChecked.value) {
+      await supabase.auth.update({
+        remember: true,
+      });
+      const authLocalStorage = useStorage("atsumari_auth", { rememberMeEnabled: true });
+    }
     if (error) {
       console.log("err");
 
@@ -81,18 +89,6 @@ const { pressed } = useMousePressed({ target: revealPasswordButtonRef });
 
 // Remember me
 let rememberMeChecked = ref<boolean>(false);
-
-/* const authLocalStorage = useStorage('atsumari_auth', { rememberMeEmail: '' }) */
-watch(
-  () => email.value,
-  (newValue) => {
-    if (newValue.length) {
-      rememberMeChecked.value = true;
-    } else {
-      rememberMeChecked.value = false;
-    }
-  }
-);
 </script>
 
 <template>

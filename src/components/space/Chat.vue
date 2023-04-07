@@ -439,7 +439,7 @@ const handleOpenMessageReactionEmojiMenu = (messageId: string) => {
     .messages__message {
       position: relative;
       margin-bottom: 1rem;
-      padding: 0.5rem 0.5rem 0.5rem 0.5rem;
+      padding: 0.2rem 0.5rem;
       border-radius: 0.2rem;
       background-color: var(--others-message-bg);
 
