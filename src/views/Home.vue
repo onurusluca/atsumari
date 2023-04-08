@@ -11,10 +11,6 @@ let userSpaces = ref<SpacesType[]>([]);
 let showContentLoadingPlaceholder = ref<boolean>(true);
 let showNoSpacesMessage = ref<boolean>(false);
 onMounted(async () => {
-  /*   if (!authStore.session) {
-    router.push({ name: "Login" });
-  } */
-
   await handleReadSpace();
 });
 
@@ -239,12 +235,12 @@ let generateRandomSeeds = computed(() => {
     ></ul>
     <!-- clp -->
     <!-- TODO: Enable if it takes too much time to load spaces -->
-    <!--     <div v-if="showContentLoadingPlaceholder" class="clp-container">
+    <div v-if="showContentLoadingPlaceholder" class="clp-container">
       <div class="clp"></div>
       <div class="clp"></div>
       <div class="clp"></div>
       <div class="clp"></div>
-    </div> -->
+    </div>
 
     <!-- No spaces -->
     <div v-if="showNoSpacesMessage" class="home__no-spaces">

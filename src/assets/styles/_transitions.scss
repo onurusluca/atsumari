@@ -100,30 +100,30 @@
 // Tab transition
 .slide-left-fade-enter-active,
 .slide-left-fade-leave-active {
-  transition: all 200ms ease-out;
+  transition: all 100ms ease-out;
 }
 
 .slide-left-fade-enter-from {
   opacity: 0;
-  transform: translateX(30px);
+  transform: translateX(20px);
 }
 
 .slide-left-fade-leave-to {
   opacity: 0;
-  transform: translateX(-30px);
+  transform: translateX(-20px);
 }
 
 .slide-right-fade-enter-active,
 .slide-right-fade-leave-active {
-  transition: all 200ms ease-out;
+  transition: all 100ms ease-out;
 }
 
 .slide-right-fade-enter-from {
   opacity: 0;
-  transform: translateX(-30px);
+  transform: translateX(-20px);
 }
 
 .slide-right-fade-leave-to {
   opacity: 0;
-  transform: translateX(30px);
+  transform: translateX(20px);
 }

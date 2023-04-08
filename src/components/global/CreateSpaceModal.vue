@@ -9,12 +9,20 @@ const router = useRouter();
 
 const emit = defineEmits(["closeModal"]);
 
+const spaceMaps = reactive({
+  nature:
+    "https://rznoqrxsbrfyzlrlfcvj.supabase.co/storage/v1/object/public/space-maps/newworld.png",
+});
+
 /****************************************
  * API CALLS
  ****************************************/
 let spaceCreated = ref<boolean>(false);
 let spaceName = ref<string>("");
 let spacePassword = ref<string>("");
+
+let spaceMap = ref<string>("");
+let spaceSize = ref<number>(2);
 const handleCreateSpace = async () => {
   try {
     const { error } = await supabase.from("spaces").insert([
@@ -22,6 +30,8 @@ const handleCreateSpace = async () => {
         name: spaceName.value,
         user_id: authStore?.session?.user?.id,
         password: spacePassword.value ? spacePassword.value : null,
+        map: spaceMap.value,
+        size: spaceSize.value,
       },
     ]);
     if (error) {
@@ -90,6 +100,7 @@ const passwordLengthIsTooShort = computed(() => {
 
 // Tabs logic
 let activeStep = ref<number>(0);
+let totalSteps = ref<number>(3);
 let animationType = ref<string>("");
 const onClickBack = (step: number) => {
   animationType.value = "slide-right-fade";
@@ -100,6 +111,17 @@ const onClickNext = (step: number) => {
 
   activeStep.value = step;
 };
+
+// Range slider
+const sliderSettings = reactive({
+  min: 2,
+  max: 100,
+  step: 10,
+  ranges: {
+    2: "2-5",
+    10: "-20",
+  },
+});
 </script>
 <template>
   <div class="create-space-modal">
@@ -107,150 +129,199 @@ const onClickNext = (step: number) => {
       class="create-space-modal__content"
       v-on-click-outside.bubble="clickOutsideHandlerModal"
     >
+      <button class="btn btn-icon content__close-modal-btn" @click="onClickCancel">
+        <ph:x-bold />
+      </button>
+
+      <!--    <h5 class="mb-xxl">
+        {{ t("spaces.createSpace.title") }}
+      </h5> -->
+
       <!-- Steps -->
       <Transition :name="animationType" mode="out-in">
-        <!-- Step 1 -->
-        <section v-if="activeStep === 0" class="content__step">
-          <form v-if="!spaceCreated" class="step__form">
-            <h5 class="mb-xl">{{ t("spaces.createSpace.title") }}</h5>
-            <div class="form__input-single">
-              <label for="spaceName" class="form__label"
-                >{{ t("spaces.createSpace.spaceName") }}
-                <span style="font-size: 0.9rem; color: var(--paler-font)"
-                  >({{ t("spaces.createSpace.thisWillAppearInURL") }})</span
-                ></label
-              >
-              <!-- @input is for mobile(v-model won't update until input loses focus): https://github.com/vuejs/vue/issues/8231 -->
-              <input
-                v-model="spaceName"
-                @input="(e) => (spaceName = e?.target?.value)"
-                type="text"
-                name="spaceName"
-                id="spaceName"
-                required
-                pattern="^[a-zA-Z0-9 _,-]+$"
-                maxlength="30"
-                :placeholder="t('spaces.createSpace.spaceNamePlaceholder')"
-                class="form__text-input"
-                @keypress.enter.native.prevent
-              />
-              <p
-                v-if="spaceNamePatternNotMatched"
-                class="warning-text mt-m"
-                style="font-size: 0.9rem"
-              >
-                {{ t("spaces.createSpace.matchThePattern") }}
-              </p>
-            </div>
+        <keep-alive>
+          <div :key="activeStep">
+            <!-- STEP 1 -->
+            <section v-if="activeStep === 0" class="content__step">
+              <h6 class="step__title">{{
+                t("spaces.createSpace.steps.step1.title")
+              }}</h6>
+              <!--    <p class="step__description">{{
+            t("spaces.createSpace.steps.step1.description")
+          }}</p> -->
 
-            <span class="toggle-container">
-              <ri:lock-password-line class="mr-s" />
-              <label class="toggle-container__text-left"
-                >{{ t("spaces.createSpace.passwordProtect") }}
-              </label>
-              <input
-                @input="togglePasswordProtect"
-                class="toggle-switch toggle-switch-style"
-                id="toggle1"
-                type="checkbox"
-              />
-              <label class="toggle-switch-btn" for="toggle1"></label>
-            </span>
+              <form v-if="!spaceCreated" class="step-one__form">
+                <div class="form__input-single">
+                  <label for="spaceName" class="form__label"
+                    >{{ t("spaces.createSpace.spaceName") }}
+                  </label>
+                  <!-- @input is for mobile(v-model won't update until input loses focus): https://github.com/vuejs/vue/issues/8231 -->
+                  <input
+                    v-model="spaceName"
+                    @input="(e) => (spaceName = e?.target?.value)"
+                    type="text"
+                    name="spaceName"
+                    id="spaceName"
+                    required
+                    pattern="^[a-zA-Z0-9 _,-]+$"
+                    maxlength="30"
+                    :placeholder="t('spaces.createSpace.thisWillAppearInURL')"
+                    class="form__text-input"
+                    @keypress.enter.native.prevent
+                  />
+                  <p
+                    v-if="spaceNamePatternNotMatched"
+                    class="warning-text mt-m"
+                    style="font-size: 0.9rem"
+                  >
+                    {{ t("spaces.createSpace.matchThePattern") }}
+                  </p>
+                </div>
 
-            <div
-              v-if="passwordProtectEnabled"
-              class="form__input-single form__with-icon"
-            >
-              <label for="spacePassword" class="form__label">{{
-                t("spaces.createSpace.spacePassword")
-              }}</label>
+                <span class="toggle-container">
+                  <ri:lock-password-line class="mr-s" />
+                  <label class="toggle-container__text-left"
+                    >{{ t("spaces.createSpace.passwordProtect") }}
+                  </label>
+                  <input
+                    @input="togglePasswordProtect"
+                    class="toggle-switch toggle-switch-style"
+                    id="toggle1"
+                    type="checkbox"
+                  />
+                  <label class="toggle-switch-btn" for="toggle1"></label>
+                </span>
 
-              <input
-                v-model="spacePassword"
-                :type="pressed ? 'text' : 'password'"
-                autocomplete="new-password"
-                name="spacePassword"
-                id="spacePassword"
-                minlength="4"
-                required
-                class="form__text-input"
-                @keypress.enter.native.prevent
-              />
-              <button
-                v-if="!pressed"
-                ref="revealPasswordButtonRef"
-                class="btn-no-style input-single__icon input-single__clickable-icon"
-              >
-                <ri:eye-close-line />
-              </button>
-              <button
-                v-else
-                class="btn-no-style input-single__icon input-single__clickable-icon"
-              >
-                <ri:eye-line />
-              </button>
+                <div
+                  v-if="passwordProtectEnabled"
+                  class="form__input-single form__with-icon"
+                >
+                  <label for="spacePassword" class="form__label">{{
+                    t("spaces.createSpace.spacePassword")
+                  }}</label>
 
-              <!-- Password length warning -->
-              <p
-                v-show="passwordLengthIsTooShort"
-                class="warning-text mt-m"
-                style="font-size: 0.9rem"
-              >
-                {{ t("spaces.createSpace.passwordLengthWarning") }}
-              </p>
-            </div>
+                  <input
+                    v-model="spacePassword"
+                    :type="pressed ? 'text' : 'password'"
+                    autocomplete="new-password"
+                    name="spacePassword"
+                    id="spacePassword"
+                    minlength="4"
+                    required
+                    class="form__text-input"
+                    @keypress.enter.native.prevent
+                  />
+                  <button
+                    v-if="!pressed"
+                    ref="revealPasswordButtonRef"
+                    class="btn btn-no-style input-single__icon input-single__clickable-icon"
+                  >
+                    <ri:eye-close-line />
+                  </button>
+                  <button
+                    v-else
+                    class="btn btn-no-style input-single__icon input-single__clickable-icon"
+                  >
+                    <ri:eye-line />
+                  </button>
 
-            <!-- Buttons -->
-            <div class="step_bottom-controls mt-xxl">
-              <!-- Cancel -->
-              <button @click.prevent="onClickCancel" class="btn btn-outline mr-l">
-                {{ t("buttons.cancel") }}
-              </button>
+                  <!-- Password length warning -->
+                  <p
+                    v-show="passwordLengthIsTooShort"
+                    class="warning-text mt-m"
+                    style="font-size: 0.9rem"
+                  >
+                    {{ t("spaces.createSpace.passwordLengthWarning") }}
+                  </p>
+                </div>
 
-              <!-- Next -->
-              <button
-                :disabled="
-                  !buttonsActive ||
-                  passwordLengthIsTooShort ||
-                  spaceNamePatternNotMatched ||
-                  spaceName === '' ||
-                  (passwordProtectEnabled === true && spacePassword === '')
-                "
-                @click.prevent="onClickNext(1)"
-                class="btn btn-create"
-              >
-                <div v-if="!showButtonLoading">{{ t("buttons.next") }}</div>
-                <carbon:chevron-right v-if="!showButtonLoading" class="ml-s" />
-              </button>
-            </div>
-          </form>
-        </section>
+                <!-- Buttons -->
+                <div class="step_bottom-controls mt-xxl">
+                  <!-- Cancel -->
+                  <button @click.prevent="onClickCancel" class="btn btn-outline mr-l">
+                    {{ t("buttons.cancel") }}
+                  </button>
 
-        <!-- Step 2 -->
-        <section v-else-if="activeStep === 1" class="content__step">
-          <p>fsdfsd</p>
-          <br /><p>fsdfsd</p> <br /><p>fsdfsd</p> <br /><p>fsdfsd</p> <br /><p
-            >fsdfsd</p
-          >
-          <br /><p>fsdfsd</p> <br /><p>fsdfsd</p> <br /><p>fsdfsd</p> <br /><p
-            >fsdfsd</p
-          >
-          <!-- Buttons -->
-          <div class="step_bottom-controls mt-xxl">
-            <!-- Cancel -->
-            <button @click.prevent="onClickBack(0)" class="btn btn-outline mr-l">
-              <carbon:chevron-left class="mr-s" />
+                  <p class="bottom-controls__current-step"
+                    >{{ activeStep + 1 }}/{{ totalSteps }}</p
+                  >
 
-              {{ t("buttons.back") }}
-            </button>
+                  <!-- Next -->
+                  <button
+                    :disabled="
+                      !buttonsActive ||
+                      passwordLengthIsTooShort ||
+                      spaceNamePatternNotMatched ||
+                      spaceName === '' ||
+                      (passwordProtectEnabled === true && spacePassword === '')
+                    "
+                    @click.prevent="onClickNext(1)"
+                    class="btn btn-create"
+                  >
+                    <div v-if="!showButtonLoading">{{ t("buttons.next") }}</div>
+                    <carbon:chevron-right v-if="!showButtonLoading" class="ml-s" />
+                  </button>
+                </div>
+              </form>
+            </section>
 
-            <!-- Next -->
-            <button @click.prevent="onClickNext(2)" class="btn btn-create">
-              <div v-if="!showButtonLoading">{{ t("buttons.next") }}</div>
-              <carbon:chevron-right v-if="!showButtonLoading" class="ml-s" />
-            </button>
+            <!-- STEP 2 -->
+            <section v-else-if="activeStep === 1" class="content__step">
+              <h6 class="step__title">{{
+                t("spaces.createSpace.steps.step2.title")
+              }}</h6>
+              <form class="step-two__form">
+                <div class="form__left">
+                  <img
+                    :src="spaceMaps.nature"
+                    :alt="t('alts.spaceImage')"
+                    class="left__image"
+                  />
+                </div>
+                <div class="form__right">
+                  <div class="right__top"> </div>
+                  <div class="right__bottom">
+                    <div class="form__input-single">
+                      <label for="spaceName" class="form__label"
+                        >{{ t("spaces.createSpace.steps.step2.spaceSize") }}
+                      </label>
+                      <!-- @input is for mobile(v-model won't update until input loses focus): https://github.com/vuejs/vue/issues/8231 -->
+                      <input
+                        v-model="spaceSize"
+                        type="range"
+                        :min="sliderSettings.min"
+                        :max="sliderSettings.max"
+                        :step="sliderSettings.step"
+                        name="spaceName"
+                        id="spaceName"
+                        class="form__text-input"
+                      />
+                      <p class="form__label">{{ spaceSize }}</p>
+                    </div>
+                  </div>
+                </div>
+              </form>
+              <!-- Buttons -->
+              <div class="step_bottom-controls mt-xxl">
+                <!-- Cancel -->
+                <button @click.prevent="onClickBack(0)" class="btn btn-outline mr-l">
+                  <carbon:chevron-left class="mr-s" />
+
+                  {{ t("buttons.back") }}
+                </button>
+
+                <p class="bottom-controls__current-step"
+                  >{{ activeStep + 1 }}/{{ totalSteps }}</p
+                >
+                <!-- Next -->
+                <button @click.prevent="onClickNext(2)" class="btn btn-create">
+                  <div v-if="!showButtonLoading">{{ t("buttons.next") }}</div>
+                  <carbon:chevron-right v-if="!showButtonLoading" class="ml-s" />
+                </button>
+              </div>
+            </section>
           </div>
-        </section>
+        </keep-alive>
       </Transition>
     </div>
     <!-- Space created -->
@@ -298,9 +369,10 @@ const onClickNext = (step: number) => {
   z-index: $modal-z-index;
 
   .create-space-modal__content {
+    position: relative;
     min-width: 30rem;
     max-width: 95vw; // mobile
-    padding: 1.5rem 1rem;
+    padding: 2rem;
 
     border-radius: $borderRadius;
     border: 1px solid var(--border);
@@ -308,13 +380,53 @@ const onClickNext = (step: number) => {
 
     box-shadow: 0px 3px 10px 2px var(--shadow);
 
+    .content__close-modal-btn {
+      position: absolute;
+      right: 0.5rem;
+      top: 0.5rem;
+    }
+
     .content__step {
       width: inherit;
-      .step__form {
+
+      .step__title {
+        margin-bottom: 1.5rem;
+      }
+      /*  .step__description {
+        font-size: 0.9rem;
+        color: var(--pale-font);
+        margin-bottom: 1rem;
+      } */
+
+      .step-one__form {
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
+      }
+
+      .step-two__form {
+        display: flex;
+        gap: 2rem;
+        align-items: start;
+        justify-content: space-between;
+        .form__left {
+          .left__image {
+            width: 20rem;
+            height: auto;
+            object-fit: contain;
+            border-radius: $borderRadius;
+          }
+        }
+        .form__right {
+          .right__top {
+          }
+          .right__bottom {
+            input[type="range"] {
+              width: 15rem;
+            }
+          }
+        }
       }
 
       .step_bottom-controls {
@@ -322,6 +434,11 @@ const onClickNext = (step: number) => {
         display: flex;
         align-items: center;
         justify-content: space-between;
+
+        .bottom-controls__current-step {
+          font-size: 0.9rem;
+          color: var(--pale-font);
+        }
       }
     }
 

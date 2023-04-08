@@ -119,13 +119,23 @@ spaces:
     title: Create Space
     passwordProtect: Password Protect
     spaceName: Space Name
-    thisWillAppearInURL: This will appear at the end of the URL
-    spaceNamePlaceholder: Enter a name for your space
+    thisWillAppearInURL: This will appear at the end of the invite URL
     matchThePattern: Use letters(a-z), numbers(0-9) and (-,_) without spaces
     spacePassword: Password
     spaceCreated: Space created!
     passwordLengthWarning: Password must be at least 4 characters
     showMe: Show me
+    steps:
+      step1:
+        title: Give your space a name
+        description: Set a password or only allow people with the emails you specify to join
+      step2:
+        title: Select a map for your space
+        description: Select some of the maps we have created or upload your own
+        spaceSize: Space Size
+      step3:
+        title: Start collaborating
+        description: Start collaborating with your team
   deleteSpace:
     title: Delete Space
     message: Are you sure you want to delete this space?
@@ -157,3 +167,7 @@ chat:
 # Online Users
 onlineUsers:
   title: Online Users
+
+##### ACCESSIBILITY #####
+alts:
+  spaceImage: Space map image

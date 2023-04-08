@@ -45,8 +45,8 @@
 // Inputs with icon
 .input-single__icon {
   position: absolute;
-  right: .5rem;
-  top: 2rem;
+  right: .4rem;
+  top: 2.1rem;
 
   color: var(--palest-font);
   font-size: 1.1rem;
@@ -55,6 +55,7 @@
 }
 
 .input-single__clickable-icon {
+
   cursor: pointer;
 
   &:hover {

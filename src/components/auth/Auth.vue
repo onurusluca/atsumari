@@ -32,11 +32,8 @@ const handleLogin = async () => {
       password: password.value,
     });
 
-    // Set session if remember me is checked
+    // TODO: Set longer session if remember me is checked
     if (rememberMeChecked.value) {
-      await supabase.auth.update({
-        remember: true,
-      });
       const authLocalStorage = useStorage("atsumari_auth", { rememberMeEnabled: true });
     }
     if (error) {
