@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import type { OnClickOutsideHandler } from "@vueuse/core";
+import type { SpacesType } from "@/api/types";
+
 import { vOnClickOutside } from "@vueuse/components";
 import ConfettiExplosion from "vue-confetti-explosion";
 
@@ -9,11 +11,6 @@ const router = useRouter();
 
 const emit = defineEmits(["closeModal"]);
 
-const spaceMaps = reactive({
-  nature:
-    "https://rznoqrxsbrfyzlrlfcvj.supabase.co/storage/v1/object/public/space-maps/newworld.png",
-});
-
 /****************************************
  * API CALLS
  ****************************************/
@@ -21,7 +18,6 @@ let spaceCreated = ref<boolean>(false);
 let spaceName = ref<string>("");
 let spacePassword = ref<string>("");
 
-let spaceMap = ref<string>("");
 let spaceSize = ref<number>(2);
 const handleCreateSpace = async () => {
   try {
@@ -30,28 +26,47 @@ const handleCreateSpace = async () => {
         name: spaceName.value,
         user_id: authStore?.session?.user?.id,
         password: spacePassword.value ? spacePassword.value : null,
-        map: spaceMap.value,
+        image: spaceMap.value,
         size: spaceSize.value,
       },
     ]);
     if (error) {
       throw error;
     } else {
-      spaceCreated.value = true;
-      showButtonLoading.value = false;
-      // emit('closeModal')
-      // router.push({ name: 'Home' })
+      await handleReadSpace();
+      if (userSpaces.value.length > 0) {
+        spaceCreated.value = true;
+        showButtonLoading.value = false;
+
+        activeStep.value = 2;
+      }
     }
   } catch (error: any) {
     console.log("CREATE SPACE CATCH ERROR: ", error.message);
   }
 };
 
+let userSpaces = ref<SpacesType[]>([]);
+const handleReadSpace = async () => {
+  // Get the created space
+  try {
+    let { data: spaces, error } = await supabase
+      .from("spaces")
+      .select("*")
+      .eq("user_id", authStore?.session?.user?.id)
+      .eq("name", spaceName.value);
+    if (spaces) {
+      userSpaces.value = spaces;
+    }
+    if (error) throw error;
+  } catch (error: any) {
+    console.log("READ SPACE CATCH ERROR: ", error.message);
+  }
+};
+
 /****************************************
  * UI
  ****************************************/
-// Step logic
-
 let showButtonLoading = ref<boolean>(false);
 let buttonsActive = ref<boolean>(true);
 
@@ -112,6 +127,25 @@ const onClickNext = (step: number) => {
   activeStep.value = step;
 };
 
+// Theme selection
+const spaceMapImages = reactive<Record<string, string>>({
+  nature:
+    "https://rznoqrxsbrfyzlrlfcvj.supabase.co/storage/v1/object/public/space-maps/newworld.png",
+  modern:
+    "https://rznoqrxsbrfyzlrlfcvj.supabase.co/storage/v1/object/public/space-maps/modern.png",
+  city: "https://rznoqrxsbrfyzlrlfcvj.supabase.co/storage/v1/object/public/space-maps/city.png",
+  fantasy:
+    "https://rznoqrxsbrfyzlrlfcvj.supabase.co/storage/v1/object/public/space-maps/fantasy.png",
+});
+
+let currentTheme = ref<string>("Nature");
+let spaceMap = ref<string>(spaceMapImages.nature);
+
+const handleSelectMap = (map: string) => {
+  currentTheme.value = map;
+  spaceMap.value = spaceMapImages[currentTheme.value.toLowerCase()];
+};
+
 // Range slider
 const sliderSettings = reactive({
   min: 1,
@@ -136,6 +170,44 @@ const handleChange = (event: Event) => {
 const hostableUsersCountRange = computed(() => {
   return sliderSettings.ranges[spaceSize.value];
 });
+
+// Copy
+const onCopyToClipboard = (spaceUrl: string) => {
+  navigator.clipboard.writeText(spaceUrl);
+  showToast("copiedNotification");
+};
+
+// Make space name URL friendly
+const slugify = (string: string) => {
+  return string
+    .toString()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim()
+    .replace(/&/g, "-and-")
+    .replace(/[\s\W-]+/g, "-");
+};
+
+// Toast
+let toastOpen = ref<boolean>(false);
+let toastType = ref<string>("");
+
+function showToast(toastTypeProp: string) {
+  // Set toast props
+  toastType.value = toastTypeProp;
+  toastOpen.value = true;
+
+  setTimeout(() => {
+    toastOpen.value = false;
+  }, 5500);
+}
+
+// Go to space
+const handleClickGoToSpace = (spaceId: string) => {
+  // emit("closeModal");
+  router.push({ name: "Space", params: { spaceId: spaceId } });
+};
 </script>
 <template>
   <div class="create-space-modal">
@@ -263,7 +335,6 @@ const hostableUsersCountRange = computed(() => {
                   <!-- Next -->
                   <button
                     :disabled="
-                      !buttonsActive ||
                       passwordLengthIsTooShort ||
                       spaceNamePatternNotMatched ||
                       spaceName === '' ||
@@ -272,8 +343,8 @@ const hostableUsersCountRange = computed(() => {
                     @click.prevent="onClickNext(1)"
                     class="btn btn-create"
                   >
-                    <div v-if="!showButtonLoading">{{ t("buttons.next") }}</div>
-                    <carbon:chevron-right v-if="!showButtonLoading" class="ml-s" />
+                    <div>{{ t("buttons.next") }}</div>
+                    <carbon:chevron-right class="ml-s" />
                   </button>
                 </div>
               </form>
@@ -287,7 +358,7 @@ const hostableUsersCountRange = computed(() => {
               <form class="step-two__form">
                 <div class="form__left">
                   <img
-                    :src="spaceMaps.nature"
+                    :src="spaceMap"
                     :alt="t('alts.spaceImage')"
                     class="left__image"
                   />
@@ -299,12 +370,20 @@ const hostableUsersCountRange = computed(() => {
                       {{ t("spaces.createSpace.steps.step2.mapTheme.title") }}
                     </p>
                     <div class="top__buttons">
-                      <button class="btn btn-outline">
+                      <button
+                        @click.prevent="handleSelectMap('Nature')"
+                        class="btn btn-outline"
+                        :class="currentTheme === 'Nature' ? 'btn-outline--active' : ''"
+                      >
                         <emojione:deciduous-tree class="mr-s" />
                         {{ t("spaces.createSpace.steps.step2.mapTheme.nature") }}
                       </button>
 
-                      <button class="btn btn-outline">
+                      <button
+                        @click.prevent="handleSelectMap('Modern')"
+                        class="btn btn-outline"
+                        :class="currentTheme === 'Modern' ? 'btn-outline--active' : ''"
+                      >
                         <emojione:office-building class="mr-s" />
                         {{ t("spaces.createSpace.steps.step2.mapTheme.modern") }}
                       </button>
@@ -361,8 +440,84 @@ const hostableUsersCountRange = computed(() => {
                   >{{ activeStep + 1 }}/{{ totalSteps }}</p
                 >
                 <!-- Next -->
-                <button @click.prevent="onClickNext(2)" class="btn btn-create">
-                  <div v-if="!showButtonLoading">{{ t("buttons.next") }}</div>
+                <button
+                  @click.prevent="handleClickOnConfirm"
+                  :disabled="!buttonsActive"
+                  class="btn btn-create"
+                >
+                  <div v-if="!showButtonLoading">{{ t("buttons.createSpace") }}</div>
+                  <ph:check-circle v-if="!showButtonLoading" class="ml-s" />
+                  <svg-spinners:90-ring-with-bg v-show="showButtonLoading" />
+                </button>
+              </div>
+            </section>
+
+            <!-- STEP 3 (completed) -->
+            <section v-else-if="activeStep === 2" class="content__step">
+              <!-- Space created -->
+              <div class="content__space-created">
+                <ph:check-circle style="font-size: 3rem; color: var(--brand-green)" />
+                <h5 class="mb-s" style="color: var(--brand-green)">{{
+                  t("spaces.createSpace.spaceCreated")
+                }}</h5>
+
+                <!-- Confetti -->
+                <component
+                  :is="ConfettiExplosion"
+                  :particleCount="200"
+                  :particleSize="8"
+                  :duration="4000"
+                  :force="1"
+                  :colors="['#FF4755', '#98DB7C', '#000000']"
+                />
+              </div>
+
+              <h6 class="step__title-centered mt-xl mb-xxl">{{ spaceName }}</h6>
+
+              <!-- Space URL and copy -->
+              <div class="content__space-url">
+                <div class="space-url__input">
+                  <input
+                    type="text"
+                    :value="`http://localhost:5173/space/${userSpaces[0].id}/${slugify(
+                      userSpaces[0].name
+                    )}`"
+                    class="form__text-input"
+                    readonly
+                  />
+                  <button
+                    @click="
+                      onCopyToClipboard(
+                        `http://localhost:5173/space/${userSpaces[0].id}/${slugify(
+                          userSpaces[0].name
+                        )}`
+                      )
+                    "
+                    class="btn btn-icon"
+                  >
+                    <carbon:copy
+                      style="
+                        font-size: 1rem;
+                        color: var(--text-100);
+                        margin-right: 0.5rem;
+                      "
+                    />
+                    {{ t("spaces.copySpaceUrl") }}
+                  </button>
+                </div>
+              </div>
+
+              <!-- Buttons -->
+              <div class="step_bottom-controls mt-xxl">
+                <button @click.prevent="onClickShowMe" class="btn btn-outline">
+                  {{ t("spaces.createSpace.showMe") }}
+                </button>
+                <!-- Next -->
+                <button
+                  @click.prevent="handleClickGoToSpace(slugify(userSpaces[0].name))"
+                  class="btn btn-create"
+                >
+                  <div v-if="!showButtonLoading">{{ t("buttons.goToSpace") }}</div>
                   <carbon:chevron-right v-if="!showButtonLoading" class="ml-s" />
                 </button>
               </div>
@@ -371,30 +526,7 @@ const hostableUsersCountRange = computed(() => {
         </keep-alive>
       </Transition>
     </div>
-    <!-- Space created -->
-    <div v-if="activeStep === 4" class="content__space-created">
-      <ph:check-circle style="font-size: 3rem; color: var(--brand-green)" />
-      <h5 class="mb-s" style="color: var(--brand-green)">{{
-        t("spaces.createSpace.spaceCreated")
-      }}</h5>
-
-      <!-- Confetti -->
-      <component
-        :is="ConfettiExplosion"
-        :particleCount="200"
-        :particleSize="8"
-        :duration="4000"
-        :force="1"
-        :colors="['#FF4755', '#98DB7C', '#000000']"
-      />
-
-      <button @click.prevent="onClickShowMe" class="btn btn-outline mt-l">
-        {{ t("spaces.createSpace.showMe") }}
-      </button>
-    </div>
   </div>
-
-  <!--   <svg-spinners:90-ring-with-bg v-show="showButtonLoading" /> -->
 </template>
 <style scoped lang="scss">
 .create-space-modal {
@@ -438,6 +570,9 @@ const hostableUsersCountRange = computed(() => {
 
       .step__title {
         margin-bottom: 1.5rem;
+      }
+      .step__title-centered {
+        text-align: center;
       }
       /*  .step__description {
         font-size: 0.9rem;
@@ -552,12 +687,26 @@ const hostableUsersCountRange = computed(() => {
       }
     }
 
-    /*    .content__space-created {
+    .content__space-created {
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-    } */
+    }
+
+    .content__space-url {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+
+      .space-url__input {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+    }
   }
 }
 </style>

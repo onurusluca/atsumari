@@ -85,6 +85,10 @@ button:disabled {
   }
 }
 
+.btn-outline--active {
+  outline: 2px solid var(--brand-green);
+}
+
 .btn-main {
 
   color: #fff;

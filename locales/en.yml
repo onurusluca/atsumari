@@ -16,6 +16,8 @@ buttons:
   back: Back
   complete: Complete
   createAccount: Create Account
+  goToSpace: Go to Space
+  createSpace: Create Space
 
 language:
   language: Language
