@@ -56,6 +56,7 @@ declare module '@vue/runtime-core' {
     'Ph:chatsCircleFill': typeof import('~icons/ph/chats-circle-fill')['default']
     'Ph:checkCircle': typeof import('~icons/ph/check-circle')['default']
     'Ph:dotsThreeOutlineFill': typeof import('~icons/ph/dots-three-outline-fill')['default']
+    'Ph:usersFill': typeof import('~icons/ph/users-fill')['default']
     'Ph:usersFour': typeof import('~icons/ph/users-four')['default']
     'Ph:usersThree': typeof import('~icons/ph/users-three')['default']
     'Ph:usersThreeFill': typeof import('~icons/ph/users-three-fill')['default']

@@ -114,13 +114,27 @@ const onClickNext = (step: number) => {
 
 // Range slider
 const sliderSettings = reactive({
-  min: 2,
+  min: 1,
   max: 100,
-  step: 10,
+  step: 1,
+  stepValues: [2, 25, 50, 100],
   ranges: {
     2: "2-5",
-    10: "-20",
-  },
+    10: "6-20",
+    25: "21-50",
+    50: "51-100",
+    100: "100+",
+  } as Record<number, string>,
+});
+const stepIndex = ref<number>(0);
+const handleChange = (event: Event) => {
+  // Change stepIndex based on slider steps: 0 is 2, 1 is 25, 2 is 50, 3 is 100
+  stepIndex.value = +(event.target as HTMLInputElement).value;
+  spaceSize.value = sliderSettings.stepValues[stepIndex.value];
+};
+
+const hostableUsersCountRange = computed(() => {
+  return sliderSettings.ranges[spaceSize.value];
 });
 </script>
 <template>
@@ -281,7 +295,7 @@ const sliderSettings = reactive({
                 <div class="form__right">
                   <div class="right__top">
                     <!-- Map theme(type) -->
-                    <p class="top__title">
+                    <p class="right__title">
                       {{ t("spaces.createSpace.steps.step2.mapTheme.title") }}
                     </p>
                     <div class="top__buttons">
@@ -298,21 +312,38 @@ const sliderSettings = reactive({
                   </div>
                   <div class="right__bottom">
                     <div class="form__input-single">
-                      <label for="spaceName" class="form__label"
-                        >{{ t("spaces.createSpace.steps.step2.spaceSize") }}
-                      </label>
-                      <!-- @input is for mobile(v-model won't update until input loses focus): https://github.com/vuejs/vue/issues/8231 -->
-                      <input
-                        v-model="spaceSize"
-                        type="range"
-                        :min="sliderSettings.min"
-                        :max="sliderSettings.max"
-                        :step="sliderSettings.step"
-                        name="spaceName"
-                        id="spaceName"
-                        class="form__text-input"
-                      />
-                      <p class="form__label">{{ spaceSize }}</p>
+                      <div class="bottom__title">
+                        <label for="spaceName" class="right__title"
+                          >{{ t("spaces.createSpace.steps.step2.spaceSize") }}
+                        </label>
+                        <p class="flex-center">
+                          <ph:users-fill style="font-size: 1.1rem" class="mr-xs" />{{
+                            hostableUsersCountRange
+                          }}</p
+                        >
+                      </div>
+
+                      <!-- Range slider -->
+                      <div class="right__space-size-selector">
+                        <input
+                          type="range"
+                          min="0"
+                          max="3"
+                          step="1"
+                          :value="stepIndex"
+                          @input="handleChange"
+                          class="space-size-selector__slider"
+                        />
+                        <div class="space-size-selector__step-labels">
+                          <div
+                            v-for="(step, index) in sliderSettings.stepValues"
+                            :key="index"
+                            class="step-labels__label"
+                          >
+                            {{ step }}
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -443,9 +474,6 @@ const sliderSettings = reactive({
             padding-bottom: 2rem;
             margin-bottom: 2rem;
             border-bottom: 1px solid var(--border);
-            .top__title {
-              font-weight: bold;
-            }
 
             .top__buttons {
               display: flex;
@@ -453,8 +481,59 @@ const sliderSettings = reactive({
             }
           }
           .right__bottom {
-            input[type="range"] {
-              width: 15rem;
+            .bottom__title {
+              display: flex;
+              justify-content: space-between;
+            }
+          }
+
+          .right__title {
+            font-weight: bold;
+          }
+          .right__space-size-selector {
+            margin-top: 0.4rem;
+            .space-size-selector__slider {
+              -webkit-appearance: none;
+              appearance: none;
+              width: 100%;
+              height: 6px;
+              background-color: #ddd;
+              outline: none;
+              opacity: 0.8;
+              transition: opacity 0.2s;
+              cursor: pointer;
+              &:hover {
+                opacity: 1;
+              }
+
+              &::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                appearance: none;
+                width: 1.2rem;
+                height: 1.2rem;
+                background-color: var(--primary-100);
+                border-radius: 50%;
+                box-shadow: 0px 0px 0px 2px var(--text-100);
+                cursor: pointer;
+              }
+            }
+            .space-size-selector__step-labels {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              padding: 0.2rem 0.3rem;
+            }
+
+            .step-labels__label {
+              &:nth-child(2) {
+                margin-left: 0.6rem;
+              }
+              &:nth-child(3) {
+                margin-left: 0.4rem;
+              }
+              &:nth-child(4) {
+                margin-right: -0.5rem;
+              }
             }
           }
         }
