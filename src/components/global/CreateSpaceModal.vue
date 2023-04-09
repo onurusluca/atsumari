@@ -204,9 +204,9 @@ function showToast(toastTypeProp: string) {
 }
 
 // Go to space
-const handleClickGoToSpace = (spaceId: string) => {
+const handleClickGoToSpace = (spaceId: string, spaceName: string) => {
   // emit("closeModal");
-  router.push({ name: "Space", params: { spaceId: spaceId } });
+  router.push({ name: "Space", params: { id: spaceId, name: spaceName } });
 };
 </script>
 <template>
@@ -514,7 +514,9 @@ const handleClickGoToSpace = (spaceId: string) => {
                 </button>
                 <!-- Next -->
                 <button
-                  @click.prevent="handleClickGoToSpace(slugify(userSpaces[0].name))"
+                  @click.prevent="
+                    handleClickGoToSpace(slugify(userSpaces[0].id), userSpaces[0].name)
+                  "
                   class="btn btn-create"
                 >
                   <div v-if="!showButtonLoading">{{ t("buttons.goToSpace") }}</div>
@@ -527,6 +529,11 @@ const handleClickGoToSpace = (spaceId: string) => {
       </Transition>
     </div>
   </div>
+
+  <!-- Toast -->
+  <Transition name="slide-up">
+    <Toast v-if="toastOpen === true" toastTheme="successToast" :toastType="toastType" />
+  </Transition>
 </template>
 <style scoped lang="scss">
 .create-space-modal {

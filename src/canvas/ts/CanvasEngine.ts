@@ -303,4 +303,49 @@ export function createCanvasApp(
       emitter.emit("playerMove", myPlayer);
     }
   });
+
+  /******************
+   * MOUSE EVENTS *
+   ******************/
+  // Listen to double click
+  /*   canvas.addEventListener("dblclick", (e: MouseEvent) => {
+    const x = e.clientX + cameraX - 8;
+    const y = e.clientY + cameraY - 25;
+
+    // Emit double click event
+    emitter.emit("doubleClick", { x, y });
+
+    myPlayer.x = x;
+    myPlayer.y = y;
+  }); */
+
+  // Listen to right click
+  canvas.addEventListener("contextmenu", (e: MouseEvent) => {
+    const mouseX = e.clientX;
+    const mouseY = e.clientY;
+
+    const worldX = e.clientX + cameraX;
+    const worldY = e.clientY + cameraY;
+
+    const mousePos = {
+      mouseX,
+      mouseY,
+    };
+
+    const worldPos = {
+      worldX,
+      worldY,
+    };
+
+    // Emit right click event
+    emitter.emit("rightClick", { mousePos, worldPos });
+
+    e.preventDefault();
+  });
+
+  // Get right click move position confirmation
+  emitter.on("rightClickPlayerMoveConfirmed", async (user) => {
+    myPlayer.x = user.x - 36;
+    myPlayer.y = user.y - 64;
+  });
 }

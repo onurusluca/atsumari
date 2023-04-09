@@ -49,6 +49,8 @@ onMounted(async () => {
   emojiPicker.addEventListener("emoji:select", (selection: any) => {
     message.value += selection.emoji;
     emojiPickerVisible.value = false;
+
+    // Focus message input after emoji selection
     messageInputRef.value?.focus();
   });
   /*
@@ -144,6 +146,9 @@ const handleSendMessage = async () => {
       } else {
         message.value = "";
         showMessageSendingLoading.value = false;
+
+        // Focus message input after sending message
+        messageInputRef.value?.focus();
       }
     } catch (error: any) {
       console.log("CREATE MESSAGE CATCH ERROR: ", error.message);
@@ -302,6 +307,8 @@ const handleOpenMessageReactionEmojiMenu = (messageId: string) => {
   messageIdToAddReaction.value = messageId;
   messageReactionMenuVisible.value = !messageReactionMenuVisible.value;
 }; */
+
+// TODO: Set different color for username
 </script>
 
 <template>
@@ -451,18 +458,19 @@ const handleOpenMessageReactionEmojiMenu = (messageId: string) => {
         gap: 0.5rem;
         align-items: center;
         .top__user-name {
-          color: var(--pale-font);
+          //color: var(--pale-font);
+          font-weight: 600;
           line-height: 0;
         }
 
         .message__sent-time {
-          font-size: 0.8rem;
+          font-size: 0.7rem;
           color: var(--paler-font);
         }
       }
 
       .message__content {
-        margin: 1rem 0 0.5rem 0;
+        margin: 0.2rem 0 0rem 0;
         color: var(--f-color);
       }
 
