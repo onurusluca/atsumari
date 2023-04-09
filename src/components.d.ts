@@ -36,6 +36,8 @@ declare module '@vue/runtime-core' {
     Chat: typeof import('./components/space/Chat.vue')['default']
     ConfirmModal: typeof import('./components/global/ConfirmModal.vue')['default']
     CreateSpaceModal: typeof import('./components/global/CreateSpaceModal.vue')['default']
+    'Emojione:deciduousTree': typeof import('~icons/emojione/deciduous-tree')['default']
+    'Emojione:officeBuilding': typeof import('~icons/emojione/office-building')['default']
     EmojiPicker: typeof import('./components/space/EmojiPicker.vue')['default']
     'FluentEmoji:sadButRelievedFace': typeof import('~icons/fluent-emoji/sad-but-relieved-face')['default']
     'Gridicons:customize': typeof import('~icons/gridicons/customize')['default']

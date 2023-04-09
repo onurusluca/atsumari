@@ -279,7 +279,23 @@ const sliderSettings = reactive({
                   />
                 </div>
                 <div class="form__right">
-                  <div class="right__top"> </div>
+                  <div class="right__top">
+                    <!-- Map theme(type) -->
+                    <p class="top__title">
+                      {{ t("spaces.createSpace.steps.step2.mapTheme.title") }}
+                    </p>
+                    <div class="top__buttons">
+                      <button class="btn btn-outline">
+                        <emojione:deciduous-tree class="mr-s" />
+                        {{ t("spaces.createSpace.steps.step2.mapTheme.nature") }}
+                      </button>
+
+                      <button class="btn btn-outline">
+                        <emojione:office-building class="mr-s" />
+                        {{ t("spaces.createSpace.steps.step2.mapTheme.modern") }}
+                      </button>
+                    </div>
+                  </div>
                   <div class="right__bottom">
                     <div class="form__input-single">
                       <label for="spaceName" class="form__label"
@@ -420,6 +436,21 @@ const sliderSettings = reactive({
         }
         .form__right {
           .right__top {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+
+            padding-bottom: 2rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+            .top__title {
+              font-weight: bold;
+            }
+
+            .top__buttons {
+              display: flex;
+              gap: 1rem;
+            }
           }
           .right__bottom {
             input[type="range"] {

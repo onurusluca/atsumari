@@ -133,6 +133,13 @@ spaces:
         title: Select a map for your space
         description: Select some of the maps we have created or upload your own
         spaceSize: Space Size
+        mapTheme:
+          title: Map Theme
+          nature: Nature
+          modern: Modern
+          city: City
+          fantasy: Fantasy
+          custom: Custom
       step3:
         title: Start collaborating
         description: Start collaborating with your team
