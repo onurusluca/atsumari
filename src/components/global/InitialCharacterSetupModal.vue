@@ -1,34 +1,61 @@
 <script setup lang="ts">
-import type { OnClickOutsideHandler } from "@vueuse/core";
-import { vOnClickOutside } from "@vueuse/components";
+import type { ProfilesType } from "@/api/types/index";
 
 const { t } = useI18n();
 const authStore = useAuthStore();
-const router = useRouter();
+// const router = useRouter();
 
-const emit = defineEmits(["initialSetupCompleted", "closeModal"]);
+const props = defineProps<{
+  spaceId: string;
+}>();
+const emit = defineEmits(["initialSetupCompleted"]);
 
+onMounted(async () => {
+  await handleReadProfile();
+});
 /****************************************
  * API CALLS
  ****************************************/
+
 let nameChanged = ref<boolean>(false);
+
 let userName = ref<string>("");
+let allUserNames = reactive<Array<Object>>([]);
 const handleChangeUserName = async () => {
   try {
-    const { data, error } = await supabase
+    console.log("allUserNames: ", allUserNames);
+
+    const { error } = await supabase
       .from("profiles")
-      .update({ user_name: userName.value })
-      .eq("id", authStore?.session?.user?.id);
+      .eq("id", authStore?.session?.user?.id)
+      .update({ user_name_for_each_space: allUserNames });
+
     if (error) {
       throw error;
     } else {
       nameChanged.value = true;
       showButtonLoading.value = false;
       emit("initialSetupCompleted");
-      // router.push({ name: 'Home' })
     }
   } catch (error: any) {
     console.log("CHANGE username CATCH ERROR: ", error.message);
+  }
+};
+
+const handleReadProfile = async () => {
+  try {
+    let { data: profiles, error } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", authStore?.session?.user?.id);
+
+    if (profiles[0].user_name_for_each_space !== null) {
+      allUserNames = profiles[0].user_name_for_each_space;
+      console.log("allUserNames: ", allUserNames);
+    }
+    if (error) throw error;
+  } catch (error: any) {
+    console.log("READ PROFILES CATCH ERROR: ", error.message);
   }
 };
 
@@ -40,26 +67,18 @@ let showButtonLoading = ref<boolean>(false);
 let buttonsActive = ref<boolean>(true);
 
 const handleClickOnConfirm = async () => {
+  allUserNames.push({
+    [props.spaceId]: userName.value,
+  });
+
   buttonsActive.value = false;
   showButtonLoading.value = true;
   await handleChangeUserName();
 };
-const onClickCancel = async () => {
-  buttonsActive.value = false;
-  emit("closeModal");
-};
-
-// Click outside
-const clickOutsideHandlerModal: OnClickOutsideHandler = () => {
-  emit("closeModal");
-};
 </script>
 <template>
   <div class="change-username-modal">
-    <div
-      class="change-username-modal__content"
-      v-on-click-outside.bubble="clickOutsideHandlerModal"
-    >
+    <div class="change-username-modal__content">
       <form
         v-if="!nameChanged"
         @submit.prevent="handleClickOnConfirm"

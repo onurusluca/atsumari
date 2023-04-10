@@ -5,6 +5,7 @@ import { createCanvasApp } from "@/canvas/ts/CanvasEngine";
 import InitialCharacterSetupModal from "@/components/global/InitialCharacterSetupModal.vue";
 import { emitter } from "@/composables/useEmit";
 import type { User } from "@/types/general";
+import type { ProfilesType } from "@/api/types/index";
 
 /****************************************
  * DECLARATIONS
@@ -53,10 +54,22 @@ window.addEventListener("resize", () => {
   windowHeight.value = window.innerHeight;
 });
 
+let initialSetupCompleted = ref<boolean>(false);
+
 /****************************************
  * INITIALIZATION
  ****************************************/
 onMounted(async () => {
+  watchEffect(async () => {
+    if (initialSetupCompleted.value) {
+      await handleReadProfile();
+      await initialPreparations();
+      await doRealtimeStuff();
+    }
+  });
+});
+
+const initialPreparations = async () => {
   // We need to do a lot of stuff in onMounted because we need to wait for the DOM to be ready because of canvas
 
   generalStore.spaceId = spaceId;
@@ -64,7 +77,6 @@ onMounted(async () => {
   generalStore.userId = userId;
   generalStore.users = users;
 
-  await handleReadProfile();
   await downloadSpaceMap();
   await downloadmyCharacterSpriteSheet();
 
@@ -106,7 +118,8 @@ onMounted(async () => {
     canvas,
     canvasFrameRate.value,
     spaceMap.value,
-    myCharacterSprite.value
+    myCharacterSprite.value,
+    initialSetupCompleted.value
   );
 
   // Focus canvas on click
@@ -181,7 +194,7 @@ onMounted(async () => {
   canvas.addEventListener("click", () => {
     rightClickMenuIsEnabled.value = false;
   });
-});
+};
 
 // Update user position with the clicked position
 const moveUserToRightClickedPosition = async () => {
@@ -211,20 +224,19 @@ const moveUserToRightClickedPosition = async () => {
 };
 
 // Initial setups
-let initialSetupCompleted = ref<boolean>(true);
 let userName = ref<string>("");
 const handleReadProfile = async () => {
   // TODO: Fix after implementing user name
-  userName.value = Math.random().toString(36).substring(2, 12);
   try {
     let { data: profiles, error } = await supabase
       .from("profiles")
       .select("*")
       .eq("id", authStore?.session?.user?.id);
-    if (profiles[0].user_name) {
-      console.log("READ PROFILES: ", profiles);
-      initialSetupCompleted.value = true;
-      // Random 10 letters username
+
+    if (profiles) {
+      if (profiles[0]) {
+      }
+      // initialSetupCompleted.value = true;
     }
     if (error) throw error;
   } catch (error: any) {
@@ -289,77 +301,79 @@ const broadCastChannel = supabase.channel(spaceId, {
   },
 });
 
-broadCastChannel
-  /*   .on('presence', { event: 'sync' }, () => {
+const doRealtimeStuff = async () => {
+  broadCastChannel
+    /*   .on('presence', { event: 'sync' }, () => {
     const state = broadCastChannel.presenceState()
     console.log('Channel synced: ', state)
   }) */
-  .on("presence", { event: "join" }, async ({ key, newPresences }) => {
-    // Listen to join event
-    console.log("Someone joined the channel: ", newPresences[0].id);
-    // Send start position for new user
-    await sendUserAction(
-      canvasLocalStorage.value.lastUserPosition
-        ? canvasLocalStorage.value.lastUserPosition.x
-        : initialUserPosition.x,
-      canvasLocalStorage.value.lastUserPosition
-        ? canvasLocalStorage.value.lastUserPosition.y
-        : initialUserPosition.y,
-      "down"
-    );
+    .on("presence", { event: "join" }, async ({ key, newPresences }) => {
+      // Listen to join event
+      console.log("Someone joined the channel: ", newPresences[0].id);
+      // Send start position for new user
+      await sendUserAction(
+        canvasLocalStorage.value.lastUserPosition
+          ? canvasLocalStorage.value.lastUserPosition.x
+          : initialUserPosition.x,
+        canvasLocalStorage.value.lastUserPosition
+          ? canvasLocalStorage.value.lastUserPosition.y
+          : initialUserPosition.y,
+        "down"
+      );
 
-    // Add user to users array
-    //if (newPresences[0].id !== userId) {
-    users.push({
-      userName: newPresences[0].userName,
-      id: newPresences[0].id,
-      x: newPresences[0].lastPosition.x,
-      y: newPresences[0].lastPosition.y,
-      characterSprite: myCharacterSprite.value,
-      facingTo: "down",
-    });
-  })
-  .on("presence", { event: "leave" }, ({ key, leftPresences }) => {
-    // Listen to leave event
-    console.log("Someone left the channel: ", leftPresences);
-
-    // Remove user from users array
-    const userIndex = users.findIndex((user) => user.id === leftPresences[0].id);
-    if (userIndex !== -1) {
-      users.splice(userIndex, 1);
-    }
-  })
-  .subscribe(async (status: string) => {
-    // Send join event
-    if (status === "SUBSCRIBED") {
-      const presenceTrackStatus = await broadCastChannel.track({
-        id: authStore.user?.id,
-        userName: userName.value,
-        online_at: new Date().toISOString(),
-        lastPosition: {
-          x: canvasLocalStorage.value.lastUserPosition
-            ? canvasLocalStorage.value.lastUserPosition.x
-            : initialUserPosition.x,
-          y: canvasLocalStorage.value.lastUserPosition
-            ? canvasLocalStorage.value.lastUserPosition.y
-            : initialUserPosition.y,
-        },
+      // Add user to users array
+      //if (newPresences[0].id !== userId) {
+      users.push({
+        userName: newPresences[0].userName,
+        id: newPresences[0].id,
+        x: newPresences[0].lastPosition.x,
+        y: newPresences[0].lastPosition.y,
+        characterSprite: myCharacterSprite.value,
+        facingTo: "down",
       });
-      console.log("Sent join event: ", presenceTrackStatus);
-    }
-  })
-  .on("broadcast", { event: "sendUserPositionEvent" }, (payload: any) => {
-    // Listen for broadcast events
-    console.log("Received broadcast event", payload);
+    })
+    .on("presence", { event: "leave" }, ({ key, leftPresences }) => {
+      // Listen to leave event
+      console.log("Someone left the channel: ", leftPresences);
 
-    // Update user position
-    const user = users.find((user) => user.id === payload.payload.id);
-    if (user) {
-      user.x = payload.payload.x;
-      user.y = payload.payload.y;
-      user.facingTo = payload.payload.facingTo;
-    }
-  });
+      // Remove user from users array
+      const userIndex = users.findIndex((user) => user.id === leftPresences[0].id);
+      if (userIndex !== -1) {
+        users.splice(userIndex, 1);
+      }
+    })
+    .subscribe(async (status: string) => {
+      // Send join event
+      if (status === "SUBSCRIBED") {
+        const presenceTrackStatus = await broadCastChannel.track({
+          id: authStore.user?.id,
+          userName: userName.value,
+          online_at: new Date().toISOString(),
+          lastPosition: {
+            x: canvasLocalStorage.value.lastUserPosition
+              ? canvasLocalStorage.value.lastUserPosition.x
+              : initialUserPosition.x,
+            y: canvasLocalStorage.value.lastUserPosition
+              ? canvasLocalStorage.value.lastUserPosition.y
+              : initialUserPosition.y,
+          },
+        });
+        console.log("Sent join event: ", presenceTrackStatus);
+      }
+    })
+    .on("broadcast", { event: "sendUserPositionEvent" }, (payload: any) => {
+      // Listen for broadcast events
+      console.log("Received broadcast event", payload);
+
+      // Update user position
+      const user = users.find((user) => user.id === payload.payload.id);
+      if (user) {
+        user.x = payload.payload.x;
+        user.y = payload.payload.y;
+        user.facingTo = payload.payload.facingTo;
+      }
+    });
+};
 
 // Send user position
 // TODO: add a tick rate so it doesn't send too many events
@@ -502,6 +516,7 @@ const handleChatMenuOpen = () => {
 
     <InitialCharacterSetupModal
       v-if="!initialSetupCompleted"
+      :space-id="spaceId"
       @initial-setup-completed="handleInitialSetupCompleted"
     />
   </div>

@@ -449,6 +449,7 @@ const handleOpenMessageReactionEmojiMenu = (messageId: string) => {
       padding: 0.2rem 0.5rem;
       border-radius: 0.2rem;
       background-color: var(--others-message-bg);
+      line-break: anywhere;
 
       &:hover {
         background-color: var(--others-message-hover-bg);
@@ -563,7 +564,7 @@ const handleOpenMessageReactionEmojiMenu = (messageId: string) => {
       .input-container__input {
         width: 100%;
         height: 100%;
-        padding: 0 0.5rem;
+        padding: 0 3.2rem 0 0.5rem;
 
         border: none;
         border-radius: 0.2rem;

@@ -96,7 +96,8 @@ export function createCanvasApp(
   canvas: HTMLCanvasElement,
   canvasFrameRate: number,
   spaceMap: string,
-  myCharacterSprite: string
+  myCharacterSprite: string,
+  initialSetupCompleted: boolean
 ) {
   const ctx = canvas.getContext("2d")!;
 
@@ -220,7 +221,13 @@ export function createCanvasApp(
     }
   };
 
-  if (users.length > 0 && myPlayerId !== "" && speed !== 0 && spaceMap !== "") {
+  if (
+    users.length > 0 &&
+    myPlayerId !== "" &&
+    speed !== 0 &&
+    spaceMap !== "" &&
+    initialSetupCompleted
+  ) {
     gameLoop();
   } else {
     const checkUsers = setInterval(() => {
