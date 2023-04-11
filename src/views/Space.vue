@@ -54,15 +54,16 @@ window.addEventListener("resize", () => {
   windowHeight.value = window.innerHeight;
 });
 
-let initialSetupCompleted = ref<boolean>(false);
+let initialSetupCompleted = ref<boolean>(true);
 
 /****************************************
  * INITIALIZATION
  ****************************************/
 onMounted(async () => {
+  await handleReadProfile();
+
   watchEffect(async () => {
     if (initialSetupCompleted.value) {
-      await handleReadProfile();
       await initialPreparations();
       await doRealtimeStuff();
     }
@@ -233,10 +234,25 @@ const handleReadProfile = async () => {
       .select("*")
       .eq("id", authStore?.session?.user?.id);
 
-    if (profiles) {
-      if (profiles[0]) {
+    // Set user name for this space
+    if (profiles[0].user_name_for_each_space != null) {
+      console.log("READ PROFILES: ", profiles);
+
+      // Find user name for this space
+      let userNameForThisSpace = profiles[0].user_name_for_each_space.find(
+        (space: any) => {
+          return Object.keys(space)[0] === spaceId;
+        }
+      );
+      console.log("USER NAME FOR THIS SPACE: ", userNameForThisSpace);
+      if (userNameForThisSpace) {
+        initialSetupCompleted.value = true;
       }
-      // initialSetupCompleted.value = true;
+
+      userName.value = userNameForThisSpace[spaceId];
+    } else {
+      // If no user name for this space, show initial setup
+      initialSetupCompleted.value = false;
     }
     if (error) throw error;
   } catch (error: any) {

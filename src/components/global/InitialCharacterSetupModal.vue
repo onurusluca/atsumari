@@ -23,13 +23,10 @@ let userName = ref<string>("");
 let allUserNames = reactive<Array<Object>>([]);
 const handleChangeUserName = async () => {
   try {
-    console.log("allUserNames: ", allUserNames);
-
     const { error } = await supabase
       .from("profiles")
-      .eq("id", authStore?.session?.user?.id)
-      .update({ user_name_for_each_space: allUserNames });
-
+      .update({ user_name_for_each_space: allUserNames })
+      .eq("id", authStore?.session?.user?.id);
     if (error) {
       throw error;
     } else {
@@ -51,7 +48,6 @@ const handleReadProfile = async () => {
 
     if (profiles[0].user_name_for_each_space !== null) {
       allUserNames = profiles[0].user_name_for_each_space;
-      console.log("allUserNames: ", allUserNames);
     }
     if (error) throw error;
   } catch (error: any) {
