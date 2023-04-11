@@ -712,16 +712,17 @@ const handleClickGoToSpace = (spaceId: string, spaceName: string) => {
         display: flex;
         align-items: center;
         gap: 0.5rem;
+        margin-bottom: 1rem;
       }
     }
   }
 
   @include s-576 {
     overflow-y: scroll;
-    padding-top: 5rem;
     .create-space-modal__content {
-      min-width: 22rem;
-      margin-bottom: 1rem;
+      max-height: 95vh;
+      overflow-y: auto;
+      min-width: 98vw;
       padding: 2rem 1rem;
       .content__step {
         .step-two__form {
@@ -740,6 +741,11 @@ const handleClickGoToSpace = (spaceId: string, spaceName: string) => {
         .step_bottom-controls {
           .btn-outline {
             margin: 0;
+          }
+        }
+        .content__space-url {
+          .space-url__input {
+            flex-direction: column;
           }
         }
       }
