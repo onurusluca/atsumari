@@ -247,6 +247,8 @@ const handleReadProfile = async () => {
       console.log("USER NAME FOR THIS SPACE: ", userNameForThisSpace);
       if (userNameForThisSpace) {
         initialSetupCompleted.value = true;
+      } else {
+        initialSetupCompleted.value = false;
       }
 
       userName.value = userNameForThisSpace[spaceId];

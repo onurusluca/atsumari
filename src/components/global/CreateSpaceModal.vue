@@ -452,7 +452,7 @@ const handleClickGoToSpace = (spaceId: string, spaceName: string) => {
               </div>
             </section>
 
-            <!-- STEP 3 (completed) -->
+            <!-- STEP 3 (complete) -->
             <section v-else-if="activeStep === 2" class="content__step">
               <!-- Space created -->
               <div class="content__space-created">
@@ -712,6 +712,36 @@ const handleClickGoToSpace = (spaceId: string, spaceName: string) => {
         display: flex;
         align-items: center;
         gap: 0.5rem;
+      }
+    }
+  }
+
+  @include s-576 {
+    overflow-y: scroll;
+    padding-top: 5rem;
+    .create-space-modal__content {
+      min-width: 22rem;
+      margin-bottom: 1rem;
+      padding: 2rem 1rem;
+      .content__step {
+        .step-two__form {
+          flex-direction: column;
+          .form__left {
+            width: 100%;
+
+            .left__image {
+              width: 100%;
+            }
+          }
+          .form__right {
+            width: 100%;
+          }
+        }
+        .step_bottom-controls {
+          .btn-outline {
+            margin: 0;
+          }
+        }
       }
     }
   }
