@@ -158,6 +158,18 @@ const handleSendMessage = async (event: Event) => {
       } else {
         message.value = "";
         showMessageSendingLoading.value = false;
+
+        // Reset message input height
+        let messageInputContainerParent = document.querySelector(".chat__send-message");
+        if (messageInputContainerParent) {
+          messageInputContainerParent.style.height = "3.2rem";
+        }
+
+        // Reset messages container height
+        let messagesContainerParent = document.querySelector(".chat__message-groups");
+        if (messagesContainerParent) {
+          messagesContainerParent.style.height = "94%";
+        }
       }
     } catch (error: any) {
       console.log("CREATE MESSAGE CATCH ERROR: ", error.message);
@@ -304,6 +316,20 @@ const createNewLineOnMobileEnterPress = (event: KeyboardEvent) => {
     if (messageInput) {
       const message = messageInput.innerHTML;
       messageInput.innerHTML = `${message}<br>`;
+
+      // Set the height of the message input to the height of the message. Make it grow to up not down.
+      let messageInputContainerParent = document.querySelector(".chat__send-message");
+      if (messageInputContainerParent) {
+        messageInputContainerParent.style.height = `${messageInput.scrollHeight}px`;
+      }
+
+      // Set the height of the messages container to the height of the message input. Make it grow to up not down.
+      let messagesContainer = document.querySelector(".chat__message-groups");
+      if (messagesContainer) {
+        messagesContainer.style.height = `calc(99.5% - ${messageInput.scrollHeight}px)`;
+        // Scroll to the bottom of the messages container
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
     }
   }
 };
@@ -505,10 +531,13 @@ const handleHoverMessage = (index: number) => {
       width: 100%;
       height: 100%;
       .input-container__input {
-        // Text area as input
+        // Text area as inpu
+        display: flex;
+        align-items: center;
+
         width: 100%;
         height: 100%;
-        padding: 0 3.2rem 0 0.5rem;
+        padding: 1rem 2.5rem 0.5rem 0.5rem;
 
         border: none;
         border-radius: 0.2rem;
