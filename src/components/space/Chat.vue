@@ -294,96 +294,66 @@ const handleHoverMessage = (index: number) => {
   messageActionsVisible.value = true;
 };
 
-/*
-let messageReactionMenuVisible = ref<boolean>(false);
-let messageIdToAddReaction = ref<string>();
+// Group messages by user
+const groupedMessages = computed(() => {
+  const groups: any[] = [];
+  let prevMessage: any;
 
-const clickOutsideHandlerMessageRactionEmojiPicker: OnClickOutsideHandler = () => {
-  messageReactionMenuVisible.value = false;
-};
+  spaceMessages.value.forEach((message) => {
+    if (
+      prevMessage &&
+      message.user_id === prevMessage.user_id &&
+      Math.abs(
+        new Date(message.created_at).getTime() -
+          new Date(prevMessage.created_at).getTime()
+      ) <=
+        2 * 60 * 1000
+    ) {
+      groups[groups.length - 1].messages.push(message);
+    } else {
+      groups.push({
+        userId: message.user_id,
+        user: message.user_name,
+        time: message.created_at,
+        messages: [message],
+      });
+    }
+    prevMessage = message;
+  });
 
-// Message
-const handleOpenMessageReactionEmojiMenu = (messageId: string) => {
-  messageIdToAddReaction.value = messageId;
-  messageReactionMenuVisible.value = !messageReactionMenuVisible.value;
-}; */
-
-// TODO: Set different color for username
+  return groups;
+});
 </script>
 
 <template>
   <div class="chat">
-    <ul class="chat__messages" ref="messagesContainerRef">
+    <ul class="chat__message-groups" ref="messagesContainerRef">
+      <!-- Chat groups(to show the messages, from the same user sent in a minute, in the same container) -->
       <li
-        v-for="(message, index) in spaceMessages"
-        :key="index"
-        class="messages__message"
-        :class="
-          message.user_id === authStore?.session?.user?.id ? 'messages__my-message' : ''
-        "
-        @mouseover="handleHoverMessage(index)"
+        v-for="(group, groupIndex) in groupedMessages"
+        :key="groupIndex"
+        class="message-groups__group"
+        :class="group.userId === authStore?.session?.user?.id ? 'groups__my-group' : ''"
       >
-        <!-- Don't show the name if the previous message is from the same user -->
-        <p class="message__top">
-          <span class="top__user-name">
-            {{ message.user_name }}
-          </span>
-          <!-- Sent time -->
-          <!-- Don't show if the sent time between the previous message is under 1 minutes-->
-          <span class="message__sent-time">
-            {{ formattedMessageSentTime(message.created_at!) }}
-          </span>
+        <p class="group__top">
+          <span class="top__user-name">{{ group.user }}</span>
+          <span class="message__sent-time">{{
+            formattedMessageSentTime(group.time)
+          }}</span>
         </p>
-        <p class="message__content">
-          {{ message.message }}
-        </p>
-
-        <!-- message reactions -->
-        <!--      <div class="message__message-reactions">
-          <div
-            v-for="(reactions, index) in messageReactionsByMessageId(message.id)"
-
-            :key="index"
-            class="message-reactions__reaction"
+        <ul class="group__messages">
+          <!-- Single chat group -->
+          <li
+            v-for="(message, messageIndex) in group.messages"
+            :key="messageIndex"
+            class="messages__message"
+            @mouseover="handleHoverMessage(messageIndex)"
           >
-            <span
-              v-for="(reaction, index) in reactions"
-              :key="index"
-              class="reaction__emoji"
-              >reactions:{{ reaction.emoji }}</span
-            >
-          </div>
-        </div> -->
-
-        <!-- React, edit and more -->
-
-        <!--         <div
-          v-show="messageActionsVisible && visibleMessageIndex === index"
-          class="message__actions"
-        >
-          <button
-            @click.stop="handleOpenMessageReactionEmojiMenu(message.id)"
-            class="btn-no-style actions__icon"
-          >
-            <carbon:face-add />
-          </button>
-          <button class="btn-no-style actions__icon">
-            <carbon:edit />
-          </button>
-          <button class="btn-no-style actions__icon">
-            <carbon:overflow-menu-horizontal />
-          </button>
-        </div>
+            <p class="message__content">{{ message.message }}</p>
+          </li>
+        </ul>
       </li>
-      <div
-        v-show="messageReactionMenuVisible"
-        v-on-click-outside.bubble="clickOutsideHandlerMessageRactionEmojiPicker"
-        class="message__message-reaction-emoji-picker"
-      >
-        <div class="messageReactionEmojiPickerContainerRef"></div>
-      </div> -->
-      </li></ul
-    >
+    </ul>
 
     <div class="chat__send-message">
       <div class="send-message__input-container">
@@ -440,14 +410,13 @@ const handleOpenMessageReactionEmojiMenu = (messageId: string) => {
   box-shadow: 0px -20px 10px 3px rgba(0, 0, 0, 0.2);
   z-index: $space-sidebar-z-index;
 
-  .chat__messages {
+  .chat__message-groups {
     overflow-y: auto;
     height: 94%;
     padding: 0.5rem;
 
     // Message bubble
-    .messages__message {
-      position: relative;
+    .message-groups__group {
       margin-bottom: 1rem;
       padding: 0.2rem 1rem;
       width: max-content;
@@ -460,7 +429,7 @@ const handleOpenMessageReactionEmojiMenu = (messageId: string) => {
       &:hover {
         background-color: var(--others-message-hover-bg);
       }
-      .message__top {
+      .group__top {
         display: flex;
         gap: 0.5rem;
         align-items: center;
@@ -476,68 +445,18 @@ const handleOpenMessageReactionEmojiMenu = (messageId: string) => {
         }
       }
 
-      .message__content {
-        margin: 0.3rem 0 0rem 0;
-        color: var(--f-color);
-      }
-
-      .message__message-reactions {
-        .message-reactions__reaction {
-          display: flex;
-          align-items: center;
-
-          margin: 1rem 0.5rem 0 0;
-
-          background-color: var(--bg-300);
-          padding: 0.2rem;
-          border-radius: 0.2rem;
-
-          width: max-content;
-
-          .reaction__emoji {
+      // Single chat group
+      .group__messages {
+        .messages__message {
+          .message__content {
+            color: var(--f-color);
           }
         }
-      }
-
-      .message__actions {
-        position: absolute;
-        top: -1rem;
-        right: 0rem;
-
-        display: flex;
-        width: max-content;
-
-        border-radius: 0.2rem;
-        background-color: var(--actions-bg);
-        box-shadow: 0px 3px 5px 2px var(--shadow);
-
-        z-index: 100; // Make sure it's on top of the message bubble
-
-        .actions__icon {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: var(--paler-font);
-          cursor: pointer;
-
-          // Border radius for first and last child
-          &:first-child {
-            border-top-left-radius: 0.2rem;
-            border-bottom-left-radius: 0.2rem;
-          }
-        }
-      }
-      .message__message-reaction-emoji-picker {
-        position: absolute;
-        top: 3rem;
-        right: 0rem;
-
-        z-index: 101;
-        border: 5px red solid;
       }
     }
+
     // My message bubble
-    .messages__my-message {
+    .groups__my-group {
       background-color: var(--my-message-bg);
       text-align: right;
       margin-left: auto;
@@ -545,7 +464,7 @@ const handleOpenMessageReactionEmojiMenu = (messageId: string) => {
       &:hover {
         background-color: var(--my-message-hover-bg);
       }
-      .message__top {
+      .group__top {
         display: flex;
         flex-direction: row-reverse;
         justify-content: flex-start;
