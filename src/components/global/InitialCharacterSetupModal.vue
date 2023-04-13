@@ -85,8 +85,10 @@ const handleClickOnConfirm = async () => {
           <label for="userName" class="form__label">{{
             t("user.setUserName.userName")
           }}</label>
+          <!-- @input is for mobile(v-model won't update until input loses focus): https://github.com/vuejs/vue/issues/8231 -->
           <input
             v-model="userName"
+            @input="(e: Event ) => (userName = e.target?.value)"
             type="text"
             required
             maxlength="30"

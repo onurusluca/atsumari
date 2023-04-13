@@ -3,6 +3,7 @@ import { createPicker, NativeRenderer, i18n, lightTheme, darkTheme } from "picmo
 import { isDark } from "@/utils/dark";
 import { vOnClickOutside } from "@vueuse/components";
 import type { OnClickOutsideHandler } from "@vueuse/core";
+import { formattedMessageSentTime } from "@/utils/formattedMessageSentTime";
 
 import type { MessagesType } from "@/api/types";
 
@@ -24,6 +25,13 @@ let emojiPicker = ref<any>(null);
 let messageReactionEmojiPicker = ref<any>(null);
 
 onMounted(async () => {
+  if (window.innerWidth < 768) {
+    console.log("Mobile");
+
+    isMobile.value = true;
+  } else {
+    isMobile.value = false;
+  }
   //await handleReadMessages();
   // Scroll to bottom of messagesContainerRef
   if ((y.value, messagesContainerRef.value)) {
@@ -128,7 +136,11 @@ watchEffect(async () => {
 let message = ref<string>("");
 let showMessageSendingLoading = ref<boolean>(false);
 
-const handleSendMessage = async () => {
+const handleSendMessage = async (event: Event) => {
+  // Prevent text area default behavior (new line)
+  event.preventDefault();
+  // Focus message input after sending message
+  messageInputRef.value?.focus();
   showMessageSendingLoading.value = true;
 
   if (message.value !== "") {
@@ -137,7 +149,7 @@ const handleSendMessage = async () => {
         {
           message: message.value,
           user_id: authStore?.session?.user?.id,
-          user_name: generalStore.userName || "onur",
+          user_name: generalStore.userName,
           space_id: generalStore.spaceId,
         },
       ]);
@@ -146,9 +158,6 @@ const handleSendMessage = async () => {
       } else {
         message.value = "";
         showMessageSendingLoading.value = false;
-
-        // Focus message input after sending message
-        messageInputRef.value?.focus();
       }
     } catch (error: any) {
       console.log("CREATE MESSAGE CATCH ERROR: ", error.message);
@@ -227,44 +236,10 @@ supabase
  * UI
  ****************************************/
 
-// Format message sent time
-const formattedMessageSentTime = (time: string) => {
-  const date = new Date(time);
-  const now = new Date();
-  const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / 1000 / 60);
-
-  const messages = {
-    now: t("times.chatTime.now"),
-    oneMinuteAgo: t("times.chatTime.oneMinuteAgo"),
-    minutesAgo: t("times.chatTime.minutesAgo"),
-    oneHourAgo: t("times.chatTime.oneHourAgo"),
-    hoursAgo: t("times.chatTime.hoursAgo"),
-    oneDayAgo: t("times.chatTime.oneDayAgo"),
-  };
-
-  switch (true) {
-    case diffInMinutes < 1:
-      return messages.now;
-    case diffInMinutes === 1:
-      return messages.oneMinuteAgo;
-    case diffInMinutes < 60:
-      return `${diffInMinutes} ${messages.minutesAgo}`;
-    case diffInMinutes < 1440:
-      const diffInHours = Math.floor(diffInMinutes / 60);
-      return diffInHours === 1
-        ? messages.oneHourAgo
-        : `${diffInHours} ${messages.hoursAgo}`;
-    case diffInMinutes < 10080:
-      const diffInDays = Math.floor(diffInMinutes / 1440);
-      return diffInDays === 1 ? messages.oneDayAgo : date.toLocaleDateString();
-
-    default:
-      return date.toLocaleDateString();
-  }
-};
-
 // Update sent time every minute
 setInterval(() => {
+  console.log("Updated sent time!");
+
   const messages = document.querySelectorAll(".message__sent-time");
   messages.forEach((message) => {
     const time = message.getAttribute("data-time");
@@ -273,26 +248,6 @@ setInterval(() => {
     }
   });
 }, 60000);
-
-// Emoji picker
-let emojiPickerVisible = ref<boolean>(false);
-let messageInputRef = ref<HTMLElement | null>(null);
-
-const clickOutsideHandlerEmojiPicker: OnClickOutsideHandler = () => {
-  emojiPickerVisible.value = false;
-};
-
-const handleOpenSendMessageEmojiPicker = () => {
-  emojiPickerVisible.value = !emojiPickerVisible.value;
-};
-
-// MESSAGE ACTIONS
-let messageActionsVisible = ref<boolean>(false);
-let visibleMessageIndex = ref<number>();
-const handleHoverMessage = (index: number) => {
-  visibleMessageIndex.value = index;
-  messageActionsVisible.value = true;
-};
 
 // Group messages by user
 const groupedMessages = computed(() => {
@@ -323,6 +278,43 @@ const groupedMessages = computed(() => {
 
   return groups;
 });
+
+// Emoji picker
+let emojiPickerVisible = ref<boolean>(false);
+let messageInputRef = ref<HTMLElement | null>(null);
+const clickOutsideHandlerEmojiPicker: OnClickOutsideHandler = () => {
+  emojiPickerVisible.value = false;
+};
+const handleOpenSendMessageEmojiPicker = () => {
+  emojiPickerVisible.value = !emojiPickerVisible.value;
+};
+
+// Check if mobile
+let isMobile = ref<boolean>(false);
+window.addEventListener("resize", () => {
+  isMobile.value = window.innerWidth <= 768;
+});
+
+// Message input
+const createNewLineOnMobileEnterPress = (event: KeyboardEvent) => {
+  console.log("event: ", event);
+
+  if (event.key === "Enter" && isMobile.value) {
+    const messageInput = messageInputRef.value;
+    if (messageInput) {
+      const message = messageInput.innerHTML;
+      messageInput.innerHTML = `${message}<br>`;
+    }
+  }
+};
+
+// MESSAGE ACTIONS
+/* let messageActionsVisible = ref<boolean>(false);
+let visibleMessageIndex = ref<number>();
+const handleHoverMessage = (index: number) => {
+  visibleMessageIndex.value = index;
+  messageActionsVisible.value = true;
+}; */
 </script>
 
 <template>
@@ -347,7 +339,6 @@ const groupedMessages = computed(() => {
             v-for="(message, messageIndex) in group.messages"
             :key="messageIndex"
             class="messages__message"
-            @mouseover="handleHoverMessage(messageIndex)"
           >
             <p class="message__content">{{ message.message }}</p>
           </li>
@@ -357,21 +348,32 @@ const groupedMessages = computed(() => {
 
     <div class="chat__send-message">
       <div class="send-message__input-container">
-        <!-- @input is for mobile(v-model won't update until input loses focus): https://github.com/vuejs/vue/issues/8231 -->
-
-        <input
+        <!--        <input
           type="text"
           v-model="message"
-          @input="(e: Event ) => (message = e.target?.value)"
           ref="messageInputRef"
           :placeholder="t('chat.typeAMessage')"
-          @keypress.enter="handleSendMessage"
+          @keypress.enter="
+            isMobile ? createNewLineOnMobileEnterPress($event) : handleSendMessage()
+          "
           class="input-container__input"
-        />
+        /> -->
+
+        <textarea
+          v-model="message"
+          ref="messageInputRef"
+          :placeholder="t('chat.typeAMessage')"
+          @keypress.enter="
+            isMobile
+              ? createNewLineOnMobileEnterPress($event)
+              : handleSendMessage($event)
+          "
+          class="input-container__input"
+        ></textarea>
 
         <!-- Emoji button -->
         <button
-          @click.stop="handleOpenSendMessageEmojiPicker"
+          @click.prevent="handleOpenSendMessageEmojiPicker"
           class="btn btn-no-style input-container__icon input-container__icon--emoji"
         >
           <carbon:face-add />
@@ -379,7 +381,7 @@ const groupedMessages = computed(() => {
 
         <!-- Send button(show on mobile only) -->
         <button
-          @click.stop="handleSendMessage"
+          @click.prevent="handleSendMessage"
           class="btn btn-no-style input-container__icon input-container__icon--send"
         >
           <carbon:send />
@@ -418,7 +420,7 @@ const groupedMessages = computed(() => {
     // Message bubble
     .message-groups__group {
       margin-bottom: 1rem;
-      padding: 0.2rem 1rem;
+      padding: 0.5rem;
       width: max-content;
       max-width: 100%;
 
@@ -426,15 +428,12 @@ const groupedMessages = computed(() => {
       background-color: var(--others-message-bg);
       line-break: anywhere;
 
-      &:hover {
-        background-color: var(--others-message-hover-bg);
-      }
       .group__top {
         display: flex;
         gap: 0.5rem;
         align-items: center;
+        margin-bottom: 0.5rem;
         .top__user-name {
-          //color: var(--pale-font);
           font-weight: 600;
           line-height: 0;
         }
@@ -442,13 +441,22 @@ const groupedMessages = computed(() => {
         .message__sent-time {
           font-size: 0.7rem;
           color: var(--paler-font);
+          user-select: none;
         }
       }
 
       // Single chat group
       .group__messages {
         .messages__message {
+          border-radius: 0.2rem;
+          width: max-content;
+          /*   &:hover {
+            background-color: var(--others-message-hover-bg);
+
+            cursor: pointer;
+          } */
           .message__content {
+            white-space: pre-wrap; // to show new line
             color: var(--f-color);
           }
         }
@@ -460,14 +468,23 @@ const groupedMessages = computed(() => {
       background-color: var(--my-message-bg);
       text-align: right;
       margin-left: auto;
+      .group__messages {
+        .messages__message {
+          margin-left: auto;
 
-      &:hover {
-        background-color: var(--my-message-hover-bg);
+          /*      &:hover {
+            background-color: var(--my-message-hover-bg);
+          } */
+        }
       }
+
       .group__top {
         display: flex;
         flex-direction: row-reverse;
         justify-content: flex-start;
+        .top__user-name {
+          color: var(--primary-100);
+        }
       }
     }
   }
@@ -488,6 +505,7 @@ const groupedMessages = computed(() => {
       width: 100%;
       height: 100%;
       .input-container__input {
+        // Text area as input
         width: 100%;
         height: 100%;
         padding: 0 3.2rem 0 0.5rem;
@@ -499,6 +517,7 @@ const groupedMessages = computed(() => {
         font-weight: 500;
         background-color: var(--text-input-bg);
         color: var(--f-color);
+        resize: none;
       }
       .input-container__icon {
         position: absolute;

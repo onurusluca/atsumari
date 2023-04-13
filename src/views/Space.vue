@@ -4,6 +4,7 @@ import { vOnClickOutside } from "@vueuse/components";
 import { createCanvasApp } from "@/canvas/ts/CanvasEngine";
 import InitialCharacterSetupModal from "@/components/global/InitialCharacterSetupModal.vue";
 import { emitter } from "@/composables/useEmit";
+
 import type { User } from "@/types/general";
 import type { ProfilesType } from "@/api/types/index";
 
@@ -76,6 +77,7 @@ const initialPreparations = async () => {
   generalStore.spaceId = spaceId;
   generalStore.spaceName = spaceName;
   generalStore.userId = userId;
+  generalStore.userName = userName.value;
   generalStore.users = users;
 
   await downloadSpaceMap();

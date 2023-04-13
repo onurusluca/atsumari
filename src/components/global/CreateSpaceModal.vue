@@ -244,7 +244,7 @@ const handleClickGoToSpace = (spaceId: string, spaceName: string) => {
                   <!-- @input is for mobile(v-model won't update until input loses focus): https://github.com/vuejs/vue/issues/8231 -->
                   <input
                     v-model="spaceName"
-                    @input="(e) => (spaceName = e?.target?.value)"
+                    @input="(e: Event ) => (spaceName = e.target?.value)"
                     type="text"
                     name="spaceName"
                     id="spaceName"

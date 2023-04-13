@@ -141,8 +141,10 @@ export function createCanvasApp(
 
     // Center camera on my player
     myPlayer = users.find((user) => user.id === myPlayerId)!;
-    cameraX = myPlayer.x - canvas.width / 2.2;
-    cameraY = myPlayer.y - canvas.height / 2.2;
+    if (myPlayer) {
+      cameraX = myPlayer.x - canvas.width / 2.2;
+      cameraY = myPlayer.y - canvas.height / 2.2;
+    }
 
     ctx.drawImage(
       worldImg,
@@ -230,10 +232,18 @@ export function createCanvasApp(
   ) {
     gameLoop();
   } else {
-    const checkUsers = setInterval(() => {
-      if (users.length > 0) {
+    const checkConditionsBeforeLoop = setInterval(() => {
+      if (
+        users.length > 0 &&
+        myPlayerId !== "" &&
+        speed !== 0 &&
+        spaceMap !== "" &&
+        initialSetupCompleted
+      ) {
         gameLoop();
-        clearInterval(checkUsers);
+        clearInterval(checkConditionsBeforeLoop);
+
+        // Emit event to notify that the canvas is loaded
         emitter.emit("canvasLoaded");
       }
     }, 0);
