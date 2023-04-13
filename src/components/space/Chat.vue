@@ -387,9 +387,12 @@ const handleOpenMessageReactionEmojiMenu = (messageId: string) => {
 
     <div class="chat__send-message">
       <div class="send-message__input-container">
+        <!-- @input is for mobile(v-model won't update until input loses focus): https://github.com/vuejs/vue/issues/8231 -->
+
         <input
           type="text"
           v-model="message"
+          @input="(e: Event ) => (message = e.target?.value)"
           ref="messageInputRef"
           :placeholder="t('chat.typeAMessage')"
           @keypress.enter="handleSendMessage"
@@ -446,7 +449,10 @@ const handleOpenMessageReactionEmojiMenu = (messageId: string) => {
     .messages__message {
       position: relative;
       margin-bottom: 1rem;
-      padding: 0.2rem 0.5rem;
+      padding: 0.2rem 1rem;
+      width: max-content;
+      max-width: 100%;
+
       border-radius: 0.2rem;
       background-color: var(--others-message-bg);
       line-break: anywhere;
@@ -471,7 +477,7 @@ const handleOpenMessageReactionEmojiMenu = (messageId: string) => {
       }
 
       .message__content {
-        margin: 0.2rem 0 0rem 0;
+        margin: 0.3rem 0 0rem 0;
         color: var(--f-color);
       }
 
@@ -534,6 +540,7 @@ const handleOpenMessageReactionEmojiMenu = (messageId: string) => {
     .messages__my-message {
       background-color: var(--my-message-bg);
       text-align: right;
+      margin-left: auto;
 
       &:hover {
         background-color: var(--my-message-hover-bg);
