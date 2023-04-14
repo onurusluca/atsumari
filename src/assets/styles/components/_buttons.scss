@@ -166,3 +166,18 @@ button:disabled {
   }
 
 }
+
+
+.btn-upgrade {
+  color: #fff;
+  background-color: var(--upgrade-btn-bg);
+
+  svg {
+    color: #fff;
+
+  }
+
+  &:hover {
+    background-color: var(--upgrade-btn-bg-hover);
+  }
+}

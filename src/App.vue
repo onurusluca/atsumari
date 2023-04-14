@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import Dashboard from "./layouts/dashboard.vue";
+import Dashboard from "./layouts/dashboardLayout.vue";
 import NoLayout from "./layouts/noLayout.vue";
+import SpaceSettingsLayout from "./layouts/spaceSettingsLayout.vue";
 
 const router = useRouter();
 const route = useRouter();
@@ -40,7 +41,9 @@ watch(
 // Dashboard and default usage(in-space) have different layouts
 const layoutLogic = computed(() => {
   if (route.currentRoute.value.name === "Home") {
-    return "dashboard";
+    return "dashboardLayout";
+  } else if (route.currentRoute.value.path.includes("space-settings")) {
+    return "spaceSettingsLayout";
   } else {
     return "no-layout";
   }
@@ -49,7 +52,8 @@ const layoutLogic = computed(() => {
 
 <template>
   <NoLayout v-if="layoutLogic === 'no-layout'" />
-  <Dashboard v-if="layoutLogic === 'dashboard'" />
+  <Dashboard v-if="layoutLogic === 'dashboardLayout'" />
+  <SpaceSettingsLayout v-if="layoutLogic === 'spaceSettingsLayout'" />
 </template>
 
 <style lang="scss"></style>

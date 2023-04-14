@@ -29,10 +29,10 @@
   // Backgrounds
   --bg-100: #ffffff;
   --bg-200: #f5f5f4;
-  --bg-300: #ffffff;
+  --bg-300: #dfdfdf;
   --text-input-bg: #fff;
   --toggle-input-bg: #2196f3;
-
+  --active-route-link-bg: #d2ebff;
 
   // Borders
   --border: #E5E5E5;
@@ -57,7 +57,7 @@
   // Buttons
   --main-btn-bg: #61DAFB;
   --main-btn-bg-hover: #3cd5ff;
-  --outline-btn-hover: #252525;
+  --outline-btn-hover: #f1f1f1;
   --create-btn-bg: #2CC56F;
   --create-btn-bg-hover: #20b661;
   --save-btn-bg: #4F46E5;
@@ -66,6 +66,8 @@
   --danger-btn-bg-hover: #e53b49;
   --warning-btn-bg: #f5be0b;
   --warning-btn-bg-hover: #e4b00a;
+  --upgrade-btn-bg: #f5be0b;
+  --upgrade-btn-bg-hover: #e4b00a;
   --gray-hover: #e6e6e6;
   --soft-hover: #b3b3b3;
 
@@ -160,6 +162,8 @@
   --danger-btn-bg-hover: #e53b49;
   --warning-btn-bg: #f5be0b;
   --warning-btn-bg-hover: #e4b00a;
+  --upgrade-btn-bg: #f5be0b;
+  --upgrade-btn-bg-hover: #e4b00a;
   --gray-hover: #333;
   --soft-hover: #111111;
 

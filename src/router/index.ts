@@ -18,18 +18,29 @@ const router = createRouter({
       */
     },
 
-    // Space
+    // Space settings
     {
-      path: "/space-settings/:id",
+      path: "/space-settings/:id/:name",
       name: "SpaceSettings",
-      component: () => import("@/views/SpaceSettings.vue"),
+      component: () => import("@/views/space-settings/SpaceSettings.vue"),
     },
+    {
+      path: "/space-settings/:id/:name/access",
+      name: "Access",
+      component: () => import("@/views/space-settings/SpaceAccess.vue"),
+    },
+    {
+      path: "/space-settings/:id/:name/delete-shutdown",
+      name: "DeleteShutdown",
+      component: () => import("@/views/space-settings/SpaceDeleteShutDown.vue"),
+    },
+    // end space settings
 
     // Map
     {
       path: "/space-edit/:id",
       name: "Space Edit",
-      component: () => import("@/views/SpaceSettings.vue"),
+      component: () => import("@/views/space-settings/SpaceSettings.vue"),
     },
 
     // Auth
@@ -48,14 +59,25 @@ const router = createRouter({
       name: "Account",
       component: () => import("@/views/auth/Account.vue"),
     },
+    // end auth
 
-    // Space
+    // Space (room)
     {
       path: "/space/:id/:name",
       name: "Space",
       component: () => import("@/views/Space.vue"),
       meta: {
         // needsAuth: true,
+      },
+    },
+
+    // Upgrade
+    {
+      path: "/upgrade",
+      name: "Upgrade",
+      component: () => import("@/views/UpgradeSpace.vue"),
+      meta: {
+        needsAuth: true,
       },
     },
 

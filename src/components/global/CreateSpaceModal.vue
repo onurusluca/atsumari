@@ -460,16 +460,6 @@ const handleClickGoToSpace = (spaceId: string, spaceName: string) => {
                 <h5 class="mb-s" style="color: var(--brand-green)">{{
                   t("spaces.createSpace.spaceCreated")
                 }}</h5>
-
-                <!-- Confetti -->
-                <component
-                  :is="ConfettiExplosion"
-                  :particleCount="200"
-                  :particleSize="8"
-                  :duration="4000"
-                  :force="1"
-                  :colors="['#FF4755', '#98DB7C', '#000000']"
-                />
               </div>
 
               <h6 class="step__title-centered mt-xl mb-xxl">{{ spaceName }}</h6>
@@ -512,6 +502,16 @@ const handleClickGoToSpace = (spaceId: string, spaceName: string) => {
                 <button @click.prevent="onClickShowMe" class="btn btn-outline">
                   {{ t("spaces.createSpace.showMe") }}
                 </button>
+
+                <!-- Confetti -->
+                <component
+                  :is="ConfettiExplosion"
+                  :particleCount="200"
+                  :particleSize="8"
+                  :duration="4000"
+                  :force="1"
+                  :colors="['#FF4755', '#98DB7C', '#000000']"
+                />
                 <!-- Next -->
                 <button
                   @click.prevent="
@@ -739,9 +739,6 @@ const handleClickGoToSpace = (spaceId: string, spaceName: string) => {
           }
         }
         .step_bottom-controls {
-          .btn-outline {
-            margin: 0;
-          }
         }
         .content__space-url {
           .space-url__input {

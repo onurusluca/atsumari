@@ -70,7 +70,7 @@ defineProps<{
   font-weight: 600;
   background: var(--bg-100);
   border-radius: 0.5rem;
-  box-shadow: 0px 10px 15px -3px var(--shadow);
+  box-shadow: 0px 10px 15px -3px var(--shadow-darker);
   border: 1px solid var(--border);
   z-index: $toast-z-index;
 

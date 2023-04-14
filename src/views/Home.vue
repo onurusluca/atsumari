@@ -138,7 +138,7 @@ let generateRandomSeeds = computed(() => {
             <!-- Settings menu -->
             <!-- Language menu dropdown -->
             <Transition name="fade">
-              <ul
+              <div
                 v-if="settingsMenuDropDownOpen && settingsMenuDropDownIndex === index"
                 v-on-click-outside.bubble="clickOutsideHandlersettingsMenuDrowpdown"
                 class="space-settings__menu-dropdown dropdown-menu"
@@ -148,18 +148,13 @@ let generateRandomSeeds = computed(() => {
                     name: 'SpaceSettings',
                     params: {
                       id: item.id,
+                      name: item.name,
                     },
                   }"
                   tag="li"
                   class="btn btn-icon"
                 >
-                  <carbon:settings-services
-                    style="
-                      font-size: 1rem;
-                      color: var(--text-100);
-                      margin-right: 0.5rem;
-                    "
-                  />
+                  <carbon:settings-services class="menu-list-icon" />
                   {{ t("spaces.menu.manageSpace") }}
                 </router-link>
                 <!-- Copy space URL -->
@@ -172,22 +167,22 @@ let generateRandomSeeds = computed(() => {
                   "
                   class="btn btn-icon"
                 >
-                  <carbon:copy
-                    style="
-                      font-size: 1rem;
-                      color: var(--text-100);
-                      margin-right: 0.5rem;
-                    "
-                  />
+                  <carbon:copy class="menu-list-icon" />
                   {{ t("spaces.copySpaceUrl") }}
                 </button>
+
+                <button class="btn btn-icon btn-upgrade">
+                  <ri:vip-crown-2-line class="menu-list-icon" />
+                  {{ t("buttons.upgrade") }}
+                </button>
+
                 <!--     <router-link
                   :to="`/space-edit/${item.id}`"
                   tag="li"
                 >
                   {{ t("spaces.menu.editMap") }}
                 </router-link> -->
-              </ul>
+              </div>
             </Transition>
           </div>
         </div>
@@ -235,12 +230,12 @@ let generateRandomSeeds = computed(() => {
     ></ul>
     <!-- clp -->
     <!-- TODO: Enable if it takes too much time to load spaces -->
-    <div v-if="showContentLoadingPlaceholder" class="clp-container">
+    <!--     <div v-if="showContentLoadingPlaceholder" class="clp-container">
       <div class="clp"></div>
       <div class="clp"></div>
       <div class="clp"></div>
       <div class="clp"></div>
-    </div>
+    </div> -->
 
     <!-- No spaces -->
     <div v-if="showNoSpacesMessage" class="home__no-spaces">
@@ -310,6 +305,8 @@ let generateRandomSeeds = computed(() => {
           .image-container__enter-btn {
             transition: visibility 100ms ease;
             visibility: visible;
+
+            border: 2px solid var(--border);
           }
         }
         .image-container__image {
@@ -340,6 +337,11 @@ let generateRandomSeeds = computed(() => {
         } */
       }
     }
+  }
+
+  .menu-list-icon {
+    font-size: 1rem;
+    margin-right: 0.5rem;
   }
   .home__no-spaces {
     // Center

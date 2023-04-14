@@ -32,12 +32,5 @@ const handleDeleteSpace = async (spaceId: string) => {
 
 <style scoped lang="scss">
 .space-settings {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  #main-canvas {
-    border: 1px solid blue;
-  }
 }
 </style>

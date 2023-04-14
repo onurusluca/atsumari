@@ -18,6 +18,7 @@ buttons:
   createAccount: Create Account
   goToSpace: Go to Space
   createSpace: Create Space
+  upgrade: Upgrade
 
 language:
   language: Language
@@ -163,7 +164,15 @@ home:
   spaces:
     noSpacesMessage: You don't have any spaces yet. Create one now!
 
-##### SPACE #####
+##### SPACE SETTINGS #####
+spaceSettings:
+  title: Space Management
+  links:
+    general: General
+    access: Access
+    deleteShutdown: Delete or Shutdown
+
+##### SPACE(Room) #####
 space:
   userActions:
     moveHere: Move Here
