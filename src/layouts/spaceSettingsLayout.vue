@@ -12,7 +12,7 @@
 
 <style scoped lang="scss">
 .content {
-  margin: 5rem 1rem 0 16rem;
+  margin: 6rem 1rem 0 16rem;
   @include m-768 {
   }
 

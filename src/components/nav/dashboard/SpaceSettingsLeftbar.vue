@@ -60,6 +60,13 @@ watch(
         }}</li
       >
     </ul>
+
+    <div class="leftbar__bottom">
+      <!-- Go to home -->
+      <router-link :to="{ name: 'Home' }" class="btn btn-icon"
+        ><ph:house-fill class="mr-xs" />{{ t("buttons.goToHome") }}</router-link
+      >
+    </div>
   </div>
 </template>
 
@@ -108,6 +115,16 @@ watch(
     .links__link--active {
       background-color: var(--active-route-link-bg);
     }
+  }
+
+  .leftbar__bottom {
+    position: absolute;
+    bottom: 1rem;
+    left: 0.5rem;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   @include m-768 {
