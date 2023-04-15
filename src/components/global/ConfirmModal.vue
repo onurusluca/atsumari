@@ -63,7 +63,7 @@ function onClickCancel() {
               : modalType === "saveConfirmation"
               ? t("modals.askSaveConfirm")
               : modalType === "deleteSpaceConfirmation"
-              ? t("modals.askDeleteConfirm")
+              ? t("modals.askDeleteSpaceConfirm")
               : ""
           }}
         </h5>
@@ -154,7 +154,7 @@ function onClickCancel() {
     text-align: center;
 
     position: relative;
-    min-width: 30rem;
+    max-width: 35rem;
     max-width: 95vw;
     padding: 2rem;
 
@@ -170,24 +170,24 @@ function onClickCancel() {
       align-items: center;
       justify-content: center;
 
-      max-width: 30rem;
+      max-width: 35rem;
 
       .top__icon {
         margin-bottom: 1rem;
       }
 
       .top__delete-confirmation {
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.8rem;
       }
     }
 
     .content__body {
-      margin: 1.5rem 0;
+      margin: 1rem 0;
       .body__modal-item {
         font-weight: 600;
         font-size: 1.3rem;
         color: var(--subject-font);
-        margin-bottom: 1rem;
+        margin: 1rem 0 2rem 0;
       }
     }
 

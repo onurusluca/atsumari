@@ -3,6 +3,8 @@ import type { SpacesType } from "@/api/types";
 import type { OnClickOutsideHandler } from "@vueuse/core";
 import { vOnClickOutside } from "@vueuse/components";
 
+import { slugify } from "@/utils/slugify";
+
 const { t } = useI18n();
 const authStore = useAuthStore();
 const router = useRouter();
@@ -75,18 +77,6 @@ const openSettingsMenu = (index: number) => {
 
 const clickOutsideHandlersettingsMenuDrowpdown: OnClickOutsideHandler = () => {
   settingsMenuDropDownOpen.value = false;
-};
-
-// Make space name URL friendly
-const slugify = (string: string) => {
-  return string
-    .toString()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .trim()
-    .replace(/&/g, "-and-")
-    .replace(/[\s\W-]+/g, "-");
 };
 
 // Copy
@@ -171,7 +161,7 @@ let generateRandomSeeds = computed(() => {
                   {{ t("spaces.copySpaceUrl") }}
                 </button>
 
-                <button class="btn btn-icon btn-upgrade">
+                <button class="btn btn-upgrade">
                   <ri:vip-crown-2-line class="menu-list-icon" />
                   {{ t("buttons.upgrade") }}
                 </button>

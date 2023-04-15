@@ -114,6 +114,7 @@ button:disabled {
   color: #fff;
   background-color: var(--save-btn-bg);
 
+
   &:hover {
     background-color: var(--save-btn-bg-hover);
   }
@@ -136,6 +137,21 @@ button:disabled {
     background-color: var(--warning-btn-bg-hover);
   }
 }
+
+
+.btn-upgrade {
+  color: #000000;
+  background-color: var(--upgrade-btn-bg);
+
+  svg {
+    color: #000000;
+  }
+
+  &:hover {
+    background-color: var(--upgrade-btn-bg-hover);
+  }
+}
+
 
 .btn-bottom-control {
   display: flex;
@@ -165,19 +181,4 @@ button:disabled {
     outline: max(1px, 0.15em) solid var(--input-focus-border);
   }
 
-}
-
-
-.btn-upgrade {
-  color: #fff;
-  background-color: var(--upgrade-btn-bg);
-
-  svg {
-    color: #fff;
-
-  }
-
-  &:hover {
-    background-color: var(--upgrade-btn-bg-hover);
-  }
 }

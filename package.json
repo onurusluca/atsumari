@@ -19,7 +19,7 @@
     "@vueuse/head": "^1.1.23",
     "emittery": "^1.0.1",
     "nanoid": "^4.0.2",
-    "picmo": "^5.8.1",
+    "picmo": "^5.8.2",
     "pinia": "^2.0.34",
     "vue": "^3.2.47",
     "vue-confetti-explosion": "^1.0.2",
@@ -27,7 +27,7 @@
     "vue-router": "^4.1.6"
   },
   "devDependencies": {
-    "@iconify/json": "^2.2.49",
+    "@iconify/json": "^2.2.50",
     "@rushstack/eslint-patch": "^1.2.0",
     "@types/node": "^18.15.11",
     "@vitejs/plugin-vue": "^4.1.0",

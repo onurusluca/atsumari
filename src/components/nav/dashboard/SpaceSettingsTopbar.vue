@@ -1,5 +1,11 @@
 <script setup lang="ts">
+import { slugify } from "@/utils/slugify";
+
+const { t } = useI18n();
 const route = useRouter();
+
+const spaceId = String(route.currentRoute.value.params.id);
+const spaceName = String(route.currentRoute.value.params.name);
 </script>
 
 <template>
@@ -9,7 +15,25 @@ const route = useRouter();
         {{ route.currentRoute.value.params.name }}
       </div>
     </div>
-    <div class="navbar__right"> </div>
+    <div class="navbar__right">
+      <router-link
+        class="btn btn-save"
+        :to="{
+          name: 'Space',
+          params: {
+            id: spaceId,
+            name: slugify(spaceName),
+          },
+        }"
+      >
+        {{ t("spaces.enterSpace") }}
+        <ion:enter-outline class="ml-s" />
+      </router-link>
+      <button class="btn btn-upgrade">
+        <ri:vip-crown-2-line class="mr-s" />
+        {{ t("buttons.upgrade") }}
+      </button>
+    </div>
   </div>
 </template>
 
@@ -39,6 +63,9 @@ const route = useRouter();
     }
   }
   .navbar__right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
   }
 }
 </style>

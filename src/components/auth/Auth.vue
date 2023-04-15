@@ -13,11 +13,14 @@ const emit = defineEmits(["change", "delete"]);
 
 let email = ref<string>("");
 let password = ref<any>(null);
+
 let loading = ref(false);
 let errorUi = ref<string>("");
 let errorUiSecond = ref<string>("");
 let checkYourEmail = ref<string>("");
 let showEmailVerification = ref<boolean>(false);
+
+let rememberMeChecked = ref<boolean>(false);
 
 onMounted(() => {});
 
@@ -25,16 +28,22 @@ onMounted(() => {});
  * API CALLS
  ****************************************/
 const handleLogin = async () => {
+  // Set the session expiration time according to the user's remember me preference
+  const sessionDuration = rememberMeChecked.value ? 30 * 24 * 60 * 60 : 24 * 60 * 60; // 30 days or 1 day in seconds
+
   try {
     loading.value = true;
     const { error } = await supabase.auth.signInWithPassword({
       email: email.value,
       password: password.value,
+      expires_in: sessionDuration,
     });
 
     // TODO: Set longer session if remember me is checked
     if (rememberMeChecked.value) {
-      const authLocalStorage = useStorage("atsumari_auth", { rememberMeEnabled: true });
+      const authLocalStorage = useStorage("atsumari_auth", {
+        rememberMeCheckedLocal: true,
+      });
     }
     if (error) {
       console.log("err");
@@ -83,9 +92,6 @@ const handleRegister = async () => {
 // Reveal password button
 let revealPasswordButtonRef = ref<HTMLElement>();
 const { pressed } = useMousePressed({ target: revealPasswordButtonRef });
-
-// Remember me
-let rememberMeChecked = ref<boolean>(false);
 </script>
 
 <template>

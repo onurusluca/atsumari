@@ -40,9 +40,9 @@ const onClickDeleteSpace = async () => {
 
 <template>
   <div class="delete-shutdown">
-    <button @click="onClickDeleteSpace" class="btn btn-danger">{{
-      t("buttons.deleteSpace")
-    }}</button>
+    <button @click="onClickDeleteSpace" class="btn btn-danger"
+      ><ph:trash class="mr-s" />{{ t("buttons.deleteSpace") }}</button
+    >
   </div>
 
   <ConfirmModal
