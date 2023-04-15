@@ -399,7 +399,7 @@ const handleHoverMessage = (index: number) => {
 
         <!-- Emoji button -->
         <button
-          @click.prevent="handleOpenSendMessageEmojiPicker"
+          @click.prevent.stop="handleOpenSendMessageEmojiPicker"
           class="btn btn-no-style input-container__icon input-container__icon--emoji"
         >
           <carbon:face-add />

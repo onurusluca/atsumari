@@ -50,12 +50,16 @@ function changeThemeDarkMode() {
 
 // Language menu dropdown
 const languageMenuDropdownOpen = ref<Boolean>(false);
-const clickOutsideHandlerLanguageDrowpdown: OnClickOutsideHandler = (event) => {
+const clickOutsideHandlerLanguageDrowpdown: OnClickOutsideHandler = () => {
   languageMenuDropdownOpen.value = false;
 };
 
 // Modal
 let showModal = ref<boolean>(false);
+const onClickShowModal = () => {
+  userMenuDropdownOpen.value = false;
+  showModal.value = true;
+};
 </script>
 
 <template>
@@ -73,7 +77,7 @@ let showModal = ref<boolean>(false);
       </div>
     </div>
     <div class="navbar__right">
-      <button @click.stop="showModal = !showModal" class="btn btn-create mr-xxl">
+      <button @click.stop="onClickShowModal" class="btn btn-create mr-xxl">
         <ri:add-circle-line class="mr-s" style="font-size: 1.3rem" />
         {{ t("spaces.createSpace.title") }}
       </button>
@@ -125,33 +129,35 @@ let showModal = ref<boolean>(false);
           </button>
 
           <!-- Language -->
-          <button
-            @click.stop="languageMenuDropdownOpen = !languageMenuDropdownOpen"
-            class="btn btn-icon ml-s"
-          >
-            <carbon:ibm-watson-language-translator
-              class="mr-s"
-              style="font-size: 1rem"
-            />
-            {{ t("language.language") }}
-            <carbon:chevron-down class="ml-s" style="font-size: 0.8rem" />
-          </button>
-
-          <!-- Language menu dropdown -->
-          <Transition name="slide-down-up">
-            <div
-              v-if="languageMenuDropdownOpen"
-              v-on-click-outside.bubble="clickOutsideHandlerLanguageDrowpdown"
-              class="language-menu-dropdown__user-menu-dropdown dropdown-menu"
+          <div class="user-menu-dropdown__language-changer">
+            <button
+              @click.stop="languageMenuDropdownOpen = !languageMenuDropdownOpen"
+              class="btn btn-icon ml-s"
             >
-              <button class="btn btn-icon" @click="changeLanguage('en')">
-                {{ t("language.english") }}
-              </button>
-              <button class="btn btn-icon" @click="changeLanguage('ja')">
-                {{ t("language.japanese") }}
-              </button>
-            </div>
-          </Transition>
+              <carbon:ibm-watson-language-translator
+                class="mr-s"
+                style="font-size: 1rem"
+              />
+              {{ t("language.language") }}
+              <carbon:chevron-down class="ml-s" style="font-size: 0.8rem" />
+            </button>
+
+            <!-- Language menu dropdown -->
+            <Transition name="slide-down-up">
+              <div
+                v-if="languageMenuDropdownOpen"
+                v-on-click-outside.bubble="clickOutsideHandlerLanguageDrowpdown"
+                class="language-changer__dropdown dropdown-menu"
+              >
+                <button class="btn btn-icon" @click="changeLanguage('en')">
+                  {{ t("language.english") }}
+                </button>
+                <button class="btn btn-icon" @click="changeLanguage('ja')">
+                  {{ t("language.japanese") }}
+                </button>
+              </div>
+            </Transition>
+          </div>
 
           <span class="user-menu-dropdown__divider"></span>
 
@@ -207,6 +213,7 @@ let showModal = ref<boolean>(false);
   .navbar__right {
     display: flex;
     align-items: center;
+    padding-right: 1rem;
 
     .right__avatar {
       background-color: var(--brand-green);
@@ -255,9 +262,16 @@ let showModal = ref<boolean>(false);
         height: 1px;
         background-color: var(--border);
       }
-      .language-menu-dropdown__user-menu-dropdown {
-        position: absolute;
-        bottom: 0.5rem;
+
+      .user-menu-dropdown__language-changer {
+        position: relative;
+
+        .language-changer__dropdown {
+          position: absolute;
+          top: 2.2rem;
+          left: 50%;
+          transform: translateX(-50%);
+        }
       }
     }
   }

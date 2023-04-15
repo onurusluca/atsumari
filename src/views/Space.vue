@@ -197,6 +197,33 @@ const initialPreparations = async () => {
   canvas.addEventListener("click", () => {
     rightClickMenuIsEnabled.value = false;
   });
+
+  // Listen to zoom in/out events
+  let canvasScale = 1;
+
+  emitter.on("zoomIn", () => {
+    console.log("Zoom in received");
+
+    // Update canvas scale
+    let canvas = document.querySelector(
+      ".canvas-container__canvas"
+    ) as HTMLCanvasElement;
+    // Increase scale by 0.1
+    canvasScale += 0.1;
+    canvas.style.transform = `scale(${canvasScale})`;
+  });
+
+  emitter.on("zoomOut", () => {
+    console.log("Zoom out received");
+
+    // Update canvas scale
+    let canvas = document.querySelector(
+      ".canvas-container__canvas"
+    ) as HTMLCanvasElement;
+    // Increase scale by 0.1
+    canvasScale -= 0.1;
+    canvas.style.transform = `scale(${canvasScale})`;
+  });
 };
 
 // Update user position with the clicked position

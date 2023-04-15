@@ -105,8 +105,8 @@ export function createCanvasApp(
   const characterImg = loadImage(myCharacterSprite);
   const characterImgMyPlayer = loadImage(myCharacterSprite);
 
-  let cameraX = 0;
-  let cameraY = 0;
+  let cameraX = 200;
+  let cameraY = 200;
 
   let myPlayer: User = {
     id: "",
@@ -123,6 +123,8 @@ export function createCanvasApp(
     s: false,
     d: false,
   };
+
+  let zoomFactor = 1;
 
   let lastPressedKey = "null";
 
@@ -141,8 +143,10 @@ export function createCanvasApp(
 
     // Center camera on my player
     myPlayer = users.find((user) => user.id === myPlayerId)!;
-    cameraX = myPlayer.x - canvas.width / 2.2;
-    cameraY = myPlayer.y - canvas.height / 2.2;
+    if (myPlayer) {
+      cameraX = myPlayer.x - canvas.width / 2.2;
+      cameraY = myPlayer.y - canvas.height / 2.2;
+    }
 
     ctx.drawImage(
       worldImg,
@@ -207,7 +211,9 @@ export function createCanvasApp(
     // Draw FPS
     fps = Math.round(1000 / deltaTime);
     ctx.fillStyle = "black";
-    ctx.font = "16px Arial";
+
+    // Bold Poppins 16px
+    ctx.font = "bold 16px Poppins";
     ctx.fillText(`FPS: ${fps}`, 10, 20);
 
     // Check the browser and use the appropriate fps limiter because every browser has its own way of doing it
@@ -230,10 +236,18 @@ export function createCanvasApp(
   ) {
     gameLoop();
   } else {
-    const checkUsers = setInterval(() => {
-      if (users.length > 0) {
+    const checkConditionsBeforeLoop = setInterval(() => {
+      if (
+        users.length > 0 &&
+        myPlayerId !== "" &&
+        speed !== 0 &&
+        spaceMap !== "" &&
+        initialSetupCompleted
+      ) {
         gameLoop();
-        clearInterval(checkUsers);
+        clearInterval(checkConditionsBeforeLoop);
+
+        // Emit event to notify that the canvas is loaded
         emitter.emit("canvasLoaded");
       }
     }, 0);
@@ -354,5 +368,23 @@ export function createCanvasApp(
   emitter.on("rightClickPlayerMoveConfirmed", async (user) => {
     myPlayer.x = user.x - 36;
     myPlayer.y = user.y - 64;
+  });
+
+  // Override zoom and ctrl+scroll
+  canvas.addEventListener("wheel", (e: WheelEvent) => {
+    if (e.ctrlKey) {
+      e.preventDefault();
+      const zoomSpeed = 0.1;
+      if (e.deltaY < 0) {
+        // Zoom in
+        // emitter.emit("zoomIn", zoomSpeed);
+        zoomFactor += zoomSpeed;
+      } else {
+        // Zoom out
+        //emitter.emit("zoomOut", zoomSpeed);
+        zoomFactor -= zoomSpeed;
+      }
+      zoomFactor = Math.min(Math.max(zoomFactor, 0.1), 5);
+    }
   });
 }
