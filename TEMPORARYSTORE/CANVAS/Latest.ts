@@ -58,12 +58,13 @@ function drawPlayer(
 
   // Draw player name background
   ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-  ctx.font = `${14 * zoomFactor}px Poppins`;
+  ctx.font = `${16 * zoomFactor}px Poppins`;
   const userNameTextWidth = ctx.measureText(player.userName).width;
   const padding = 15 * zoomFactor;
-  const backgroundHeight = 20 * zoomFactor;
+  const backgroundHeight = 24 * zoomFactor;
   const backgroundWidth = userNameTextWidth + padding * 3;
-  const backgroundX = (player.x - cameraX - userNameTextWidth / 24) * zoomFactor;
+  const backgroundX =
+    (player.x - cameraX - userNameTextWidth / 24 - padding) * zoomFactor;
   const backgroundY = (player.y - cameraY - characterImg.height / 4) * zoomFactor;
   ctx.beginPath();
   ctx.arc(
@@ -84,17 +85,20 @@ function drawPlayer(
   ctx.fill();
 
   // Draw user status icon
-  const statusRadius = 5 * zoomFactor;
+  const statusRadius = 6 * zoomFactor;
   const statusX = backgroundX + padding;
   const statusY = backgroundY + backgroundHeight / 2;
   switch (userStatus) {
     case "online":
-      ctx.fillStyle = "#2CC56F";
+      ctx.fillStyle = "green";
       break;
     case "busy":
-      ctx.fillStyle = "orange";
+      ctx.fillStyle = "yellow";
       break;
     case "away":
+      ctx.fillStyle = "orange";
+      break;
+    case "offline":
       ctx.fillStyle = "gray";
       break;
     default:
@@ -108,8 +112,8 @@ function drawPlayer(
   ctx.fillStyle = "white";
   ctx.fillText(
     player.userName,
-    (player.x - cameraX) * zoomFactor + 10 + padding,
-    (player.y - cameraY - characterImg.height / 11) * zoomFactor
+    (player.x - cameraX) * zoomFactor + padding,
+    (player.y - cameraY - characterImg.height / 14) * zoomFactor
   );
 }
 

@@ -6,4 +6,5 @@ export interface User {
   y: number;
   characterSprite: string;
   facingTo: string;
+  userStatus: string;
 }

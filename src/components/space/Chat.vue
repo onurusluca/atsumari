@@ -249,17 +249,19 @@ supabase
  ****************************************/
 
 // Update sent time every minute
-setInterval(() => {
-  console.log("Updated sent time!");
+if (props.chatOpened) {
+  setInterval(() => {
+    console.log("Updated sent time!");
 
-  const messages = document.querySelectorAll(".message__sent-time");
-  messages.forEach((message) => {
-    const time = message.getAttribute("data-time");
-    if (time) {
-      message.innerHTML = formattedMessageSentTime(time);
-    }
-  });
-}, 60000);
+    const messages = document.querySelectorAll(".message__sent-time");
+    messages.forEach((message) => {
+      const time = message.getAttribute("data-time");
+      if (time) {
+        message.innerHTML = formattedMessageSentTime(time);
+      }
+    });
+  }, 60000);
+}
 
 // Group messages by user
 const groupedMessages = computed(() => {

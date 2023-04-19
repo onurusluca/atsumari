@@ -377,6 +377,7 @@ const doRealtimeStuff = async () => {
         y: newPresences[0].lastPosition.y,
         characterSprite: myCharacterSprite.value,
         facingTo: "down",
+        userStatus: "online",
       });
     })
     .on("presence", { event: "leave" }, ({ key, leftPresences }) => {

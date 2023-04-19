@@ -18,7 +18,7 @@ onMounted(() => {});
   <div class="online-users">
     <ul class="online-users__list">
       <li v-for="(user, index) in onlineUsers" :key="index" class="list__item">
-        {{ user.id }}</li
+        {{ user.userName }}</li
       >
     </ul>
   </div>

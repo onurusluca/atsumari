@@ -41,7 +41,8 @@ function drawPlayer(
   frame: number,
   player: User,
   cameraX: number,
-  cameraY: number
+  cameraY: number,
+  zoomFactor: number
 ) {
   const frameCoords = characterAnimations[animation][frame];
   ctx.drawImage(
@@ -50,19 +51,19 @@ function drawPlayer(
     frameCoords[1],
     24,
     24,
-    player.x - cameraX - 8,
-    player.y - cameraY - 8,
-    96,
-    96
+    (player.x - cameraX - 8) * zoomFactor,
+    (player.y - cameraY - 8) * zoomFactor,
+    96 * zoomFactor,
+    96 * zoomFactor
   );
 
   ctx.fillStyle = "white";
-  ctx.font = "20px Arial";
+  ctx.font = `${20 * zoomFactor}px Arial`;
   const userNameTextWidth = ctx.measureText(player.userName).width;
   ctx.fillText(
     player.userName,
-    player.x - cameraX - userNameTextWidth / 24,
-    player.y - cameraY - characterImg.height / 4 + 20
+    (player.x - cameraX - userNameTextWidth / 24) * zoomFactor,
+    (player.y - cameraY - characterImg.height / 4 + 20) * zoomFactor
   );
 }
 
@@ -117,7 +118,13 @@ export function createCanvasApp(
     facingTo: "",
   };
 
-  const pressedKeys = {
+  // When the user releases right key while still pressing the up key, character should start going up
+  let keyPressOrder: string[] = [];
+  let lastPressedKey = "null";
+
+  const pressedKeys: {
+    [key: string]: boolean;
+  } = {
     w: false,
     a: false,
     s: false,
@@ -125,8 +132,6 @@ export function createCanvasApp(
   };
 
   let zoomFactor = 1;
-
-  let lastPressedKey = "null";
 
   let animationState = "walk-down";
   let animationFrame = 0;
@@ -144,8 +149,8 @@ export function createCanvasApp(
     // Center camera on my player
     myPlayer = users.find((user) => user.id === myPlayerId)!;
     if (myPlayer) {
-      cameraX = myPlayer.x - canvas.width / 2.2;
-      cameraY = myPlayer.y - canvas.height / 2.2;
+      cameraX = myPlayer?.x - canvas.width / (2.2 * zoomFactor);
+      cameraY = myPlayer.y - canvas.height / (2.2 * zoomFactor);
     }
 
     ctx.drawImage(
@@ -154,28 +159,50 @@ export function createCanvasApp(
       0,
       worldImg.width,
       worldImg.height,
-      -cameraX - worldImg.height / 2,
-      -cameraY - worldImg.width / 2,
-      worldImg.width,
-      worldImg.height
+      (-cameraX - worldImg.height / 2) * zoomFactor,
+      (-cameraY - worldImg.width / 2) * zoomFactor,
+      worldImg.width * zoomFactor,
+      worldImg.height * zoomFactor
     );
 
-    if (pressedKeys.w) {
-      myPlayer.y -= speed;
-      animationState = "walk-up";
+    // Move my player but only if no other key is pressed(prevent diagonal movement). Also, if the user releases the second pressed key, the character should continue moving in the direction of the first pressed key
+    if (keyPressOrder.length > 0) {
+      const lastValidKey = keyPressOrder[keyPressOrder.length - 1];
+      switch (lastValidKey) {
+        case "w":
+          myPlayer.y -= speed;
+          animationState = "walk-up";
+          break;
+        case "a":
+          myPlayer.x -= speed;
+          animationState = "walk-left";
+          break;
+        case "s":
+          myPlayer.y += speed;
+          animationState = "walk-down";
+          break;
+        case "d":
+          myPlayer.x += speed;
+          animationState = "walk-right";
+          break;
+      }
     }
-    if (pressedKeys.a) {
-      myPlayer.x -= speed;
-      animationState = "walk-left";
-    }
-    if (pressedKeys.s) {
-      myPlayer.y += speed;
-      animationState = "walk-down";
-    }
-    if (pressedKeys.d) {
-      myPlayer.x += speed;
-      animationState = "walk-right";
-    }
+
+    // Draw other players
+    users.forEach((user) => {
+      if (user.id !== myPlayerId) {
+        drawPlayer(
+          ctx,
+          characterImg,
+          "walk-down",
+          1,
+          user,
+          cameraX,
+          cameraY,
+          zoomFactor
+        );
+      }
+    });
 
     // Draw my player
     drawPlayer(
@@ -185,7 +212,8 @@ export function createCanvasApp(
       animationFrame,
       myPlayer,
       cameraX,
-      cameraY
+      cameraY,
+      zoomFactor
     );
 
     // Update animation frame
@@ -195,13 +223,6 @@ export function createCanvasApp(
       animationFrame,
       animationTick
     );
-
-    // Draw other players
-    users.forEach((user) => {
-      if (user.id !== myPlayerId) {
-        drawPlayer(ctx, characterImg, "walk-down", 1, user, cameraX, cameraY);
-      }
-    });
 
     // Calculate FPS
     const currentTime = performance.now();
@@ -256,8 +277,13 @@ export function createCanvasApp(
   /******************
    * KEYBOARD EVENTS *
    ******************/
+  // Check if only one key is pressed
+
   canvas.addEventListener("keydown", (e: KeyboardEvent) => {
-    // TODO: Prevent diagonal movement
+    const key = e.key.toLowerCase();
+    if (["w", "a", "s", "d"].includes(key) && !pressedKeys[key]) {
+      keyPressOrder.push(key);
+    }
 
     // Listen to both lower and upper case
     switch (e.key.toLowerCase()) {
@@ -278,10 +304,20 @@ export function createCanvasApp(
         lastPressedKey = "d";
         break;
     }
+
+    const validKeys = ["w", "a", "s", "d"];
+
+    // TODO: In the close future, we may want to emit other users moving as well. For now, we only emit my player moving
+    /*    if (validKeys.includes(key)) {
+      // Emit player move event
+      emitter.emit("playerMove", myPlayer);
+    } */
   });
 
   canvas.addEventListener("keyup", (e: KeyboardEvent) => {
-    switch (e.key.toLowerCase()) {
+    const key = e.key.toLowerCase();
+
+    switch (key) {
       case "w":
         pressedKeys.w = false;
         break;
@@ -319,10 +355,12 @@ export function createCanvasApp(
     // Only emit if key is w,a,s,d or W,A,S,D and after user has stopped moving
     const validKeys = ["w", "a", "s", "d"];
 
-    if (validKeys.includes(e.key.toLocaleLowerCase())) {
+    if (validKeys.includes(key)) {
       // Emit player move event
       emitter.emit("playerMove", myPlayer);
     }
+
+    keyPressOrder = keyPressOrder.filter((k) => k !== key);
   });
 
   /******************
@@ -377,11 +415,9 @@ export function createCanvasApp(
       const zoomSpeed = 0.1;
       if (e.deltaY < 0) {
         // Zoom in
-        // emitter.emit("zoomIn", zoomSpeed);
         zoomFactor += zoomSpeed;
       } else {
         // Zoom out
-        //emitter.emit("zoomOut", zoomSpeed);
         zoomFactor -= zoomSpeed;
       }
       zoomFactor = Math.min(Math.max(zoomFactor, 0.1), 5);
