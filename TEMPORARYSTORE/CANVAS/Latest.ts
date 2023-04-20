@@ -41,8 +41,42 @@ function drawPlayer(
   cameraX: number,
   cameraY: number,
   zoomFactor: number,
-  userStatus: string
+  userStatus: string,
+  isMouseOver: boolean
 ) {
+  // Draw shadow
+  const shadowX = (player.x - cameraX - 8) * zoomFactor;
+  const shadowY = (player.y - cameraY - 8) * zoomFactor;
+
+  const shadowRadius = 30 * zoomFactor;
+  ctx.fillStyle = "rgba(200, 200, 200, 0.5)";
+  ctx.beginPath();
+  ctx.arc(
+    shadowX + 48 * zoomFactor,
+    shadowY + 80 * zoomFactor,
+    shadowRadius,
+    0,
+    2 * Math.PI
+  );
+  ctx.closePath();
+
+  // Draw shadow border
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
+  ctx.lineWidth = 4 * zoomFactor;
+  ctx.beginPath();
+  ctx.arc(
+    shadowX + 48 * zoomFactor,
+    shadowY + 80 * zoomFactor,
+    shadowRadius,
+    0,
+    2 * Math.PI
+  );
+  ctx.closePath();
+  if (isMouseOver) {
+    ctx.fill();
+    ctx.stroke();
+  }
+  // Draw character
   const frameCoords = characterAnimations[animation][frame];
   ctx.drawImage(
     characterImg,
@@ -50,21 +84,20 @@ function drawPlayer(
     frameCoords[1],
     24,
     24,
-    (player.x - cameraX - 8) * zoomFactor,
-    (player.y - cameraY - 8) * zoomFactor,
+    shadowX,
+    shadowY,
     96 * zoomFactor,
     96 * zoomFactor
   );
 
   // Draw player name background
   ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-  ctx.font = `${16 * zoomFactor}px Poppins`;
+  ctx.font = `${14 * zoomFactor}px Poppins`;
   const userNameTextWidth = ctx.measureText(player.userName).width;
   const padding = 15 * zoomFactor;
-  const backgroundHeight = 24 * zoomFactor;
+  const backgroundHeight = 20 * zoomFactor;
   const backgroundWidth = userNameTextWidth + padding * 3;
-  const backgroundX =
-    (player.x - cameraX - userNameTextWidth / 24 - padding) * zoomFactor;
+  const backgroundX = (player.x - cameraX - userNameTextWidth / 24) * zoomFactor;
   const backgroundY = (player.y - cameraY - characterImg.height / 4) * zoomFactor;
   ctx.beginPath();
   ctx.arc(
@@ -85,20 +118,17 @@ function drawPlayer(
   ctx.fill();
 
   // Draw user status icon
-  const statusRadius = 6 * zoomFactor;
+  const statusRadius = 5 * zoomFactor;
   const statusX = backgroundX + padding;
   const statusY = backgroundY + backgroundHeight / 2;
   switch (userStatus) {
     case "online":
-      ctx.fillStyle = "green";
+      ctx.fillStyle = "#2CC56F";
       break;
     case "busy":
-      ctx.fillStyle = "yellow";
-      break;
-    case "away":
       ctx.fillStyle = "orange";
       break;
-    case "offline":
+    case "away":
       ctx.fillStyle = "gray";
       break;
     default:
@@ -112,8 +142,8 @@ function drawPlayer(
   ctx.fillStyle = "white";
   ctx.fillText(
     player.userName,
-    (player.x - cameraX) * zoomFactor + padding,
-    (player.y - cameraY - characterImg.height / 14) * zoomFactor
+    (player.x - cameraX) * zoomFactor + 10 + padding,
+    (player.y - cameraY - characterImg.height / 11) * zoomFactor
   );
 }
 
@@ -205,6 +235,14 @@ export function createCanvasApp(
   let refreshInterval = 1000 / canvasFrameRate;
   const userAgent = navigator.userAgent;
 
+  let mouseX = 0;
+  let mouseY = 0;
+
+  canvas.addEventListener("mousemove", (e: MouseEvent) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+  });
+
   const gameLoop = () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -283,6 +321,17 @@ export function createCanvasApp(
       // Draw other players
       users.forEach((user) => {
         if (user.id !== myPlayerId) {
+          const playerRect = {
+            x: (user.x - cameraX - 8) * zoomFactor,
+            y: (user.y - cameraY - 8) * zoomFactor,
+            width: 96 * zoomFactor,
+            height: 96 * zoomFactor,
+          };
+          const isMouseOver = isColliding(
+            { x: mouseX, y: mouseY, width: 1, height: 1 },
+            playerRect
+          );
+
           drawPlayer(
             ctx,
             characterImg,
@@ -292,12 +341,24 @@ export function createCanvasApp(
             cameraX,
             cameraY,
             zoomFactor,
-            user.userStatus
+            user.userStatus,
+            isMouseOver
           );
         }
       });
 
       // Draw my player
+      const playerRect = {
+        x: (myPlayer.x - cameraX - 8) * zoomFactor,
+        y: (myPlayer.y - cameraY - 8) * zoomFactor,
+        width: 96 * zoomFactor,
+        height: 96 * zoomFactor,
+      };
+      const isMouseOver = isColliding(
+        { x: mouseX, y: mouseY, width: 1, height: 1 },
+        playerRect
+      );
+
       drawPlayer(
         ctx,
         characterImgMyPlayer,
@@ -307,7 +368,8 @@ export function createCanvasApp(
         cameraX,
         cameraY,
         zoomFactor,
-        myPlayer.userStatus
+        myPlayer.userStatus,
+        isMouseOver
       );
 
       // Update animation frame
@@ -403,6 +465,8 @@ export function createCanvasApp(
       // Emit player move event
       emitter.emit("playerMove", myPlayer);
     } */
+
+    emitter.emit("closeRightClickMenu");
   });
 
   canvas.addEventListener("keyup", (e: KeyboardEvent) => {
@@ -467,9 +531,35 @@ export function createCanvasApp(
       worldY,
     };
 
-    // Emit right click event
-    emitter.emit("rightClick", { mousePos, worldPos });
+    // Check if the right-click is on any user, if so, don't emit right click event
+    const playerWidth = 64 * zoomFactor;
+    const playerHeight = 64 * zoomFactor;
+    let collision = false;
+    for (const user of users) {
+      // Check for collisions
 
+      if (
+        user.id !== myPlayerId &&
+        isColliding(
+          {
+            x: worldX - 36,
+            y: worldY - 64,
+            width: playerWidth,
+            height: playerHeight,
+          },
+          { x: user.x, y: user.y, width: playerWidth, height: playerHeight }
+        )
+      ) {
+        collision = true;
+        break;
+      }
+    }
+
+    // Only update position if there is no collision
+    if (!collision) {
+      // Emit right click event
+      emitter.emit("rightClick", { mousePos, worldPos });
+    }
     e.preventDefault();
   });
 
@@ -477,6 +567,9 @@ export function createCanvasApp(
   emitter.on("rightClickPlayerMoveConfirmed", async (user) => {
     myPlayer.x = user.x - 36;
     myPlayer.y = user.y - 64;
+
+    // Canvas loses focus after right click, so we need to focus it again
+    canvas.focus();
   });
 
   // Override zoom and ctrl+scroll

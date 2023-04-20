@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { OnClickOutsideHandler } from "@vueuse/core";
 import { vOnClickOutside } from "@vueuse/components";
-import { createCanvasApp } from "@/canvas/ts/CanvasEngine";
+import { createCanvasApp } from "@/canvas/ts/main.js";
 import InitialCharacterSetupModal from "@/components/global/InitialCharacterSetupModal.vue";
 import { emitter } from "@/composables/useEmit";
 
@@ -191,6 +191,10 @@ const initialPreparations = async () => {
 
     // Enable right click menu
     rightClickMenuIsEnabled.value = true;
+  });
+
+  emitter.on("closeRightClickMenu", () => {
+    rightClickMenuIsEnabled.value = false;
   });
 
   // Close right click menu on click
