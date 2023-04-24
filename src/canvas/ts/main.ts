@@ -68,12 +68,6 @@ export function createCanvasApp(
     mouseY = e.clientY;
   });
 
-  // LISTENERS
-  keyDownEventListener(canvas, pressedKeys, keyPressOrder);
-  keyUpEventListener(canvas, pressedKeys, keyPressOrder, myPlayer);
-  rightClickEventListener(canvas, cameraX, cameraY, zoomFactor, users, myPlayerId);
-  wheelEventListener(canvas, zoomFactor);
-
   /****************************************
    * THE GAME LOOP
    ****************************************/
@@ -269,6 +263,12 @@ export function createCanvasApp(
       }
     }, 0);
   }
+
+  // LISTENERS
+  keyDownEventListener(canvas, pressedKeys, keyPressOrder, () => myPlayer);
+  keyUpEventListener(canvas, pressedKeys, keyPressOrder, () => myPlayer);
+  rightClickEventListener(canvas, cameraX, cameraY, zoomFactor, users, myPlayerId);
+  wheelEventListener(canvas, zoomFactor);
 
   // Get right click move position confirmation
   emitter.on("rightClickPlayerMoveConfirmed", async (user) => {

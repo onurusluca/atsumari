@@ -4,7 +4,8 @@ import type { User } from "@/types/general";
 export function keyDownEventListener(
   canvas: HTMLCanvasElement,
   pressedKeys: { [key: string]: boolean },
-  keyPressOrder: string[]
+  keyPressOrder: string[],
+  myPlayer: User
 ): void {
   canvas.addEventListener("keydown", (e: KeyboardEvent) => {
     const key = e.key.toLowerCase();
@@ -45,7 +46,7 @@ export function keyUpEventListener(
   canvas: HTMLCanvasElement,
   pressedKeys: { [key: string]: boolean },
   keyPressOrder: string[],
-  myPlayer: User
+  getMyPlayer: () => User
 ): void {
   canvas.addEventListener("keyup", (e: KeyboardEvent) => {
     const key = e.key.toLowerCase();
@@ -67,6 +68,9 @@ export function keyUpEventListener(
 
     // Only emit if key is w,a,s,d or W,A,S,D and after user has stopped moving
     const validKeys = ["w", "a", "s", "d"];
+
+    // Use the getMyPlayer function to access the current value of myPlayer
+    const myPlayer = getMyPlayer(); // This line is added
 
     if (validKeys.includes(key)) {
       // Emit player move event

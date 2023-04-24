@@ -64,7 +64,7 @@ watch(
     <div class="leftbar__bottom">
       <!-- Go to home -->
       <router-link :to="{ name: 'Home' }" class="btn btn-icon"
-        ><ph:house-fill class="mr-xs" />{{ t("buttons.goToHome") }}</router-link
+        ><ph:house-fill class="mr-s mb-xs" />{{ t("buttons.goToHome") }}</router-link
       >
     </div>
   </div>
