@@ -5,7 +5,7 @@ export function keyDownEventListener(
   canvas: HTMLCanvasElement,
   pressedKeys: { [key: string]: boolean },
   keyPressOrder: string[],
-  myPlayer: User
+  getMyPlayer: () => User
 ): void {
   canvas.addEventListener("keydown", (e: KeyboardEvent) => {
     const key = e.key.toLowerCase();
@@ -78,6 +78,9 @@ export function keyUpEventListener(
       console.log("EMITTED PLAYER MOVE", myPlayer);
     }
 
-    keyPressOrder = keyPressOrder.filter((k) => k !== key);
+    const index = keyPressOrder.indexOf(key);
+    if (index > -1) {
+      keyPressOrder.splice(index, 1);
+    }
   });
 }
