@@ -7,7 +7,7 @@ import { updateAnimationFrame } from "./animations";
 import { keyDownEventListener, keyUpEventListener } from "./keyboardEvents";
 import { rightClickEventListener, wheelEventListener } from "./mouseEvents";
 
-export function createCanvasApp(
+export async function createCanvasApp(
   users: User[],
   myPlayerId: string,
   speed: number,
@@ -20,9 +20,9 @@ export function createCanvasApp(
   const ctx = canvas.getContext("2d")!;
 
   // Load images
-  const worldImg = loadImage(spaceMap);
-  const characterImg = loadImage(myCharacterSprite);
-  const characterImgMyPlayer = loadImage(myCharacterSprite);
+  const worldImg = await loadImage(spaceMap);
+  const characterImg = await loadImage(myCharacterSprite);
+  const characterImgMyPlayer = await loadImage(myCharacterSprite);
 
   let cameraX = 200;
   let cameraY = 200;

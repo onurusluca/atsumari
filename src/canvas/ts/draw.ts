@@ -1,22 +1,14 @@
 import { characterAnimations } from "./animations";
 import type { User } from "@/types/general";
 
-export function drawPlayer(
+function drawShadow(
   ctx: CanvasRenderingContext2D,
-  characterImg: HTMLImageElement,
-  animation: string,
-  frame: number,
-  player: User,
-  cameraX: number,
-  cameraY: number,
+  shadowX: number,
+  shadowY: number,
   zoomFactor: number,
-  userStatus: string,
   isMouseOver: boolean
-) {
+): void {
   // Draw shadow
-  const shadowX = (player.x - cameraX - 8) * zoomFactor;
-  const shadowY = (player.y - cameraY - 8) * zoomFactor;
-
   const shadowRadius = 30 * zoomFactor;
   ctx.fillStyle = "rgba(200, 200, 200, 0.5)";
   ctx.beginPath();
@@ -45,7 +37,17 @@ export function drawPlayer(
     ctx.fill();
     ctx.stroke();
   }
-  // Draw character
+}
+
+function drawCharacter(
+  ctx: CanvasRenderingContext2D,
+  characterImg: HTMLImageElement,
+  animation: string,
+  frame: number,
+  shadowX: number,
+  shadowY: number,
+  zoomFactor: number
+): void {
   const frameCoords = characterAnimations[animation][frame];
   ctx.drawImage(
     characterImg,
@@ -58,16 +60,21 @@ export function drawPlayer(
     96 * zoomFactor,
     96 * zoomFactor
   );
+}
 
-  // Draw player name background
+function drawPlayerNameBackground(
+  ctx: CanvasRenderingContext2D,
+  player: User,
+  zoomFactor: number,
+  backgroundX: number,
+  backgroundY: number
+): void {
   ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
   ctx.font = `${14 * zoomFactor}px Poppins`;
   const userNameTextWidth = ctx.measureText(player.userName).width;
   const padding = 15 * zoomFactor;
   const backgroundHeight = 20 * zoomFactor;
   const backgroundWidth = userNameTextWidth + padding * 3;
-  const backgroundX = (player.x - cameraX - userNameTextWidth / 24) * zoomFactor;
-  const backgroundY = (player.y - cameraY - characterImg.height / 4) * zoomFactor;
   ctx.beginPath();
   ctx.arc(
     backgroundX + backgroundHeight / 2,
@@ -85,11 +92,16 @@ export function drawPlayer(
   );
   ctx.closePath();
   ctx.fill();
+}
 
-  // Draw user status icon
+function drawUserStatusIcon(
+  ctx: CanvasRenderingContext2D,
+  userStatus: string,
+  zoomFactor: number,
+  statusX: number,
+  statusY: number
+): void {
   const statusRadius = 5 * zoomFactor;
-  const statusX = backgroundX + padding;
-  const statusY = backgroundY + backgroundHeight / 2;
   switch (userStatus) {
     case "online":
       ctx.fillStyle = "#2CC56F";
@@ -106,12 +118,56 @@ export function drawPlayer(
   ctx.beginPath();
   ctx.arc(statusX, statusY, statusRadius, 0, 2 * Math.PI);
   ctx.fill();
+}
 
-  // Draw player name
+function drawPlayerName(
+  ctx: CanvasRenderingContext2D,
+  player: User,
+  zoomFactor: number,
+  backgroundX: number,
+  backgroundY: number,
+  padding: number
+): void {
   ctx.fillStyle = "white";
   ctx.fillText(
     player.userName,
-    (player.x - cameraX) * zoomFactor + 10 + padding,
-    (player.y - cameraY - characterImg.height / 11) * zoomFactor
+    backgroundX + 10 + padding,
+    backgroundY * zoomFactor + 15
   );
+}
+
+export function drawPlayer(
+  ctx: CanvasRenderingContext2D,
+  characterImg: HTMLImageElement,
+  animation: string,
+  frame: number,
+  player: User,
+  cameraX: number,
+  cameraY: number,
+  zoomFactor: number,
+  userStatus: string,
+  isMouseOver: boolean
+): void {
+  const shadowX = (player.x - cameraX - 8) * zoomFactor;
+  const shadowY = (player.y - cameraY - 8) * zoomFactor;
+
+  drawShadow(ctx, shadowX, shadowY, zoomFactor, isMouseOver);
+  drawCharacter(ctx, characterImg, animation, frame, shadowX, shadowY, zoomFactor);
+
+  const backgroundX =
+    (player.x - cameraX - ctx.measureText(player.userName).width / 24) * zoomFactor;
+  const backgroundY = (player.y - cameraY - characterImg.height / 4) * zoomFactor;
+
+  drawPlayerNameBackground(ctx, player, zoomFactor, backgroundX, backgroundY);
+
+  const padding = 15 * zoomFactor;
+  drawUserStatusIcon(
+    ctx,
+    userStatus,
+    zoomFactor,
+    backgroundX + padding,
+    backgroundY + (20 * zoomFactor) / 2
+  );
+
+  drawPlayerName(ctx, player, zoomFactor, backgroundX, backgroundY, padding);
 }

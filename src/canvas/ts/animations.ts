@@ -1,6 +1,8 @@
-export const characterAnimations: {
+type CharacterAnimation = {
   [key: string]: number[][];
-} = {
+};
+
+export const characterAnimations: CharacterAnimation = {
   "walk-down": [
     [0, 0],
     [24, 1],
@@ -23,17 +25,12 @@ export const characterAnimations: {
   ],
 };
 
-export function updateAnimationFrame(
-  pressedKeys: { [key: string]: boolean },
+function updateAnimationFrameIfMoving(
   animationState: string,
   animationFrame: number,
   animationTick: number
 ): [number, number] {
-  if (pressedKeys.w || pressedKeys.a || pressedKeys.s || pressedKeys.d) {
-    animationTick++;
-  } else {
-    animationFrame = 1;
-  }
+  animationTick++;
 
   if (animationTick >= 7) {
     animationFrame++;
@@ -44,4 +41,19 @@ export function updateAnimationFrame(
   }
 
   return [animationFrame, animationTick];
+}
+
+export function updateAnimationFrame(
+  pressedKeys: { [key: string]: boolean },
+  animationState: string,
+  animationFrame: number,
+  animationTick: number
+): [number, number] {
+  const isMoving = pressedKeys.w || pressedKeys.a || pressedKeys.s || pressedKeys.d;
+
+  if (isMoving) {
+    return updateAnimationFrameIfMoving(animationState, animationFrame, animationTick);
+  } else {
+    return [1, animationTick];
+  }
 }

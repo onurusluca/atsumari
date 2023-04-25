@@ -98,5 +98,6 @@ declare module '@vue/runtime-core' {
     'SvgSpinners:90RingWithBg': typeof import('~icons/svg-spinners/90-ring-with-bg')['default']
     'Teenyicons:lockSolid': typeof import('~icons/teenyicons/lock-solid')['default']
     Toast: typeof import('./components/global/Toast.vue')['default']
+    WebRTC: typeof import('./components/space/webrtc/WebRTC.vue')['default']
   }
 }

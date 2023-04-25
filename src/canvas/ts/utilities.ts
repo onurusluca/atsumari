@@ -1,13 +1,20 @@
-export function loadImage(src: string): HTMLImageElement {
-  const image = new Image();
-  image.src = src;
-  return image;
+export function loadImage(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.src = src;
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error(`Failed to load image: ${src}`));
+  });
 }
 
-export function isColliding(
-  rect1: { x: number; y: number; width: number; height: number },
-  rect2: { x: number; y: number; width: number; height: number }
-): boolean {
+interface Rect {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+export function isColliding(rect1: Rect, rect2: Rect): boolean {
   return (
     rect1.x < rect2.x + rect2.width &&
     rect1.x + rect1.width > rect2.x &&
