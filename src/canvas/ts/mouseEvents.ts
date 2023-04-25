@@ -1,83 +1,92 @@
 import type { User } from "@/types/general";
 import { isColliding } from "./utilities";
 
-export function rightClickEventListener(
-  canvas: HTMLCanvasElement,
-  cameraX: number,
-  cameraY: number,
-  zoomFactor: number,
+function getUserCollision(
+  users: User[],
+  myPlayerId: string,
+  worldX: number,
+  worldY: number,
+  playerWidth: number,
+  playerHeight: number
+): boolean {
+  for (const user of users) {
+    if (
+      user.id !== myPlayerId &&
+      isColliding(
+        {
+          x: worldX - 36,
+          y: worldY - 64,
+          width: playerWidth,
+          height: playerHeight,
+        },
+        { x: user.x, y: user.y, width: playerWidth, height: playerHeight }
+      )
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function handleRightClick(
+  e: MouseEvent,
+  getCamera: () => { cameraX: number; cameraY: number; zoomFactor: number },
   users: User[],
   myPlayerId: string
 ): void {
-  canvas.addEventListener("contextmenu", (e: MouseEvent) => {
-    const mouseX = e.clientX;
-    const mouseY = e.clientY;
+  const { clientX: mouseX, clientY: mouseY } = e;
+  const { cameraX, cameraY, zoomFactor } = getCamera();
 
-    const worldX = e.clientX + cameraX;
-    const worldY = e.clientY + cameraY;
+  const worldX = mouseX + cameraX;
+  const worldY = mouseY + cameraY;
 
-    const mousePos = {
-      mouseX,
-      mouseY,
-    };
+  const mousePos = { mouseX, mouseY };
+  const worldPos = { worldX, worldY };
 
-    const worldPos = {
-      worldX,
-      worldY,
-    };
+  // Check if the right-click is on any user, if so, don't emit right click event
+  const playerWidth = 64 * zoomFactor;
+  const playerHeight = 64 * zoomFactor;
 
-    // Check if the right-click is on any user, if so, don't emit right click event
-    const playerWidth = 64 * zoomFactor;
-    const playerHeight = 64 * zoomFactor;
-    let collision = false;
-    for (const user of users) {
-      // Check for collisions
+  const collision = getUserCollision(
+    users,
+    myPlayerId,
+    worldX,
+    worldY,
+    playerWidth,
+    playerHeight
+  );
 
-      if (
-        user.id !== myPlayerId &&
-        isColliding(
-          {
-            x: worldX - 36,
-            y: worldY - 64,
-            width: playerWidth,
-            height: playerHeight,
-          },
-          { x: user.x, y: user.y, width: playerWidth, height: playerHeight }
-        )
-      ) {
-        collision = true;
-        break;
-      }
-    }
+  if (!collision) {
+    emitter.emit("rightClick", { mousePos, worldPos });
+  }
+  e.preventDefault();
+}
 
-    // Only update position if there is no collision
-    if (!collision) {
-      // Emit right click event
-      emitter.emit("rightClick", { mousePos, worldPos });
-    }
-    e.preventDefault();
-  });
+export function rightClickEventListener(
+  canvas: HTMLCanvasElement,
+  getCamera: () => { cameraX: number; cameraY: number; zoomFactor: number },
+  users: User[],
+  myPlayerId: string
+): void {
+  canvas.addEventListener("contextmenu", (e) =>
+    handleRightClick(e, getCamera, users, myPlayerId)
+  );
 }
 
 // Override zoom and ctrl+scroll
+function handleWheelEvent(e: WheelEvent, zoomFactor: number): void {
+  if (e.ctrlKey) {
+    e.preventDefault();
+    const zoomSpeed = 0.1;
+    zoomFactor += e.deltaY < 0 ? zoomSpeed : -zoomSpeed;
+    zoomFactor = Math.min(Math.max(zoomFactor, 0.1), 5);
+  }
+}
 export function wheelEventListener(
   canvas: HTMLCanvasElement,
   zoomFactor: number
 ): void {
-  canvas.addEventListener("wheel", (e: WheelEvent) => {
-    if (e.ctrlKey) {
-      e.preventDefault();
-      const zoomSpeed = 0.1;
-      if (e.deltaY < 0) {
-        // Zoom in
-        zoomFactor += zoomSpeed;
-      } else {
-        // Zoom out
-        zoomFactor -= zoomSpeed;
-      }
-      zoomFactor = Math.min(Math.max(zoomFactor, 0.1), 5);
-    }
-  });
+  canvas.addEventListener("wheel", (e) => handleWheelEvent(e, zoomFactor));
 }
 
 // Listen to double click

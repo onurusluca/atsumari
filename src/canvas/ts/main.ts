@@ -264,10 +264,18 @@ export function createCanvasApp(
     }, 0);
   }
 
+  const getCamera = () => {
+    return {
+      cameraX: myPlayer?.x - canvas.width / (2.2 * zoomFactor),
+      cameraY: myPlayer.y - canvas.height / (2.2 * zoomFactor),
+      zoomFactor,
+    };
+  };
+
   // LISTENERS
   keyDownEventListener(canvas, pressedKeys, keyPressOrder, () => myPlayer);
   keyUpEventListener(canvas, pressedKeys, keyPressOrder, () => myPlayer);
-  rightClickEventListener(canvas, cameraX, cameraY, zoomFactor, users, myPlayerId);
+  rightClickEventListener(canvas, getCamera, users, myPlayerId);
   wheelEventListener(canvas, zoomFactor);
 
   // Get right click move position confirmation
