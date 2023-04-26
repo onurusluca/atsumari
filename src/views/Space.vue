@@ -115,16 +115,16 @@ const initialPreparations = async () => {
   );
 
   // Create canvas
-  createCanvasApp(
-    users,
-    userId,
-    speed,
-    canvas,
-    canvasFrameRate.value,
-    spaceMap.value,
-    myCharacterSprite.value,
-    initialSetupCompleted.value
-  );
+  createCanvasApp({
+    users: users,
+    myPlayerId: userId,
+    speed: speed,
+    canvas: canvas,
+    canvasFrameRate: canvasFrameRate.value,
+    spaceMap: spaceMap.value,
+    myCharacterSprite: myCharacterSprite.value,
+    initialSetupCompleted: initialSetupCompleted.value,
+  });
 
   // Focus canvas on click
   canvas.addEventListener("click", function () {

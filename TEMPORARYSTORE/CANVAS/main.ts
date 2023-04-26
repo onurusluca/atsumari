@@ -1,36 +1,31 @@
 import { emitter } from "@/composables/useEmit";
 import type { User } from "@/types/general";
-import type { CanvasAppOptions, Camera } from "../types";
+
 import { loadImage, isColliding } from "./utilities";
 import { drawPlayer } from "./draw";
 import { updateAnimationFrame } from "./animations";
 import { keyDownEventListener, keyUpEventListener } from "./keyboardEvents";
 import { rightClickEventListener, wheelEventListener } from "./mouseEvents";
 
-export async function createCanvasApp({
-  users,
-  myPlayerId,
-  speed,
-  canvas,
-  canvasFrameRate,
-  spaceMap,
-  myCharacterSprite,
-  initialSetupCompleted,
-}: CanvasAppOptions) {
+export async function createCanvasApp(
+  users: User[],
+  myPlayerId: string,
+  speed: number,
+  canvas: HTMLCanvasElement,
+  canvasFrameRate: number,
+  spaceMap: string,
+  myCharacterSprite: string,
+  initialSetupCompleted: boolean
+) {
   const ctx = canvas.getContext("2d")!;
 
   // Load images
-  const [worldImg, characterImg, characterImgMyPlayer] = await Promise.all([
-    loadImage(spaceMap),
-    loadImage(myCharacterSprite),
-    loadImage(myCharacterSprite),
-  ]);
+  const worldImg = await loadImage(spaceMap);
+  const characterImg = await loadImage(myCharacterSprite);
+  const characterImgMyPlayer = await loadImage(myCharacterSprite);
 
-  let camera: Camera = {
-    cameraX: 200,
-    cameraY: 200,
-    zoomFactor: 1,
-  };
+  let cameraX = 200;
+  let cameraY = 200;
 
   let myPlayer: User = {
     id: "",
@@ -43,13 +38,17 @@ export async function createCanvasApp({
   };
 
   // When the user releases right key while still pressing the up key, character should start going up
-  const keyPressOrder: string[] = [];
-  const pressedKeys: Record<string, boolean> = {
+  let keyPressOrder: string[] = [];
+  const pressedKeys: {
+    [key: string]: boolean;
+  } = {
     w: false,
     a: false,
     s: false,
     d: false,
   };
+
+  let zoomFactor = 1;
 
   let animationState = "walk-down";
   let animationFrame = 0;
@@ -59,7 +58,6 @@ export async function createCanvasApp({
   let fps = 0;
 
   let refreshInterval = 1000 / canvasFrameRate;
-
   const userAgent = navigator.userAgent;
 
   let mouseX = 0;
@@ -73,18 +71,15 @@ export async function createCanvasApp({
   /****************************************
    * THE GAME LOOP
    ****************************************/
-  function gameLoop() {
+  const gameLoop = () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // Set myPlayer
     myPlayer = users.find((user) => user.id === myPlayerId)!;
     if (myPlayer) {
       // Center camera on my player
-      camera = {
-        cameraX: myPlayer.x - canvas.width / (2.2 * camera.zoomFactor),
-        cameraY: myPlayer.y - canvas.height / (2.2 * camera.zoomFactor),
-        zoomFactor: camera.zoomFactor,
-      };
+      cameraX = myPlayer?.x - canvas.width / (2.2 * zoomFactor);
+      cameraY = myPlayer.y - canvas.height / (2.2 * zoomFactor);
 
       // Draw world
       ctx.drawImage(
@@ -93,16 +88,17 @@ export async function createCanvasApp({
         0,
         worldImg.width,
         worldImg.height,
-        (-camera.cameraX - worldImg.height / 2) * camera.zoomFactor,
-        (-camera.cameraY - worldImg.width / 2) * camera.zoomFactor,
-        worldImg.width * camera.zoomFactor,
-        worldImg.height * camera.zoomFactor
+        (-cameraX - worldImg.height / 2) * zoomFactor,
+        (-cameraY - worldImg.width / 2) * zoomFactor,
+        worldImg.width * zoomFactor,
+        worldImg.height * zoomFactor
       );
 
       // Move my player but only if no other key is pressed(prevent diagonal movement). Also, if the user releases the second pressed key, the character should continue moving in the direction of the first pressed key
       if (keyPressOrder.length > 0) {
         let newPlayerX = myPlayer.x;
         let newPlayerY = myPlayer.y;
+
         const lastValidKey = keyPressOrder[keyPressOrder.length - 1];
 
         // check if any key is pressed
@@ -128,8 +124,8 @@ export async function createCanvasApp({
         }
 
         // Check for collisions
-        const playerWidth = 64 * camera.zoomFactor;
-        const playerHeight = 64 * camera.zoomFactor;
+        const playerWidth = 64 * zoomFactor;
+        const playerHeight = 64 * zoomFactor;
         let collision = false;
         for (const user of users) {
           if (
@@ -159,10 +155,10 @@ export async function createCanvasApp({
       users.forEach((user) => {
         if (user.id !== myPlayerId) {
           const playerRect = {
-            x: (user.x - camera.cameraX - 8) * camera.zoomFactor,
-            y: (user.y - camera.cameraY - 8) * camera.zoomFactor,
-            width: 96 * camera.zoomFactor,
-            height: 96 * camera.zoomFactor,
+            x: (user.x - cameraX - 8) * zoomFactor,
+            y: (user.y - cameraY - 8) * zoomFactor,
+            width: 96 * zoomFactor,
+            height: 96 * zoomFactor,
           };
           const isMouseOver = isColliding(
             { x: mouseX, y: mouseY, width: 1, height: 1 },
@@ -175,9 +171,9 @@ export async function createCanvasApp({
             "walk-down",
             1,
             user,
-            camera.cameraX,
-            camera.cameraY,
-            camera.zoomFactor,
+            cameraX,
+            cameraY,
+            zoomFactor,
             user.userStatus,
             isMouseOver
           );
@@ -186,10 +182,10 @@ export async function createCanvasApp({
 
       // Draw my player
       const playerRect = {
-        x: (myPlayer.x - camera.cameraX - 8) * camera.zoomFactor,
-        y: (myPlayer.y - camera.cameraY - 8) * camera.zoomFactor,
-        width: 96 * camera.zoomFactor,
-        height: 96 * camera.zoomFactor,
+        x: (myPlayer.x - cameraX - 8) * zoomFactor,
+        y: (myPlayer.y - cameraY - 8) * zoomFactor,
+        width: 96 * zoomFactor,
+        height: 96 * zoomFactor,
       };
       const isMouseOver = isColliding(
         { x: mouseX, y: mouseY, width: 1, height: 1 },
@@ -202,9 +198,9 @@ export async function createCanvasApp({
         animationState,
         animationFrame,
         myPlayer,
-        camera.cameraX,
-        camera.cameraY,
-        camera.zoomFactor,
+        cameraX,
+        cameraY,
+        zoomFactor,
         myPlayer.userStatus,
         isMouseOver
       );
@@ -225,6 +221,7 @@ export async function createCanvasApp({
     // Draw FPS
     fps = Math.round(1000 / deltaTime);
     ctx.fillStyle = "black";
+
     // Bold Poppins 16px
     ctx.font = "bold 16px Poppins";
     ctx.fillText(`FPS: ${fps}`, 10, 20);
@@ -233,10 +230,12 @@ export async function createCanvasApp({
     if (userAgent.indexOf("Firefox") > -1) {
       // FIXME: Can't limit fps in Firefox
       requestAnimationFrame(gameLoop);
+    } else if (userAgent.indexOf("Chrome") > -1) {
+      setTimeout(gameLoop, refreshInterval);
     } else {
       setTimeout(gameLoop, refreshInterval);
     }
-  }
+  };
 
   // Init game loop
   if (
@@ -258,6 +257,7 @@ export async function createCanvasApp({
       ) {
         gameLoop();
         clearInterval(checkConditionsBeforeLoop);
+
         // Emit event to notify that the canvas is loaded
         emitter.emit("canvasLoaded");
       }
@@ -266,9 +266,9 @@ export async function createCanvasApp({
 
   const getCamera = () => {
     return {
-      cameraX: myPlayer?.x - canvas.width / (2.2 * camera.zoomFactor),
-      cameraY: myPlayer.y - canvas.height / (2.2 * camera.zoomFactor),
-      zoomFactor: camera.zoomFactor,
+      cameraX: myPlayer?.x - canvas.width / (2.2 * zoomFactor),
+      cameraY: myPlayer.y - canvas.height / (2.2 * zoomFactor),
+      zoomFactor,
     };
   };
 
@@ -276,12 +276,13 @@ export async function createCanvasApp({
   keyDownEventListener(canvas, pressedKeys, keyPressOrder, () => myPlayer);
   keyUpEventListener(canvas, pressedKeys, keyPressOrder, () => myPlayer);
   rightClickEventListener(canvas, getCamera, users, myPlayerId);
-  wheelEventListener(canvas, camera.zoomFactor);
+  wheelEventListener(canvas, zoomFactor);
 
   // Get right click move position confirmation
   emitter.on("rightClickPlayerMoveConfirmed", async (user) => {
     myPlayer.x = user.x - 36;
     myPlayer.y = user.y - 64;
+
     // Canvas loses focus after right click, so we need to focus it again
     canvas.focus();
   });

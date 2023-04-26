@@ -7,3 +7,20 @@ export type User = {
   facingTo: string;
   userStatus: string;
 };
+
+export type CanvasAppOptions = {
+  users: User[];
+  myPlayerId: string;
+  speed: number;
+  canvas: HTMLCanvasElement;
+  canvasFrameRate: number;
+  spaceMap: string;
+  myCharacterSprite: string;
+  initialSetupCompleted: boolean;
+};
+
+export type Camera = {
+  cameraX: number;
+  cameraY: number;
+  zoomFactor: number;
+};
