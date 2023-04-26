@@ -7,6 +7,7 @@ import { emitter } from "@/composables/useEmit";
 
 import type { User } from "@/types/general";
 import type { ProfilesType } from "@/api/types/index";
+import WebRTC from "@/components/space/webrtc/WebRTC.vue";
 
 /****************************************
  * DECLARATIONS
@@ -476,6 +477,9 @@ const handleChatMenuOpen = () => {
 </script>
 
 <template>
+  <!-- LiveKit Stuff -->
+  <WebRTC class="space__webrtc" />
+
   <!-- Loading animation to show until app mount -->
   <!--   <section v-if="!canvasLoaded" class="route-loading-overlay">
     <span class="loader"></span>
@@ -666,6 +670,15 @@ const handleChatMenuOpen = () => {
         height: 1.8rem;
       }
     }
+  }
+
+  .space__webrtc {
+    position: fixed;
+    z-index: 999999;
+
+    width: 30rem;
+    height: 50rem;
+    border: 1px solid red;
   }
 }
 </style>

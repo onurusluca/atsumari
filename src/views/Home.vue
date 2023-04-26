@@ -7,7 +7,6 @@ import { slugify } from "@/utils/slugify";
 
 const { t } = useI18n();
 const authStore = useAuthStore();
-const router = useRouter();
 
 let userSpaces = ref<SpacesType[]>([]);
 let showContentLoadingPlaceholder = ref<boolean>(true);

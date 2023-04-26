@@ -1,14 +1,33 @@
 <script setup lang="ts">
 import {
-  connect,
+  ConnectionQuality,
+  ConnectionState,
+  DataPacket_Kind,
+  DisconnectReason,
+  LocalAudioTrack,
+  LocalTrackPublication,
+  LocalParticipant,
+  LogLevel,
+  MediaDeviceFailure,
+  Participant,
+  ParticipantEvent,
+  RemoteParticipant,
+  RemoteTrack,
+  RemoteTrackPublication,
+  RemoteVideoTrack,
   Room,
   RoomEvent,
-  RemoteParticipant,
-  RemoteTrackPublication,
-  RemoteTrack,
-  Participant,
-} from 'livekit-client';
+  Track,
+  TrackPublication,
+  VideoPresets,
+  VideoQuality,
+  createAudioAnalyser,
+  setLogLevel,
+} from "livekit-client";
 
+import type { SimulationScenario } from "livekit-client";
+
+import { EnvVariables } from "@/envVariables";
 
 const { t } = useI18n();
 const authStore = useAuthStore();
@@ -17,69 +36,33 @@ const route = useRouter();
 
 onMounted(() => {});
 
+const LIVEKIT_API_KEY = EnvVariables.livekitApiKey;
+const LIVEKIT_URL = EnvVariables.livekitUrl;
+let token =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODI1MDU3OTAsImlzcyI6IkFQSTJWVExXbllhejVNcSIsIm5iZiI6MTY4MjUwNDg5MCwic3ViIjoiZmFzZiIsInZpZGVvIjp7ImNhblB1Ymxpc2giOnRydWUsImNhblB1Ymxpc2hEYXRhIjp0cnVlLCJjYW5TdWJzY3JpYmUiOnRydWUsInJvb20iOiJhc2Zhc2YiLCJyb29tSm9pbiI6dHJ1ZX19.P7OYsI3oFz1clgcdak8LvTV7MhI-9hsXfZnZpVL0N40";
 
+const state = {
+  isFrontFacing: false,
+  encoder: new TextEncoder(),
+  decoder: new TextDecoder(),
+  defaultDevices: new Map<MediaDeviceKind, string>(),
+  bitrateInterval: undefined as any,
+};
+let currentRoom: Room | undefined;
 
-// creates a new room with options
-const room = new Room({
-  // automatically manage subscribed video quality
-  adaptiveStream: true,
+let startTime: number;
 
-  // optimize publishing bandwidth and CPU for published tracks
-  dynacast: true,
+const searchParams = new URLSearchParams(window.location.search);
+const storedUrl = searchParams.get("url") ?? "ws://localhost:7880";
+const storedToken = searchParams.get("token") ?? "";
 
-  // default capture settings
-  videoCaptureDefaults: {
-    resolution: VideoPresets.h720.resolution,
-  },
-});
-
-// set up event listeners
-room
-  .on(RoomEvent.TrackSubscribed, handleTrackSubscribed)
-  .on(RoomEvent.TrackUnsubscribed, handleTrackUnsubscribed)
-  .on(RoomEvent.ActiveSpeakersChanged, handleActiveSpeakerChange)
-  .on(RoomEvent.Disconnected, handleDisconnect)
-  .on(RoomEvent.LocalTrackUnpublished, handleLocalTrackUnpublished);
-
-// connect to room
-await room.connect('ws://localhost:7800', token);
-console.log('connected to room', room.name);
-
-// publish local camera and mic tracks
-await room.localParticipant.enableCameraAndMicrophone();
-
-function handleTrackSubscribed(
-  track: RemoteTrack,
-  publication: RemoteTrackPublication,
-  participant: RemoteParticipant,
-) {
-  if (track.kind === Track.Kind.Video || track.kind === Track.Kind.Audio) {
-    // attach it to a new HTMLVideoElement or HTMLAudioElement
-    const element = track.attach();
-    parentElement.appendChild(element);
-  }
-}
-
-function handleTrackUnsubscribed(
-  track: RemoteTrack,
-  publication: RemoteTrackPublication,
-  participant: RemoteParticipant,
-) {
-  // remove tracks from all attached elements
-  track.detach();
-}
-
-function handleLocalTrackUnpublished(track: LocalTrackPublication, participant: LocalParticipant) {
-  // when local tracks are ended, update UI to remove them from rendering
-  track.detach();
-}
-
-function handleActiveSpeakerChange(speakers: Participant[]) {
-  // show UI indicators when participant is speaking
-}
-
-function handleDisconnect() {
-  console.log('disconnected from room');
+function updateSearchParams(url: string, token: string) {
+  const params = new URLSearchParams({ url, token });
+  window.history.replaceState(
+    null,
+    "",
+    `${window.location.pathname}?${params.toString()}`
+  );
 }
 </script>
 
