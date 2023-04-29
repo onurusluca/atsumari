@@ -1,39 +1,38 @@
 <script setup lang="ts">
 // Need to import images or put them into public folder: https://stackoverflow.com/questions/59632839/how-to-use-canvas-with-vue-in-component
-import WorldImage from '@/canvas/images/world1.png'
-import CharacterDown from '@/canvas/images/char-down.png'
+import WorldImage from "@/canvas/images/world1.png";
 
-import { Game } from '@/canvas/init'
+import { Game } from "@/canvas/init";
 //import '@/canvas/canvas'
 
-const { t } = useI18n()
-const authStore = useAuthStore()
-const route = useRouter()
+const { t } = useI18n();
+const authStore = useAuthStore();
+const route = useRouter();
 
-let roomId = route.currentRoute.value.params.id
-let roomName = route.currentRoute.value.params.name
-let userId = authStore.user?.id
+let roomId = route.currentRoute.value.params.id;
+let roomName = route.currentRoute.value.params.name;
+let userId = authStore.user?.id;
 
-let canvasWidth = ref(1024)
-let canvasHeight = ref(768)
+let canvasWidth = ref(1024);
+let canvasHeight = ref(768);
 
-let users = reactive<any[]>([])
+let users = reactive<any[]>([]);
 
 onMounted(async () => {
-  await joinPresenceChannel()
-  const canvas = document.getElementById('main-canvas') as HTMLCanvasElement
+  await joinPresenceChannel();
+  const canvas = document.getElementById("main-canvas") as HTMLCanvasElement;
 
-  new Game(canvas, canvasWidth.value, canvasHeight.value, WorldImage, players)
-  console.log(users)
-})
+  new Game(canvas, canvasWidth.value, canvasHeight.value, WorldImage, players);
+  console.log(users);
+});
 
 // Windows size to canvas size
-let windowWidth = ref(window.innerWidth)
-let windowHeight = ref(window.innerHeight)
-window.addEventListener('resize', () => {
-  windowWidth.value = window.innerWidth
-  windowHeight.value = window.innerHeight
-})
+let windowWidth = ref(window.innerWidth);
+let windowHeight = ref(window.innerHeight);
+window.addEventListener("resize", () => {
+  windowWidth.value = window.innerWidth;
+  windowHeight.value = window.innerHeight;
+});
 
 // Realtime
 const channel = supabase.channel(roomId, {
@@ -42,16 +41,16 @@ const channel = supabase.channel(roomId, {
       self: true,
     },
   },
-})
-const BROADCAST_EVENT = 'cursor'
+});
+const BROADCAST_EVENT = "cursor";
 
 // Subscribe to mouse events.
 // Our second parameter filters only for mouse events.
 channel
-  .on('broadcast', { event: BROADCAST_EVENT }, (event) => {
-    receivedCursorPosition(event)
+  .on("broadcast", { event: BROADCAST_EVENT }, (event) => {
+    receivedCursorPosition(event);
   })
-  .subscribe()
+  .subscribe();
 
 // Handle a mouse event.
 const receivedCursorPosition = ({ event, payload }) => {
@@ -60,85 +59,85 @@ const receivedCursorPosition = ({ event, payload }) => {
 
   // add to  users.value if the id is not already there and if it already exists, update x and y
   if (users.length > 0) {
-    let found = false
+    let found = false;
     for (let i = 0; i < users.length; i++) {
       if (users[i].id === payload.id) {
-        found = true
-        users[i].x = payload.x
-        users[i].y = payload.y
-        users[i].color = payload.color
+        found = true;
+        users[i].x = payload.x;
+        users[i].y = payload.y;
+        users[i].color = payload.color;
       }
     }
     if (!found) {
-      users.push(payload)
+      users.push(payload);
     }
   } else {
-    users.push(payload)
+    users.push(payload);
   }
-  console.log('JOIN USERS: ', users)
-}
+  console.log("JOIN USERS: ", users);
+};
 
 // Helper function for sending our own mouse position.
 const sendPosition = (position: object) => {
-  let x = position.offsetX
-  let y = position.offsetY
+  let x = position.offsetX;
+  let y = position.offsetY;
   return channel.send({
-    type: 'broadcast',
+    type: "broadcast",
     event: BROADCAST_EVENT,
     payload: {
       id: authStore.user?.id,
       x,
       y,
       // unique color for each user
-      color: '#' + Math.random().toString(16).substr(-6),
+      color: "#" + Math.random().toString(16).substr(-6),
     },
-  })
-}
+  });
+};
 
-let x = 0
-let y = 0
+let x = 0;
+let y = 0;
 
 // detect w a s d key events and increment +5
 const handleKeyDown = (event) => {
-  if (event.key === 'w') {
-    y += -20
-  } else if (event.key === 's') {
-    y += 20
-  } else if (event.key === 'a') {
-    x += -20
-  } else if (event.key === 'd') {
-    x += 20
+  if (event.key === "w") {
+    y += -20;
+  } else if (event.key === "s") {
+    y += 20;
+  } else if (event.key === "a") {
+    x += -20;
+  } else if (event.key === "d") {
+    x += 20;
   }
 
   //sendPosition({ offsetX: x, offsetY: y })
-}
+};
 
-window.addEventListener('keydown', handleKeyDown)
+window.addEventListener("keydown", handleKeyDown);
 
 // presence
-const channelPresence = supabase.channel(roomId + 'PRESENCE', {
+const channelPresence = supabase.channel(roomId + "PRESENCE", {
   config: {
     broadcast: {
       // self: true,
     },
     presence: { key: userId },
   },
-})
+});
 
 channelPresence
-  .on('presence', { event: 'sync' }, () => {
-    const state = channelPresence.presenceState()
-    users = state
-    console.log('SYNC USERS: ', users)
+  .on("presence", { event: "sync" }, () => {
+    const state = channelPresence.presenceState();
+    users = state;
+    console.log("SYNC USERS: ", users);
   })
-  .subscribe()
+  .subscribe();
 
 const joinPresenceChannel = async (event) => {
   return await channelPresence.track({
     user: userId,
     online_at: new Date().toISOString(),
-  })
-}
+  });
+};
 </script>
 
 <template>

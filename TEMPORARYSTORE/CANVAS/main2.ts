@@ -1,6 +1,6 @@
 import { emitter } from "@/composables/useEmit";
 import type { User } from "@/types/general";
-import type { CanvasAppOptions, Camera } from "@/types/canvasTypes";
+import type { CanvasAppOptions, Camera } from "../types";
 import { loadImage, isColliding } from "./utilities";
 import { drawPlayer } from "./draw";
 import { updateAnimationFrame } from "./animations";
@@ -276,7 +276,7 @@ export async function createCanvasApp({
   keyDownEventListener(canvas, pressedKeys, keyPressOrder, () => myPlayer);
   keyUpEventListener(canvas, pressedKeys, keyPressOrder, () => myPlayer);
   rightClickEventListener(canvas, getCamera, users, myPlayerId);
-  wheelEventListener(canvas, getCamera);
+  wheelEventListener(canvas, camera.zoomFactor);
 
   // Get right click move position confirmation
   emitter.on("rightClickPlayerMoveConfirmed", async (user) => {

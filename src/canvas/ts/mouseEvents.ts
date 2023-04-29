@@ -80,13 +80,15 @@ function handleWheelEvent(e: WheelEvent, zoomFactor: number): void {
     const zoomSpeed = 0.1;
     zoomFactor += e.deltaY < 0 ? zoomSpeed : -zoomSpeed;
     zoomFactor = Math.min(Math.max(zoomFactor, 0.1), 5);
+
+    console.log(zoomFactor);
   }
 }
 export function wheelEventListener(
   canvas: HTMLCanvasElement,
-  zoomFactor: number
+  getCamera: () => { cameraX: number; cameraY: number; zoomFactor: number }
 ): void {
-  canvas.addEventListener("wheel", (e) => handleWheelEvent(e, zoomFactor));
+  canvas.addEventListener("wheel", (e) => handleWheelEvent(e, getCamera().zoomFactor));
 }
 
 // Listen to double click

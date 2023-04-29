@@ -327,7 +327,7 @@ const downloadmyCharacterSpriteSheet = async () => {
   try {
     const { data, error } = await supabase.storage
       .from("character-sprites")
-      .download("dummy/walk.png");
+      .download("dummy/sprout-walk.png");
 
     if (data) {
       console.log("DOWNLOAD CHARACTER SPRITE SHEET: ", data);
@@ -477,9 +477,6 @@ const handleChatMenuOpen = () => {
 </script>
 
 <template>
-  <!-- LiveKit Stuff -->
-  <WebRTC class="space__webrtc" />
-
   <!-- Loading animation to show until app mount -->
   <!--   <section v-if="!canvasLoaded" class="route-loading-overlay">
     <span class="loader"></span>
@@ -569,6 +566,9 @@ const handleChatMenuOpen = () => {
         </div>
       </div>
     </div>
+
+    <!-- LiveKit Stuff -->
+    <section class="space__webrtc"> <WebRTC /> </section>
 
     <InitialCharacterSetupModal
       v-if="!initialSetupCompleted"
@@ -674,11 +674,9 @@ const handleChatMenuOpen = () => {
 
   .space__webrtc {
     position: fixed;
-    z-index: 999999;
-
-    width: 30rem;
-    height: 50rem;
-    border: 1px solid red;
+    top: 0;
+    right: 0;
+    border: 5px solid red;
   }
 }
 </style>

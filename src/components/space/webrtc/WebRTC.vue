@@ -1,12 +1,5 @@
 <script setup lang="ts">
-import {
-  HMSReactiveStore,
-  selectIsLocalAudioEnabled,
-  selectIsLocalVideoEnabled,
-  selectPeers,
-  selectIsConnectedToRoom,
-  selectVideoTrackByID,
-} from "@100mslive/hms-video-store";
+import { hmsActions, hmsStore } from "@/composables/useWebrtc";
 
 import { EnvVariables } from "@/envVariables";
 
@@ -23,134 +16,151 @@ const LIVEKIT_URL = EnvVariables.livekitUrl;
 let roomCode = ref<string>("");
 let userName = ref<string>("");
 
-const peers = ref([]);
-const audioEnabled = ref(true);
-const videoEnabled = ref(true);
-
-// Initialize HMS Store
-const hmsManager = new HMSReactiveStore();
-hmsManager.triggerOnSubscribe();
-const hmsStore = hmsManager.getStore();
-const hmsActions = hmsManager.getActions();
-
-// Joining the room
-const joinRoom = async () => {
-  // use room code to fetch auth token
-  const authToken = await hmsActions.getAuthTokenByRoomCode({
-    roomCode: roomCode.value,
-  });
-  // join room using username and auth token
-  hmsActions.join({
-    userName: userName.value,
-    authToken,
-  });
+const config = {
+  userName: "Jon Snow",
+  authToken: "<Auth token>", // client-side token generated from your token service
+  settings: {
+    // initial states
+    isAudioMuted: true,
+    isVideoMuted: false,
+  },
+  metaData: JSON.stringify({ city: "Winterfell", knowledge: "nothing" }),
+  rememberDeviceSelection: true, // remember manual device change
+  captureNetworkQualityInPreview: false, // whether to measure network score in preview
 };
-
-// Leaving the room
-const leaveRoom = async () => {
-  await hmsActions.leave();
-  peers.value = [];
-};
-
-// Cleanup if user refreshes the tab or navigates away
-onBeforeUnmount(leaveRoom);
-
-// Reactive state - update peers whenever there is a change in the peer-list
-watchEffect(() => {
-  const newPeers = hmsStore
-    .getState(selectPeers)
-    .filter((peer) => !peers.value.find((p) => p.id === peer.id));
-  peers.value = [...peers.value, ...newPeers];
-});
-
-// Mute and unmute audio
-const toggleAudio = () => {
-  const newAudioEnabled = !audioEnabled.value;
-  hmsActions.setLocalAudioEnabled(newAudioEnabled);
-  audioEnabled.value = newAudioEnabled;
-};
-
-// Mute and unmute video
-const toggleVideo = () => {
-  const newVideoEnabled = !videoEnabled.value;
-  hmsActions.setLocalVideoEnabled(newVideoEnabled);
-  videoEnabled.value = newVideoEnabled;
-};
-
-// Showing the required elements on connection/disconnection
-const onConnection = (isConnected: boolean) => {
-  const form = document.getElementById("join");
-  const conference = document.getElementById("conference");
-  const leaveBtn = document.getElementById("leave-btn");
-  const controls = document.getElementById("controls");
-
-  if (isConnected) {
-    form?.classList.add("hide");
-    conference?.classList.remove("hide");
-    leaveBtn?.classList.remove("hide");
-    controls?.classList.remove("hide");
-  } else {
-    form?.classList.remove("hide");
-    conference?.classList.add("hide");
-    leaveBtn?.classList.add("hide");
-    controls?.classList.add("hide");
-  }
-};
-
-// Listen to the connection state
-watchEffect(() => {
-  onConnection(hmsStore.getState(selectIsConnectedToRoom));
-});
+await hmsActions.preview(config);
 </script>
 
 <template>
-  <div class="webrtc">
-    <header>
-      <img class="logo" src="https://www.100ms.live/assets/logo.svg" />
-      <button id="leave-btn" class="btn-danger hide" @click="leaveRoom"
-        >Leave Room</button
-      >
-    </header>
-    <form id="join">
-      <h2>Join Room</h2>
-      <div class="input-container">
-        <input v-model="userName" type="text" name="username" placeholder="Your name" />
-      </div>
-      <div class="input-container">
-        <input v-model="roomCode" type="text" name="roomCode" placeholder="Room code" />
-      </div>
-      <button type="button" class="btn-primary" @click="joinRoom">Join</button>
-    </form>
-
-    <div id="conference" class="conference-section hide">
-      <h2>Conference</h2>
-
-      <div id="peers-container">
-        <div v-for="peer in peers" :key="peer.id" class="peer-tile">
-          <video
-            class="peer-video"
-            :id="'video-' + peer.id"
-            autoplay
-            muted
-            playsinline
-          ></video>
-          <div class="peer-name">{{ peer.name }}</div>
-        </div>
-      </div>
-    </div>
-
-    <div id="controls" class="control-bar hide">
-      <button id="mute-aud" class="btn-control" @click="toggleAudio">{{
-        audioEnabled ? "Mute" : "Unmute"
-      }}</button>
-      <button id="mute-vid" class="btn-control" @click="toggleVideo">{{
-        videoEnabled ? "Hide" : "Unhide"
-      }}</button>
-    </div>
-  </div>
+  <div class="webrtc"> </div>
 </template>
 
 <style scoped lang="scss">
 .webrtc {
+  .btn-danger {
+    border: 1px solid transparent;
+    border-radius: 4px;
+    padding: 6px 14px;
+    background-color: #f44336;
+    color: white;
+    font-family: inherit;
+    font-size: 14px;
+  }
+
+  .hide {
+    display: none !important;
+  }
+
+  form {
+    max-width: 450px;
+    margin: 30px auto;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    border-radius: 8px;
+    padding: 20px;
+  }
+
+  input {
+    display: block;
+    width: 100%;
+    border-radius: 8px;
+    border: 2px solid transparent;
+    height: 34px;
+    padding: 5px;
+    background: #37474f;
+    color: inherit;
+    font-family: inherit;
+  }
+
+  input::placeholder {
+    color: #aaa;
+  }
+
+  .input-container {
+    margin-bottom: 20px;
+  }
+
+  .btn-primary {
+    border: 1px solid transparent;
+    border-radius: 4px;
+    padding: 6px 14px;
+    background-color: #1565c0;
+    color: white;
+    font-family: inherit;
+    font-size: 14px;
+  }
+
+  form h2,
+  .conference-section h2 {
+    margin-bottom: 20px;
+  }
+
+  .conference-section {
+    padding: 20px 30px;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  .conference-section h2 {
+    text-align: center;
+    font-size: 32px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #546e7a;
+  }
+
+  #peers-container {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(min-content, 1fr));
+    place-items: center;
+    grid-gap: 10px;
+  }
+
+  .peer-video {
+    height: 250px;
+    width: 250px;
+    border-radius: 40%;
+    object-fit: cover;
+    margin-bottom: 10px;
+  }
+
+  .local.peer-video {
+    transform: scaleX(-1);
+  }
+
+  .peer-name {
+    font-size: 14px;
+    text-align: center;
+  }
+
+  .peer-tile {
+    padding: 10px;
+  }
+
+  .control-bar {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    padding: 15px;
+    justify-content: center;
+    z-index: 10;
+  }
+
+  .control-bar > *:not(:first-child) {
+    margin-left: 8px;
+  }
+
+  .btn-control {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border: 2px solid #37474f;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    text-align: center;
+    background-color: #607d8b;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+    color: white;
+  }
 }
 </style>
