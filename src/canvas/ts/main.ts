@@ -19,6 +19,16 @@ export async function createCanvasApp({
 }: CanvasAppOptions) {
   const ctx = canvas.getContext("2d")!;
 
+  // Mismatched canvas and display resolutions can cause blurry content.:
+  /*
+  const devicePixelRatio = window.devicePixelRatio || 1;
+  canvas.width = canvas.clientWidth * devicePixelRatio;
+  canvas.height = canvas.clientHeight * devicePixelRatio;
+  ctx.scale(devicePixelRatio, devicePixelRatio);
+  */
+
+  // Anti-aliasing in browsers smooths images, which can blur pixel art or low-res graphics:
+  ctx.imageSmoothingEnabled = false;
   // Load images
   const [worldImg, characterImg, characterImgMyPlayer] = await Promise.all([
     loadImage(spaceMap),
@@ -128,7 +138,7 @@ export async function createCanvasApp({
         }
 
         // Check for collisions
-        const playerWidth = 64 * camera.zoomFactor;
+        const playerWidth = 48 * camera.zoomFactor;
         const playerHeight = 64 * camera.zoomFactor;
         let collision = false;
         for (const user of users) {

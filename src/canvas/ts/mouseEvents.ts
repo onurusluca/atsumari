@@ -44,8 +44,8 @@ function handleRightClick(
   const worldPos = { worldX, worldY };
 
   // Check if the right-click is on any user, if so, don't emit right click event
-  const playerWidth = 64 * zoomFactor;
-  const playerHeight = 64 * zoomFactor;
+  const playerWidth = 48 * zoomFactor;
+  const playerHeight = 48 * zoomFactor;
 
   const collision = getUserCollision(
     users,
@@ -55,6 +55,8 @@ function handleRightClick(
     playerWidth,
     playerHeight
   );
+
+  console.log("right click", worldPos);
 
   if (!collision) {
     emitter.emit("rightClick", { mousePos, worldPos });

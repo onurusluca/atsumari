@@ -13,45 +13,18 @@ function drawShadow(
   zoomFactor: number,
   isMouseOver: boolean
 ): void {
-  // Draw shadow
-  const shadowRadiusX = 20 * zoomFactor;
-  const shadowRadiusY = 10 * zoomFactor;
-  const rotation = 0;
-  const startAngle = 0;
-  const endAngle = 2 * Math.PI;
-
-  ctx.fillStyle = "#0000004b";
-  ctx.beginPath();
-  ctx.ellipse(
-    shadowX + 32 * zoomFactor,
-    shadowY + 62 * zoomFactor,
-    shadowRadiusX,
-    shadowRadiusY,
-    rotation,
-    startAngle,
-    endAngle
+  // Draw shadow using shadow sprite
+  let shadowSize = 48;
+  ctx.drawImage(
+    shadowSprite,
+    shadowX + 8,
+    shadowY + 24,
+    shadowSize * zoomFactor,
+    shadowSize * zoomFactor
   );
-  ctx.closePath();
-  ctx.fill();
-
   if (isMouseOver) {
-    // Draw ellipse around the shadow
-    const ellipseRadiusX = 20 * zoomFactor;
-    const ellipseRadiusY = 10 * zoomFactor;
-    ctx.strokeStyle = "#333";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.ellipse(
-      shadowX + 32 * zoomFactor,
-      shadowY + 60 * zoomFactor,
-      ellipseRadiusX,
-      ellipseRadiusY,
-      rotation,
-      startAngle,
-      endAngle
-    );
-    ctx.closePath();
-    ctx.stroke();
+    // Make shadow 4px bigger when mouse is over
+    shadowSize = 52;
   }
 }
 
@@ -89,10 +62,12 @@ function drawPlayerNameBackground(
   ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
   ctx.font = `${14 * zoomFactor}px Poppins`;
   const userNameTextWidth = ctx.measureText(player.userName).width;
-  const padding = 15 * zoomFactor;
+  const padding = 10 * zoomFactor;
   const backgroundHeight = 20 * zoomFactor;
   const backgroundWidth = userNameTextWidth + padding * 3;
   ctx.beginPath();
+
+  // Left half circle
   ctx.arc(
     backgroundX + backgroundHeight / 2,
     backgroundY + backgroundHeight / 2,
@@ -100,6 +75,8 @@ function drawPlayerNameBackground(
     Math.PI / 2,
     (3 * Math.PI) / 2
   );
+
+  // Right half circle
   ctx.arc(
     backgroundX + backgroundWidth - backgroundHeight / 2,
     backgroundY + backgroundHeight / 2,

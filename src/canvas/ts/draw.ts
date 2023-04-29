@@ -4,7 +4,11 @@ import { loadImage } from "./utilities";
 import shadowImage from "../images/shadow.png";
 
 // Load images
-const [shadowSprite] = await Promise.all([loadImage(shadowImage)]);
+let shadowSprite: HTMLImageElement;
+async function loadAssets(): Promise<void> {
+  shadowSprite = await loadImage(shadowImage);
+}
+loadAssets();
 
 function drawShadow(
   ctx: CanvasRenderingContext2D,
@@ -13,8 +17,7 @@ function drawShadow(
   zoomFactor: number,
   isMouseOver: boolean
 ): void {
-  // Draw shadow using shadow sprite
-  let shadowSize = 48;
+  const shadowSize = 48;
   ctx.drawImage(
     shadowSprite,
     shadowX + 8,
@@ -22,10 +25,6 @@ function drawShadow(
     shadowSize * zoomFactor,
     shadowSize * zoomFactor
   );
-  if (isMouseOver) {
-    // Make shadow 4px bigger when mouse is over
-    shadowSize = 52;
-  }
 }
 
 function drawCharacter(
@@ -51,21 +50,23 @@ function drawCharacter(
   );
 }
 
-// Draw player name
 function drawPlayerNameBackground(
   ctx: CanvasRenderingContext2D,
-  player: User,
+  textWidth: number,
   zoomFactor: number,
   backgroundX: number,
   backgroundY: number
 ): void {
   ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
   ctx.font = `${14 * zoomFactor}px Poppins`;
-  const userNameTextWidth = ctx.measureText(player.userName).width;
-  const padding = 15 * zoomFactor;
+
+  const padding = 10 * zoomFactor;
   const backgroundHeight = 20 * zoomFactor;
-  const backgroundWidth = userNameTextWidth + padding * 3;
+  const backgroundWidth = textWidth + padding * 3;
+
   ctx.beginPath();
+
+  // Left half circle
   ctx.arc(
     backgroundX + backgroundHeight / 2,
     backgroundY + backgroundHeight / 2,
@@ -73,6 +74,8 @@ function drawPlayerNameBackground(
     Math.PI / 2,
     (3 * Math.PI) / 2
   );
+
+  // Right half circle
   ctx.arc(
     backgroundX + backgroundWidth - backgroundHeight / 2,
     backgroundY + backgroundHeight / 2,
@@ -80,11 +83,11 @@ function drawPlayerNameBackground(
     (3 * Math.PI) / 2,
     Math.PI / 2
   );
+
   ctx.closePath();
   ctx.fill();
 }
 
-// Draw status icon
 function drawUserStatusIcon(
   ctx: CanvasRenderingContext2D,
   userStatus: string,
@@ -93,38 +96,35 @@ function drawUserStatusIcon(
   statusY: number
 ): void {
   const statusRadius = 5 * zoomFactor;
-  switch (userStatus) {
-    case "online":
-      ctx.fillStyle = "#2CC56F";
-      break;
-    case "busy":
-      ctx.fillStyle = "orange";
-      break;
-    case "away":
-      ctx.fillStyle = "gray";
-      break;
-    default:
-      ctx.fillStyle = "gray";
-  }
+  ctx.fillStyle = userStatusColors(userStatus);
   ctx.beginPath();
   ctx.arc(statusX, statusY, statusRadius, 0, 2 * Math.PI);
   ctx.fill();
 }
 
+function userStatusColors(userStatus: string): string {
+  switch (userStatus) {
+    case "online":
+      return "#2CC56F";
+    case "busy":
+      return "orange";
+    case "away":
+      return "gray";
+    default:
+      return "gray";
+  }
+}
+
 function drawPlayerName(
   ctx: CanvasRenderingContext2D,
-  player: User,
+  playerName: string,
   zoomFactor: number,
   backgroundX: number,
   backgroundY: number,
   padding: number
 ): void {
   ctx.fillStyle = "white";
-  ctx.fillText(
-    player.userName,
-    backgroundX + 10 + padding,
-    backgroundY * zoomFactor + 15
-  );
+  ctx.fillText(playerName, backgroundX + 10 + padding, backgroundY * zoomFactor + 15);
 }
 
 export function drawPlayer(
@@ -139,17 +139,33 @@ export function drawPlayer(
   userStatus: string,
   isMouseOver: boolean
 ): void {
-  const shadowX = (player.x - cameraX - 4) * zoomFactor;
-  const shadowY = (player.y - cameraY - 4) * zoomFactor;
+  const characterX = (player.x - cameraX - 4) * zoomFactor;
+  const characterY = (player.y - cameraY - 4) * zoomFactor;
 
-  drawShadow(ctx, shadowX, shadowY, zoomFactor, isMouseOver);
-  drawCharacter(ctx, characterImg, animation, frame, shadowX, shadowY, zoomFactor);
+  drawShadow(ctx, characterX, characterY, zoomFactor, isMouseOver);
+  drawCharacter(
+    ctx,
+    characterImg,
+    animation,
+    frame,
+    characterX,
+    characterY,
+    zoomFactor
+  );
 
-  const backgroundX =
-    (player.x - cameraX - ctx.measureText(player.userName).width / 16) * zoomFactor;
-  const backgroundY = (player.y - cameraY - characterImg.height / 4) * zoomFactor;
+  ctx.font = `${14 * zoomFactor}px Poppins`;
+  const userNameTextWidth = ctx.measureText(player.userName).width;
 
-  drawPlayerNameBackground(ctx, player, zoomFactor, backgroundX, backgroundY);
+  const backgroundX = characterX + (32 * zoomFactor - userNameTextWidth) / 2;
+  const backgroundY = characterY - 30 * zoomFactor;
+
+  drawPlayerNameBackground(
+    ctx,
+    userNameTextWidth,
+    zoomFactor,
+    backgroundX,
+    backgroundY
+  );
 
   const padding = 10 * zoomFactor;
   drawUserStatusIcon(
@@ -160,5 +176,5 @@ export function drawPlayer(
     backgroundY + (20 * zoomFactor) / 2
   );
 
-  drawPlayerName(ctx, player, zoomFactor, backgroundX, backgroundY, padding);
+  drawPlayerName(ctx, player.userName, zoomFactor, backgroundX, backgroundY, padding);
 }
