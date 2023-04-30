@@ -9,7 +9,8 @@ import type { User } from "@/types/general";
 import type { ProfilesType } from "@/api/types/index";
 import WebRTC from "@/components/space/webrtc/WebRTC.vue";
 import Joystick from "@/components/space/Joystick.vue";
-
+import Conference from "@/components/space/webrtc/Conference.vue";
+import { selectRoomStarted } from "@100mslive/hms-video-store";
 /****************************************
  * DECLARATIONS
  ****************************************/
@@ -59,6 +60,7 @@ window.addEventListener("resize", () => {
 
 let initialSetupCompleted = ref<boolean>(true);
 
+let isWebrtcConnected = ref<boolean>(false);
 /****************************************
  * INITIALIZATION
  ****************************************/
@@ -71,6 +73,12 @@ onMounted(async () => {
       await doRealtimeStuff();
     }
   });
+
+  const onConnection = (connectionState: boolean | undefined) => {
+    isWebrtcConnected.value = Boolean(connectionState);
+  };
+
+  hmsStore.subscribe(onConnection, selectRoomStarted);
 });
 
 const initialPreparations = async () => {
@@ -569,7 +577,10 @@ const handleChatMenuOpen = () => {
     </div>
 
     <!-- LiveKit Stuff -->
-    <section class="space__webrtc"> <WebRTC /> </section>
+    <section class="space__webrtc">
+      <Conference v-if="isWebrtcConnected" />
+      <WebRTC v-else />
+    </section>
 
     <!-- Joystick -->
     <Joystick />

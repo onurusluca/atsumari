@@ -1,12 +1,5 @@
-import {
-  HMSReactiveStore,
-  selectIsLocalAudioEnabled,
-  selectIsLocalVideoEnabled,
-  selectPeers,
-  selectIsConnectedToRoom,
-  selectVideoTrackByID,
-} from "@100mslive/hms-video-store";
-
+// this code will be in src/hms.ts
+import { HMSReactiveStore } from "@100mslive/hms-video-store";
 import type { HmsTokenResponse } from "@/types/webrtcTypes";
 
 const FUNCTION_BASE_URL = "/.netlify/functions";
@@ -23,7 +16,7 @@ export const fetchToken = async (
 ): Promise<HmsTokenResponse | any> => {
   try {
     // create or fetch the room_id for the passed in room
-    const roomResponse = await fetch(`${FUNCTION_BASE_URL}/createRoom`, {
+    const response = await fetch(`${FUNCTION_BASE_URL}/createRoom`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -31,7 +24,7 @@ export const fetchToken = async (
       body: JSON.stringify({ room: roomName }),
     });
 
-    const room = await roomResponse.json();
+    const room = await response.json();
 
     // Generate the app/authToken
     const tokenResponse = await fetch(`${FUNCTION_BASE_URL}/generateAppToken`, {
@@ -49,9 +42,7 @@ export const fetchToken = async (
     const token = await tokenResponse.json();
 
     return token;
-  } catch (error) {
+  } catch (error: any) {
     throw error;
   }
 };
-
-// GUIDE: https://www.100ms.live/blog/vuejs-video-call-app-golang

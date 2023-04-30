@@ -35,6 +35,7 @@ declare module '@vue/runtime-core' {
     CarbonWarningAlt: typeof import('~icons/carbon/warning-alt')['default']
     CarbonWarningSquare: typeof import('~icons/carbon/warning-square')['default']
     Chat: typeof import('./components/space/Chat.vue')['default']
+    Conference: typeof import('./components/space/webrtc/Conference.vue')['default']
     ConfirmModal: typeof import('./components/global/ConfirmModal.vue')['default']
     CreateSpaceModal: typeof import('./components/global/CreateSpaceModal.vue')['default']
     'Emojione:deciduousTree': typeof import('~icons/emojione/deciduous-tree')['default']

@@ -22,3 +22,18 @@ export function isColliding(rect1: Rect, rect2: Rect): boolean {
     rect1.y + rect1.height > rect2.y
   );
 }
+
+export function matchUserFacingToAnimationState(facingTo: string): string {
+  switch (facingTo) {
+    case "up":
+      return "walk-up";
+    case "left":
+      return "walk-left";
+    case "down":
+      return "walk-down";
+    case "right":
+      return "walk-right";
+    default:
+      return "walk-down";
+  }
+}

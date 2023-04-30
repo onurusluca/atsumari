@@ -2,7 +2,7 @@ import { characterAnimations } from "./animations";
 import type { User } from "@/types/general";
 import { loadImage } from "./utilities";
 import shadowImage from "../images/shadow.png";
-
+import type { Camera } from "@/types/canvasTypes";
 // Load images
 let shadowSprite: HTMLImageElement;
 async function loadAssets(): Promise<void> {
@@ -180,4 +180,24 @@ export function drawPlayer(
   );
 
   drawPlayerName(ctx, player.userName, zoomFactor, backgroundX, backgroundY, padding);
+}
+
+// Draw the map
+// Add the following function
+export function drawWorld(
+  ctx: CanvasRenderingContext2D,
+  worldImg: HTMLImageElement,
+  camera: Camera
+) {
+  ctx.drawImage(
+    worldImg,
+    0,
+    0,
+    worldImg.width,
+    worldImg.height,
+    (-camera.cameraX - worldImg.height / 2) * camera.zoomFactor,
+    (-camera.cameraY - worldImg.width / 2) * camera.zoomFactor,
+    worldImg.width * camera.zoomFactor,
+    worldImg.height * camera.zoomFactor
+  );
 }
