@@ -8,6 +8,7 @@ import { emitter } from "@/composables/useEmit";
 import type { User } from "@/types/general";
 import type { ProfilesType } from "@/api/types/index";
 import WebRTC from "@/components/space/webrtc/WebRTC.vue";
+import Joystick from "@/components/space/Joystick.vue";
 
 /****************************************
  * DECLARATIONS
@@ -235,9 +236,9 @@ const initialPreparations = async () => {
 const moveUserToRightClickedPosition = async () => {
   users.forEach(async (user) => {
     if (user.id === userId) {
-      // Update user position
-      user.x = rightClickWorldPosition.value.x;
-      user.y = rightClickWorldPosition.value.y;
+      // Update user position (-24 because of the sprite size)
+      user.x = rightClickWorldPosition.value.x - 24;
+      user.y = rightClickWorldPosition.value.y - 24;
       // Set to default
       user.facingTo = "down";
 
@@ -569,6 +570,9 @@ const handleChatMenuOpen = () => {
 
     <!-- LiveKit Stuff -->
     <section class="space__webrtc"> <WebRTC /> </section>
+
+    <!-- Joystick -->
+    <Joystick />
 
     <InitialCharacterSetupModal
       v-if="!initialSetupCompleted"

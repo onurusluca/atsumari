@@ -43,10 +43,10 @@ function handleRightClick(
   const mousePos = { mouseX, mouseY };
   const worldPos = { worldX, worldY };
 
-  // Check if the right-click is on any user, if so, don't emit right click event
   const playerWidth = 48 * zoomFactor;
   const playerHeight = 48 * zoomFactor;
 
+  // Check if the right-click is on any user, if so, don't emit right click event
   const collision = getUserCollision(
     users,
     myPlayerId,
@@ -76,21 +76,31 @@ export function rightClickEventListener(
 }
 
 // Override zoom and ctrl+scroll
-function handleWheelEvent(e: WheelEvent, zoomFactor: number): void {
+function handleWheelEvent(
+  e: WheelEvent,
+  camera: { cameraX: number; cameraY: number; zoomFactor: number }
+): void {
   if (e.ctrlKey) {
     e.preventDefault();
     const zoomSpeed = 0.1;
-    zoomFactor += e.deltaY < 0 ? zoomSpeed : -zoomSpeed;
-    zoomFactor = Math.min(Math.max(zoomFactor, 0.1), 5);
+    const zoomIncrement = e.deltaY < 0 ? zoomSpeed : -zoomSpeed;
+    // Limit zoom to 0.3 - 1.8
+    camera.zoomFactor = clampZoom(camera.zoomFactor + zoomIncrement, 0.3, 1.8);
 
-    console.log(zoomFactor);
+    console.log(camera.zoomFactor);
   }
 }
+
 export function wheelEventListener(
   canvas: HTMLCanvasElement,
-  getCamera: () => { cameraX: number; cameraY: number; zoomFactor: number }
+  camera: { cameraX: number; cameraY: number; zoomFactor: number }
 ): void {
-  canvas.addEventListener("wheel", (e) => handleWheelEvent(e, getCamera().zoomFactor));
+  canvas.addEventListener("wheel", (e) => handleWheelEvent(e, camera));
+}
+
+// For limiting zoom
+function clampZoom(zoomFactor: number, minZoom: number, maxZoom: number): number {
+  return Math.min(Math.max(zoomFactor, minZoom), maxZoom);
 }
 
 // Listen to double click

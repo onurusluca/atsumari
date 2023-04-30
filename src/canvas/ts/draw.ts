@@ -20,11 +20,13 @@ function drawShadow(
   const shadowSize = 48;
   ctx.drawImage(
     shadowSprite,
-    shadowX + 8,
-    shadowY + 24,
+    shadowX + 8 * zoomFactor,
+    shadowY + 24 * zoomFactor,
     shadowSize * zoomFactor,
     shadowSize * zoomFactor
   );
+
+  //TODO: Do something on mouse over
 }
 
 function drawCharacter(
@@ -124,7 +126,8 @@ function drawPlayerName(
   padding: number
 ): void {
   ctx.fillStyle = "white";
-  ctx.fillText(playerName, backgroundX + 10 + padding, backgroundY * zoomFactor + 15);
+  ctx.font = `${14 * zoomFactor}px Poppins`;
+  ctx.fillText(playerName, backgroundX + padding * 2, backgroundY + 15 * zoomFactor);
 }
 
 export function drawPlayer(

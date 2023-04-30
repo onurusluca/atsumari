@@ -27,8 +27,6 @@ export async function createCanvasApp({
   ctx.scale(devicePixelRatio, devicePixelRatio);
   */
 
-  // Anti-aliasing in browsers smooths images, which can blur pixel art or low-res graphics:
-  ctx.imageSmoothingEnabled = false;
   // Load images
   const [worldImg, characterImg, characterImgMyPlayer] = await Promise.all([
     loadImage(spaceMap),
@@ -53,7 +51,7 @@ export async function createCanvasApp({
   };
 
   // When the user releases right key while still pressing the up key, character should start going up
-  const keyPressOrder: string[] = [];
+  let keyPressOrder: string[] = [];
   const pressedKeys: Record<string, boolean> = {
     w: false,
     a: false,
@@ -85,16 +83,15 @@ export async function createCanvasApp({
    ****************************************/
   function gameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Anti-aliasing in browsers smooths images, which can blur pixel art or low-res graphics:
+    ctx.imageSmoothingEnabled = false;
 
     // Set myPlayer
     myPlayer = users.find((user) => user.id === myPlayerId)!;
     if (myPlayer) {
       // Center camera on my player
-      camera = {
-        cameraX: myPlayer.x - canvas.width / (2.2 * camera.zoomFactor),
-        cameraY: myPlayer.y - canvas.height / (2.2 * camera.zoomFactor),
-        zoomFactor: camera.zoomFactor,
-      };
+      camera.cameraX = myPlayer.x - canvas.width / (2.2 * camera.zoomFactor);
+      camera.cameraY = myPlayer.y - canvas.height / (2.2 * camera.zoomFactor);
 
       // Draw world
       ctx.drawImage(
@@ -286,13 +283,44 @@ export async function createCanvasApp({
   keyDownEventListener(canvas, pressedKeys, keyPressOrder, () => myPlayer);
   keyUpEventListener(canvas, pressedKeys, keyPressOrder, () => myPlayer);
   rightClickEventListener(canvas, getCamera, users, myPlayerId);
-  wheelEventListener(canvas, getCamera);
+  wheelEventListener(canvas, camera);
 
-  // Get right click move position confirmation
+  // Get right click move position confirmation and move the player
   emitter.on("rightClickPlayerMoveConfirmed", async (user) => {
-    myPlayer.x = user.x - 36;
-    myPlayer.y = user.y - 64;
+    myPlayer.x = user.x;
+    myPlayer.y = user.y;
     // Canvas loses focus after right click, so we need to focus it again
     canvas.focus();
+  });
+
+  // Get joystick move
+  emitter.on("joystickMove", async (direction: string) => {
+    console.log("joystickMove", direction);
+
+    if (direction === "up") {
+      pressedKeys.w = true;
+      keyPressOrder.push("w");
+    } else if (direction === "left") {
+      pressedKeys.a = true;
+      keyPressOrder.push("a");
+    } else if (direction === "down") {
+      pressedKeys.s = true;
+      keyPressOrder.push("s");
+    } else if (direction === "right") {
+      pressedKeys.d = true;
+      keyPressOrder.push("d");
+    }
+
+    if (direction === "none") {
+      console.log("no direction");
+
+      pressedKeys.w = false;
+      pressedKeys.a = false;
+      pressedKeys.s = false;
+      pressedKeys.d = false;
+      keyPressOrder = [];
+
+      emitter.emit("playerMove", myPlayer);
+    }
   });
 }
