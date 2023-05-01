@@ -38,6 +38,9 @@ button:disabled {
 }
 
 .btn-no-style {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border: none;
   padding: .3rem .5rem;
 

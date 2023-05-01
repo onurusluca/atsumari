@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@100mslive/hms-video-store": "^0.10.1",
-    "@intlify/unplugin-vue-i18n": "^0.8.2",
+    "@intlify/unplugin-vue-i18n": "^0.10.0",
     "@supabase/supabase-js": "^2.21.0",
     "@vueuse/components": "^9.13.0",
     "@vueuse/core": "^9.13.0",
@@ -28,9 +28,9 @@
     "vue-router": "^4.1.6"
   },
   "devDependencies": {
-    "@iconify/json": "^2.2.57",
+    "@iconify/json": "^2.2.58",
     "@rushstack/eslint-patch": "^1.2.0",
-    "@types/node": "^18.16.2",
+    "@types/node": "^18.16.3",
     "@vitejs/plugin-vue": "^4.2.1",
     "@vue/eslint-config-prettier": "^7.1.0",
     "@vue/eslint-config-typescript": "^11.0.3",

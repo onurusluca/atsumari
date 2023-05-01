@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { fetchToken } from "@/composables/useWebrtc";
 import { EnvVariables } from "@/envVariables";
 
 const { t } = useI18n();
@@ -8,30 +9,30 @@ const route = useRouter();
 
 onMounted(() => {});
 
-const LIVEKIT_API_KEY = EnvVariables.livekitApiKey;
-const LIVEKIT_URL = EnvVariables.livekitUrl;
-
-const defaultRoomName = "autumn-lake-181610-VC";
+let roomName = ref<string>("");
+let roomDescription = ref<string>("my room");
+let roomTemplateId = ref<string>("64490b580ca9b196e73dadbf");
+let roomRegion = ref<string>("us");
 const isLoading = ref(false);
 const formData = reactive({
   name: "",
-  room: `${defaultRoomName}`,
+  room: roomName,
 });
 
-const joinHmsRoom = async () => {
+const handleCreateRoom = async () => {
   try {
     isLoading.value = true;
-    const authToken = await fetchToken(formData.name, formData.room);
-
-    hmsActions.join({
-      userName: formData.name,
-      authToken: authToken,
-      settings: {
-        isAudioMuted: true, // Join with audio muted
-      },
-    });
+    const roomRes = await createRoom(
+      roomName.value,
+      roomRegion.value,
+      roomDescription.value,
+      roomTemplateId.value
+    );
+    console.log(roomRes);
   } catch (error) {
-    alert(error);
+    console.log(error);
+
+    //alert(error);
   }
 
   isLoading.value = false;
@@ -42,7 +43,7 @@ const joinHmsRoom = async () => {
   <div class="webrtc">
     <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
       <div class="bg-white py-10 px-5 shadow sm:rounded-lg sm:px-10">
-        <form class="space-y-6" @submit.prevent="joinHmsRoom">
+        <form class="space-y-6" @submit.prevent="handleCreateRoom">
           <div>
             <label for="name" class="block text-sm font-2xl text-gray-700">
               Name
@@ -70,7 +71,6 @@ const joinHmsRoom = async () => {
                 name="room"
                 type="text"
                 required
-                disabled
                 v-model="formData.room"
                 class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm disabled:cursor-not-allowed"
               />

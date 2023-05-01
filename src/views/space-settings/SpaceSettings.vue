@@ -6,26 +6,11 @@ const route = useRouter();
 let spaceId = route.currentRoute.value.params;
 
 onMounted(() => {});
-
-// Delete space
-const handleDeleteSpace = async (spaceId: string) => {
-  try {
-    let { data: spaces, error } = await supabase
-      .from("spaces")
-      .delete()
-      .eq("id", spaceId);
-    if (spaces) {
-    }
-    if (error) throw error;
-  } catch (error: any) {
-    console.log("DELETE SPACE CATCH ERROR: ", error.message);
-  }
-};
 </script>
 
 <template>
   <div class="space-settings">
-    <p>spaceSettings</p>
+    <p>spaceSefdgdfttings</p>
     <p> {{ spaceId }} </p>
   </div>
 </template>

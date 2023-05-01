@@ -8,6 +8,11 @@ const EnvVariables = {
   // LiveKit
   livekitApiKey: import.meta.env.VITE_LIVEKIT_API_KEY as string,
   livekitUrl: import.meta.env.VITE_LIVEKIT_URL as string,
+
+  // WebRTC
+  hmsAppAccessKey: import.meta.env.VITE_HMS_APP_ACCESS_KEY as string,
+  hmsAppSecret: import.meta.env.VITE_HMS_APP_SECRET as string,
+  webRtcApiBaseUrl: import.meta.env.VITE_WEBRTC_API_BASE_URL as string,
 };
 
 export { EnvVariables };

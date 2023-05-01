@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ProfilesType } from "@/api/types/index";
+// import type { ProfilesType } from "@/api/types/index";
 
 const { t } = useI18n();
 const authStore = useAuthStore();
