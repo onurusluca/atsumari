@@ -51,6 +51,8 @@ const onPeerVideoChange = (isEnabled: boolean, peerId: string) => {
 };
 
 const renderPeers = (peers: HMSPeer[]) => {
+  console.log("renderPeers", peers);
+
   allPeers.value = peers;
   peers.forEach((peer: HMSPeer) => {
     if (videoRefs[peer.id]) {
@@ -99,75 +101,52 @@ const toggleVideo = async () => {
 hmsStore.subscribe(renderPeers, selectPeers);
 hmsStore.subscribe(onAudioChange, selectIsLocalAudioEnabled);
 hmsStore.subscribe(onVideoChange, selectIsLocalVideoEnabled);
+
+// Remove
 </script>
 
 <template>
-  <main class="mx-10 min-h-[80vh]">
-    <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-3 my-6">
-      <div v-for="peer in allPeers" :key="peer.id" class="relative">
+  <main class="main-container">
+    <div class="video-grid">
+      <div v-for="peer in allPeers" :key="peer.id" class="video-container">
         <video
           autoplay
           :muted="peer.isLocal"
           playsinline
-          class="h-full w-full object-cover"
+          class="video-element"
           :ref="
             (el) => {
               if (el) videoRefs[peer.id] = el;
             }
           "
         ></video>
-        <p
-          class="flex justify-center items-center py-1 px-2 text-sm font-medium bg-black bg-opacity-80 text-white pointer-events-none absolute bottom-0 left-0"
-        >
+        <p class="video-label">
           <span
-            class="inline-block w-6"
+            class="audio-icon"
             v-show="
               (peer.isLocal && isAudioEnabled) ||
               (!peer.isLocal && remotePeerProps?.[peer.id]?.[MediaState.isAudioEnabled])
             "
           >
-            <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-              <path
-                stroke="#FFF"
-                fill="#FFF"
-                d="m23 14v3a7 7 0 0 1 -14 0v-3h-2v3a9 9 0 0 0 8 8.94v2.06h-4v2h10v-2h-4v-2.06a9 9 0 0 0 8-8.94v-3z"
-              />
-              <path
-                stroke="#FFF"
-                fill="#FFF"
-                d="m16 22a5 5 0 0 0 5-5v-10a5 5 0 0 0 -10 0v10a5 5 0 0 0 5 5z"
-              />
-              <path d="m0 0h32v32h-32z" fill="none" />
-            </svg>
+            <!-- Audio Enabled SVG -->
           </span>
           <span
-            class="inline-block w-6"
+            class="audio-mute-icon"
             v-show="
               (peer.isLocal && !isAudioEnabled) ||
               (!peer.isLocal &&
                 !remotePeerProps?.[peer.id]?.[MediaState.isAudioEnabled])
             "
           >
-            <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-              <path
-                fill="#FFF"
-                d="m23 17a7 7 0 0 1 -11.73 5.14l1.42-1.41a5 5 0 0 0 8.31-3.73v-4.58l9-9-1.41-1.42-26.59 26.59 1.41 1.41 6.44-6.44a8.91 8.91 0 0 0 5.15 2.38v2.06h-4v2h10v-2h-4v-2.06a9 9 0 0 0 8-8.94v-3h-2z"
-              />
-              <path
-                fill="#FFF"
-                d="m9 17.32c0-.11 0-.21 0-.32v-3h-2v3a9 9 0 0 0 .25 2.09z"
-              />
-              <path fill="#FFF" d="m20.76 5.58a5 5 0 0 0 -9.76 1.42v8.34z" />
-              <path d="m0 0h32v32h-32z" fill="none" />
-            </svg>
+            <!-- Audio Disabled SVG -->
           </span>
-          <span class="inline-block">
-            {{ peer.isLocal ? `You (${peer.name})` : peer.name }}</span
-          >
+          <span class="peer-name">{{
+            peer.isLocal ? `You (${peer.name})` : peer.name
+          }}</span>
         </p>
 
         <p
-          class="text-white text-center absolute top-1/2 right-0 left-0"
+          class="camera-off-text"
           v-show="
             (peer.isLocal && !isVideoEnabled) ||
             (!peer.isLocal && !remotePeerProps?.[peer.id]?.[MediaState.isVideoEnabled])
@@ -178,29 +157,124 @@ hmsStore.subscribe(onVideoChange, selectIsLocalVideoEnabled);
       </div>
     </div>
 
-    <div class="mx-auto mt-10 flex items-center justify-center" v-if="allPeers.length">
-      <button class="bg-teal-800 text-white rounded-md p-3 block" @click="toggleAudio">
+    <div class="action-buttons" v-if="allPeers.length">
+      <button class="audio-toggle-button" @click="toggleAudio">
         {{ isAudioEnabled ? "Mute" : "Unmute" }} Microphone
       </button>
-      <button
-        class="bg-indigo-400 text-white rounded-md p-3 block mx-5"
-        @click="toggleVideo"
-      >
+      <button class="video-toggle-button" @click="toggleVideo">
         {{ isVideoEnabled ? "Mute" : "Unmute" }} Camera
       </button>
-      <button class="bg-rose-800 text-white rounded-md p-3 block" @click="leaveMeeting">
+      <button class="leave-meeting-button" @click="leaveMeeting">
         Leave Meeting
       </button>
     </div>
     <div v-else>
-      <p class="text-white text-center font-bold text-2xl">
-        Hold On!, Loading Video Tiles...
-      </p>
+      <p class="loading-text"> Hold On!, Loading Video Tiles... </p>
     </div>
   </main>
 </template>
 
 <style scoped lang="scss">
-.login-view {
+.main-container {
+  margin: 0 2.5rem;
+  min-height: 80vh;
+}
+
+.video-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+
+  @media (min-width: 640px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.video-container {
+  position: relative;
+}
+
+.video-element {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+}
+
+.video-label {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  pointer-events: none;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+
+.audio-icon,
+.audio-mute-icon {
+  display: inline-block;
+  width: 1.5rem;
+}
+
+.peer-name {
+  display: inline-block;
+}
+
+.camera-off-text {
+  color: white;
+  text-align: center;
+  position: absolute;
+  top: 50%;
+  right: 0;
+  left: 0;
+}
+
+.action-buttons {
+  margin-top: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.audio-toggle-button,
+.video-toggle-button,
+.leave-meeting-button {
+  background-color: #38a169; // Teal
+  color: white;
+  border-radius: 0.375rem;
+  padding: 0.75rem;
+  display: block;
+
+  &:hover {
+    cursor: pointer;
+    opacity: 0.8;
+  }
+}
+
+.video-toggle-button {
+  background-color: #9333ea; // Indigo
+  margin-left: 1.25rem;
+  margin-right: 1.25rem;
+}
+
+.leave-meeting-button {
+  background-color: #b91c1c; // Rose
+}
+
+.loading-text {
+  color: white;
+  text-align: center;
+  font-weight: 700;
+  font-size: 1.5rem;
 }
 </style>

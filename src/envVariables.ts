@@ -5,6 +5,9 @@ const EnvVariables = {
   supabaseUrl: import.meta.env.VITE_SUPABASE_URL as string,
   supabaseAnonKey: import.meta.env.VITE_SUPABASE_ANON_KEY as string,
 
+  // General
+  currentEnv: import.meta.env.VITE_CURRENT_ENV as string,
+  baseUrl: import.meta.env.VITE_BASE_URL as string,
   // LiveKit
   livekitApiKey: import.meta.env.VITE_LIVEKIT_API_KEY as string,
   livekitUrl: import.meta.env.VITE_LIVEKIT_URL as string,

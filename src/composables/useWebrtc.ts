@@ -44,7 +44,7 @@ export async function createRoom(
 export async function generateAuthToken(
   room_id: string,
   user_id: string,
-  role: string
+  role?: string
 ): Promise<any> {
   const response = await fetch(`${WEBRTC_BASE_URL}/auth-token`, {
     method: "POST",
@@ -64,50 +64,6 @@ export async function generateAuthToken(
 
   return await response.json();
 }
-
-export const fetchToken = async (
-  userName: string,
-  roomName: string
-): Promise<HmsTokenResponse | any> => {
-  try {
-    // create or fetch the room_id for the passed in room
-    const roomResponse = await fetch(`${WEBRTC_BASE_URL}/createRoom`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ room: roomName }),
-    });
-
-    if (!roomResponse.ok) {
-      throw new Error("Failed to create or fetch the room");
-    }
-
-    const room = await roomResponse.json();
-
-    // Generate the app/authToken
-    const tokenResponse = await fetch(`${WEBRTC_BASE_URL}/generateAppToken`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        user_id: userName,
-        room_id: room.id,
-        role: "host",
-      }),
-    });
-
-    if (!tokenResponse.ok) {
-      throw new Error("Failed to generate app/authToken");
-    }
-
-    const token = await tokenResponse.json();
-    return token;
-  } catch (error: any) {
-    throw error;
-  }
-};
 
 export async function getSessionAnalyticsByRoom(room_id: string): Promise<any> {
   const response = await fetch(

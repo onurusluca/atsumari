@@ -4,6 +4,7 @@ import type { SpacesType } from "@/api/types";
 
 import { vOnClickOutside } from "@vueuse/components";
 import ConfettiExplosion from "vue-confetti-explosion";
+import { getCurrentUrlOrigin } from "@/utils/general";
 
 const { t } = useI18n();
 const authStore = useAuthStore();
@@ -469,16 +470,16 @@ const handleClickGoToSpace = (spaceId: string, spaceName: string) => {
                 <div class="space-url__input">
                   <input
                     type="text"
-                    :value="`http://localhost:5173/space/${userSpaces[0].id}/${slugify(
-                      userSpaces[0].name
-                    )}`"
+                    :value="`${getCurrentUrlOrigin()}/space/${
+                      userSpaces[0].id
+                    }/${slugify(userSpaces[0].name)}`"
                     class="form__text-input"
                     readonly
                   />
                   <button
                     @click="
                       onCopyToClipboard(
-                        `http://localhost:5173/space/${userSpaces[0].id}/${slugify(
+                        `${getCurrentUrlOrigin()}/space/${userSpaces[0].id}/${slugify(
                           userSpaces[0].name
                         )}`
                       )

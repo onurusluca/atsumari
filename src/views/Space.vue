@@ -76,6 +76,7 @@ onMounted(async () => {
 
   const onConnection = (connectionState: boolean | undefined) => {
     isWebrtcConnected.value = Boolean(connectionState);
+    console.log("isWebrtcConnected", isWebrtcConnected.value);
   };
 
   hmsStore.subscribe(onConnection, selectRoomStarted);

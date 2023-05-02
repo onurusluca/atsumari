@@ -2,6 +2,8 @@
 import type { SpacesType } from "@/api/types";
 import type { OnClickOutsideHandler } from "@vueuse/core";
 import { vOnClickOutside } from "@vueuse/components";
+import { EnvVariables } from "@/envVariables";
+import { getCurrentUrlOrigin } from "@/utils/general";
 
 import { slugify } from "@/utils/slugify";
 
@@ -151,7 +153,7 @@ let generateRandomSeeds = computed(() => {
                 <button
                   @click="
                     onCopyToClipboard(
-                      `http://localhost:5173/space/${item.id}/${slugify(item.name)}`
+                      `${getCurrentUrlOrigin()}/space/${item.id}/${slugify(item.name)}`
                     )
                   "
                   class="btn btn-icon"
