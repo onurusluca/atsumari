@@ -67,7 +67,7 @@ export async function createCanvasApp({
   let fps = 0;
 
   let refreshInterval = 1000 / canvasFrameRate;
-
+  let lastAnimationFrameTime = 0;
   const userAgent = navigator.userAgent;
 
   let mouseX = 0;
@@ -81,173 +81,179 @@ export async function createCanvasApp({
   /****************************************
    * THE GAME LOOP
    ****************************************/
-  function gameLoop() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    // Anti-aliasing in browsers smooths images, which can blur pixel art or low-res graphics:
-    ctx.imageSmoothingEnabled = false;
+  function gameLoop(currentTimestamp: number) {
+    const elapsedTime = currentTimestamp - lastAnimationFrameTime;
 
-    // Set myPlayer
-    myPlayer = users.find((user) => user.id === myPlayerId)!;
-    if (myPlayer) {
-      // Center camera on my player
-      camera.cameraX = myPlayer.x - canvas.width / (2.2 * camera.zoomFactor);
-      camera.cameraY = myPlayer.y - canvas.height / (2.2 * camera.zoomFactor);
+    if (elapsedTime >= refreshInterval) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // Anti-aliasing in browsers smooths images, which can blur pixel art or low-res graphics:
+      ctx.imageSmoothingEnabled = false;
 
-      // Draw world
-      ctx.drawImage(
-        worldImg,
-        0,
-        0,
-        worldImg.width,
-        worldImg.height,
-        (-camera.cameraX - worldImg.height / 2) * camera.zoomFactor,
-        (-camera.cameraY - worldImg.width / 2) * camera.zoomFactor,
-        worldImg.width * camera.zoomFactor,
-        worldImg.height * camera.zoomFactor
-      );
+      // Set myPlayer
+      myPlayer = users.find((user) => user.id === myPlayerId)!;
+      if (myPlayer) {
+        // Center camera on my player
+        camera.cameraX = myPlayer.x - canvas.width / (2.2 * camera.zoomFactor);
+        camera.cameraY = myPlayer.y - canvas.height / (2.2 * camera.zoomFactor);
 
-      // Move my player but only if no other key is pressed(prevent diagonal movement). Also, if the user releases the second pressed key, the character should continue moving in the direction of the first pressed key
-      if (keyPressOrder.length > 0) {
-        let newPlayerX = myPlayer.x;
-        let newPlayerY = myPlayer.y;
-        const lastValidKey = keyPressOrder[keyPressOrder.length - 1];
+        // Draw world
+        ctx.drawImage(
+          worldImg,
+          0,
+          0,
+          worldImg.width,
+          worldImg.height,
+          (-camera.cameraX - worldImg.height / 2) * camera.zoomFactor,
+          (-camera.cameraY - worldImg.width / 2) * camera.zoomFactor,
+          worldImg.width * camera.zoomFactor,
+          worldImg.height * camera.zoomFactor
+        );
 
-        // check if any key is pressed
-        if (pressedKeys.w || pressedKeys.a || pressedKeys.s || pressedKeys.d) {
-          switch (lastValidKey) {
-            case "w":
-              newPlayerY -= speed;
-              animationState = "walk-up";
-              myPlayer.facingTo = "up";
+        // Move my player but only if no other key is pressed(prevent diagonal movement). Also, if the user releases the second pressed key, the character should continue moving in the direction of the first pressed key
+        if (keyPressOrder.length > 0) {
+          let newPlayerX = myPlayer.x;
+          let newPlayerY = myPlayer.y;
+          const lastValidKey = keyPressOrder[keyPressOrder.length - 1];
+
+          // check if any key is pressed
+          if (pressedKeys.w || pressedKeys.a || pressedKeys.s || pressedKeys.d) {
+            switch (lastValidKey) {
+              case "w":
+                newPlayerY -= speed;
+                animationState = "walk-up";
+                myPlayer.facingTo = "up";
+                break;
+              case "a":
+                newPlayerX -= speed;
+                animationState = "walk-left";
+                myPlayer.facingTo = "left";
+                break;
+              case "s":
+                newPlayerY += speed;
+                animationState = "walk-down";
+                myPlayer.facingTo = "down";
+                break;
+              case "d":
+                newPlayerX += speed;
+                animationState = "walk-right";
+                myPlayer.facingTo = "right";
+                break;
+            }
+          }
+
+          // Check for collisions
+          const playerWidth = 48 * camera.zoomFactor;
+          const playerHeight = 64 * camera.zoomFactor;
+          let collision = false;
+          for (const user of users) {
+            if (
+              user.id !== myPlayerId &&
+              isColliding(
+                {
+                  x: newPlayerX,
+                  y: newPlayerY,
+                  width: playerWidth,
+                  height: playerHeight,
+                },
+                { x: user.x, y: user.y, width: playerWidth, height: playerHeight }
+              )
+            ) {
+              collision = true;
               break;
-            case "a":
-              newPlayerX -= speed;
-              animationState = "walk-left";
-              myPlayer.facingTo = "left";
-              break;
-            case "s":
-              newPlayerY += speed;
-              animationState = "walk-down";
-              myPlayer.facingTo = "down";
-              break;
-            case "d":
-              newPlayerX += speed;
-              animationState = "walk-right";
-              myPlayer.facingTo = "right";
-              break;
+            }
+          }
+
+          if (!collision) {
+            myPlayer.x = newPlayerX;
+            myPlayer.y = newPlayerY;
           }
         }
 
-        // Check for collisions
-        const playerWidth = 48 * camera.zoomFactor;
-        const playerHeight = 64 * camera.zoomFactor;
-        let collision = false;
-        for (const user of users) {
-          if (
-            user.id !== myPlayerId &&
-            isColliding(
-              {
-                x: newPlayerX,
-                y: newPlayerY,
-                width: playerWidth,
-                height: playerHeight,
-              },
-              { x: user.x, y: user.y, width: playerWidth, height: playerHeight }
-            )
-          ) {
-            collision = true;
-            break;
-          }
-        }
+        // Draw other players
+        users.forEach((user) => {
+          if (user.id !== myPlayerId) {
+            const playerRect = {
+              x: (user.x - camera.cameraX - 8) * camera.zoomFactor,
+              y: (user.y - camera.cameraY - 8) * camera.zoomFactor,
+              width: 96 * camera.zoomFactor,
+              height: 96 * camera.zoomFactor,
+            };
 
-        if (!collision) {
-          myPlayer.x = newPlayerX;
-          myPlayer.y = newPlayerY;
-        }
+            // Check if mouse is over the player
+            const isMouseOver = isColliding(
+              { x: mouseX, y: mouseY, width: 1, height: 1 },
+              playerRect
+            );
+
+            drawPlayer(
+              ctx,
+              characterImg,
+              matchUserFacingToAnimationState(user.facingTo),
+              1,
+              user,
+              camera.cameraX,
+              camera.cameraY,
+              camera.zoomFactor,
+              user.userStatus,
+              isMouseOver
+            );
+          }
+        });
+
+        // Draw my player
+        const playerRect = {
+          x: (myPlayer.x - camera.cameraX - 8) * camera.zoomFactor,
+          y: (myPlayer.y - camera.cameraY - 8) * camera.zoomFactor,
+          width: 96 * camera.zoomFactor,
+          height: 96 * camera.zoomFactor,
+        };
+        const isMouseOver = isColliding(
+          { x: mouseX, y: mouseY, width: 1, height: 1 },
+          playerRect
+        );
+
+        drawPlayer(
+          ctx,
+          characterImgMyPlayer,
+          animationState,
+          animationFrame,
+          myPlayer,
+          camera.cameraX,
+          camera.cameraY,
+          camera.zoomFactor,
+          myPlayer.userStatus,
+          isMouseOver
+        );
+
+        // Update animation frame
+        [animationFrame, animationTick] = updateAnimationFrame(
+          pressedKeys,
+          animationState,
+          animationFrame,
+          animationTick
+        );
       }
+      // Calculate FPS
+      const currentTime = performance.now();
+      const deltaTime = currentTime - lastTime;
+      lastTime = currentTime;
 
-      // Draw other players
-      users.forEach((user) => {
-        if (user.id !== myPlayerId) {
-          const playerRect = {
-            x: (user.x - camera.cameraX - 8) * camera.zoomFactor,
-            y: (user.y - camera.cameraY - 8) * camera.zoomFactor,
-            width: 96 * camera.zoomFactor,
-            height: 96 * camera.zoomFactor,
-          };
+      // Draw FPS
+      fps = Math.round(1000 / deltaTime);
+      ctx.fillStyle = "black";
+      // Bold Poppins 16px
+      ctx.font = "bold 16px Poppins";
+      ctx.fillText(`FPS: ${fps}`, 10, 20);
 
-          // Check if mouse is over the player
-          const isMouseOver = isColliding(
-            { x: mouseX, y: mouseY, width: 1, height: 1 },
-            playerRect
-          );
-
-          drawPlayer(
-            ctx,
-            characterImg,
-            matchUserFacingToAnimationState(user.facingTo),
-            1,
-            user,
-            camera.cameraX,
-            camera.cameraY,
-            camera.zoomFactor,
-            user.userStatus,
-            isMouseOver
-          );
-        }
-      });
-
-      // Draw my player
-      const playerRect = {
-        x: (myPlayer.x - camera.cameraX - 8) * camera.zoomFactor,
-        y: (myPlayer.y - camera.cameraY - 8) * camera.zoomFactor,
-        width: 96 * camera.zoomFactor,
-        height: 96 * camera.zoomFactor,
-      };
-      const isMouseOver = isColliding(
-        { x: mouseX, y: mouseY, width: 1, height: 1 },
-        playerRect
-      );
-
-      drawPlayer(
-        ctx,
-        characterImgMyPlayer,
-        animationState,
-        animationFrame,
-        myPlayer,
-        camera.cameraX,
-        camera.cameraY,
-        camera.zoomFactor,
-        myPlayer.userStatus,
-        isMouseOver
-      );
-
-      // Update animation frame
-      [animationFrame, animationTick] = updateAnimationFrame(
-        pressedKeys,
-        animationState,
-        animationFrame,
-        animationTick
-      );
+      lastAnimationFrameTime = currentTimestamp - (elapsedTime % refreshInterval);
     }
-    // Calculate FPS
-    const currentTime = performance.now();
-    const deltaTime = currentTime - lastTime;
-    lastTime = currentTime;
-
-    // Draw FPS
-    fps = Math.round(1000 / deltaTime);
-    ctx.fillStyle = "black";
-    // Bold Poppins 16px
-    ctx.font = "bold 16px Poppins";
-    ctx.fillText(`FPS: ${fps}`, 10, 20);
 
     // Check the browser and use the appropriate fps limiter because every browser has its own way of doing it
+
     if (userAgent.indexOf("Firefox") > -1) {
-      // FIXME: Can't limit fps in Firefox
-      requestAnimationFrame(gameLoop);
+      setTimeout(() => requestAnimationFrame(gameLoop), refreshInterval - elapsedTime);
     } else {
-      setTimeout(gameLoop, refreshInterval);
+      requestAnimationFrame(gameLoop);
     }
   }
 
@@ -259,7 +265,7 @@ export async function createCanvasApp({
     spaceMap !== "" &&
     initialSetupCompleted
   ) {
-    gameLoop();
+    requestAnimationFrame(gameLoop);
   } else {
     const checkConditionsBeforeLoop = setInterval(() => {
       if (
@@ -269,7 +275,7 @@ export async function createCanvasApp({
         spaceMap !== "" &&
         initialSetupCompleted
       ) {
-        gameLoop();
+        requestAnimationFrame(gameLoop);
         clearInterval(checkConditionsBeforeLoop);
         // Emit event to notify that the canvas is loaded
         emitter.emit("canvasLoaded");

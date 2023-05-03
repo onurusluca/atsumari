@@ -6,7 +6,7 @@ import InitialCharacterSetupModal from "@/components/global/InitialCharacterSetu
 import { emitter } from "@/composables/useEmit";
 
 import type { User } from "@/types/general";
-import type { ProfilesType } from "@/api/types/index";
+// import type { ProfilesType } from "@/api/types/index";
 import WebRTC from "@/components/space/webrtc/WebRTC.vue";
 import Joystick from "@/components/space/Joystick.vue";
 import Conference from "@/components/space/webrtc/Conference.vue";
@@ -669,10 +669,10 @@ const handleChatMenuOpen = () => {
     .bottom-control__right {
       display: flex;
       align-items: center;
-      .right__chat {
+      /*      .right__chat {
         .chat__chat-menu {
         }
-      }
+      } */
       .right__user-list {
         margin-left: 1rem;
       }
