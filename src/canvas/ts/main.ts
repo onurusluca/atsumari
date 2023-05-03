@@ -19,13 +19,11 @@ export async function createCanvasApp({
 }: CanvasAppOptions) {
   const ctx = canvas.getContext("2d")!;
 
-  // Mismatched canvas and display resolutions can cause blurry content.:
-  /*
+  // Mismatched canvas and display resolutions can cause blurry content
   const devicePixelRatio = window.devicePixelRatio || 1;
   canvas.width = canvas.clientWidth * devicePixelRatio;
   canvas.height = canvas.clientHeight * devicePixelRatio;
   ctx.scale(devicePixelRatio, devicePixelRatio);
-  */
 
   // Load images
   const [worldImg, characterImg, characterImgMyPlayer] = await Promise.all([
@@ -280,7 +278,7 @@ export async function createCanvasApp({
         // Emit event to notify that the canvas is loaded
         emitter.emit("canvasLoaded");
       }
-    }, 0);
+    }, 100);
   }
 
   const getCamera = () => {
