@@ -48,7 +48,7 @@ const handleReadSpace = async () => {
 };
 
 // Realtime
-supabase
+/* supabase
   .channel("custom-all-channel")
   .on(
     "postgres_changes",
@@ -58,7 +58,7 @@ supabase
       await handleReadSpace();
     }
   )
-  .subscribe();
+  .subscribe(); */
 
 /****************************************
  * UI

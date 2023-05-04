@@ -7,23 +7,21 @@ const initialTouchX = ref(0);
 const initialTouchY = ref(0);
 
 const handleTouchStart = (event: TouchEvent) => {
+  event.preventDefault();
   const touch = event.touches[0];
   initialTouchX.value = touch.clientX;
   initialTouchY.value = touch.clientY;
 };
 
 const handleTouchMove = (event: TouchEvent) => {
+  event.preventDefault();
   const touch = event.touches[0];
   const deltaX = touch.clientX - initialTouchX.value;
   const deltaY = touch.clientY - initialTouchY.value;
 
-  // Calculate the distance between the initial touch point and the current touch point
   const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-
-  // Define the maximum radius for the joystick movement
   const maxRadius = 50;
 
-  // Limit the joystick's movement within the defined radius
   if (distance <= maxRadius) {
     positionX.value = deltaX;
     positionY.value = deltaY;
@@ -40,13 +38,12 @@ const handleTouchMove = (event: TouchEvent) => {
     direction = deltaY > 0 ? "down" : "up";
   }
 
-  // Emit the direction of the joystick
   if (direction !== "") {
     emitter.emit("joystickMove", direction);
   }
 };
-
-const handleTouchEnd = () => {
+const handleTouchEnd = (event: TouchEvent) => {
+  event.preventDefault();
   positionX.value = 0;
   positionY.value = 0;
 
