@@ -137,42 +137,48 @@ let message = ref<string>("");
 let showMessageSendingLoading = ref<boolean>(false);
 
 const handleSendMessage = async (event: Event) => {
-  // Prevent text area default behavior (new line)
-  event.preventDefault();
-  // Focus message input after sending message
-  messageInputRef.value?.focus();
-  showMessageSendingLoading.value = true;
+  // Catch shift + enter keypress
+  if (event.shiftKey && event.key === "Enter") {
+    createNewLineOnEnterPress(event as KeyboardEvent);
+  } else {
+    // Prevent text area default behavior (new line)
+    event.preventDefault();
+    // Focus message input after sending message
+    messageInputRef.value?.focus();
+    showMessageSendingLoading.value = true;
 
-  if (message.value !== "") {
-    try {
-      const { error } = await supabase.from("messages").insert([
-        {
-          message: message.value,
-          user_id: authStore?.session?.user?.id,
-          user_name: generalStore.userName,
-          space_id: generalStore.spaceId,
-        },
-      ]);
-      if (error) {
-        throw error;
-      } else {
-        message.value = "";
-        showMessageSendingLoading.value = false;
+    if (message.value !== "") {
+      try {
+        const { error } = await supabase.from("messages").insert([
+          {
+            message: message.value,
+            user_id: authStore?.session?.user?.id,
+            user_name: generalStore.userName,
+            space_id: generalStore.spaceId,
+          },
+        ]);
+        if (error) {
+          throw error;
+        } else {
+          message.value = "";
+          showMessageSendingLoading.value = false;
 
-        // Reset message input height
-        let messageInputContainerParent = document.querySelector(".chat__send-message");
-        if (messageInputContainerParent) {
-          messageInputContainerParent.style.height = "3.2rem";
+          // Reset message input height
+          let messageInputContainerParent =
+            document.querySelector(".chat__send-message");
+          if (messageInputContainerParent) {
+            messageInputContainerParent.style.height = "3.2rem";
+          }
+
+          // Reset messages container height
+          let messagesContainerParent = document.querySelector(".chat__message-groups");
+          if (messagesContainerParent) {
+            messagesContainerParent.style.height = "94%";
+          }
         }
-
-        // Reset messages container height
-        let messagesContainerParent = document.querySelector(".chat__message-groups");
-        if (messagesContainerParent) {
-          messagesContainerParent.style.height = "94%";
-        }
+      } catch (error: any) {
+        console.log("CREATE MESSAGE CATCH ERROR: ", error.message);
       }
-    } catch (error: any) {
-      console.log("CREATE MESSAGE CATCH ERROR: ", error.message);
     }
   }
 };
@@ -310,27 +316,41 @@ window.addEventListener("resize", () => {
 });
 
 // Message input
-const createNewLineOnMobileEnterPress = (event: KeyboardEvent) => {
+const createNewLineOnEnterPress = (event: KeyboardEvent) => {
   console.log("event: ", event);
 
-  if (event.key === "Enter" && isMobile.value) {
-    const messageInput = messageInputRef.value;
-    if (messageInput) {
-      const message = messageInput.innerHTML;
-      messageInput.innerHTML = `${message}<br>`;
+  const messageInput = messageInputRef.value;
+  if (messageInput) {
+    const message = messageInput.innerHTML;
+    messageInput.innerHTML = `${message}<br>`;
 
-      // Set the height of the message input to the height of the message. Make it grow to up not down.
-      let messageInputContainerParent = document.querySelector(".chat__send-message");
-      if (messageInputContainerParent) {
-        messageInputContainerParent.style.height = `${messageInput.scrollHeight}px`;
+    // Set the height of the message input to the height of the message. Make it grow to up not down.
+    let messageInputContainerParent = document.querySelector(".chat__send-message");
+    if (messageInputContainerParent) {
+      messageInputContainerParent.style.height = `${messageInput.scrollHeight}px`;
+
+      // Max height of the message input is 10rem
+      if (messageInput.scrollHeight > 160) {
+        messageInputContainerParent.style.height = "160px";
+        messageInput.style.overflow = "auto";
       }
+    }
 
-      // Set the height of the messages container to the height of the message input. Make it grow to up not down.
-      let messagesContainer = document.querySelector(".chat__message-groups");
-      if (messagesContainer) {
-        messagesContainer.style.height = `calc(99.5% - ${messageInput.scrollHeight}px)`;
-        // Scroll to the bottom of the messages container
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    // Scroll to the top of the message input
+    if (messageInput) {
+      messageInput.scrollTop = 0;
+    }
+
+    // Set the height of the messages container to the height of the message input. Make it grow to up not down.
+    let messagesContainer = document.querySelector(".chat__message-groups");
+    if (messagesContainer) {
+      messagesContainer.style.height = `calc(99.5% - ${messageInput.scrollHeight}px)`;
+      // Scroll to the top of the messages container
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+      // Max height of the message input is 10rem so the messages container should be 10rem less than the window height
+      if (messageInput.scrollHeight > 160) {
+        messagesContainer.style.height = `calc(99.5% - 160px)`;
       }
     }
   }
@@ -382,7 +402,7 @@ const handleHoverMessage = (index: number) => {
           ref="messageInputRef"
           :placeholder="t('chat.typeAMessage')"
           @keypress.enter="
-            isMobile ? createNewLineOnMobileEnterPress($event) : handleSendMessage()
+            isMobile ? createNewLineOnEnterPress($event) : handleSendMessage()
           "
           class="input-container__input"
         /> -->
@@ -392,9 +412,7 @@ const handleHoverMessage = (index: number) => {
           ref="messageInputRef"
           :placeholder="t('chat.typeAMessage')"
           @keypress.enter="
-            isMobile
-              ? createNewLineOnMobileEnterPress($event)
-              : handleSendMessage($event)
+            isMobile ? createNewLineOnEnterPress($event) : handleSendMessage($event)
           "
           class="input-container__input"
         ></textarea>
@@ -533,7 +551,7 @@ const handleHoverMessage = (index: number) => {
       width: 100%;
       height: 100%;
       .input-container__input {
-        // Text area as inpu
+        // Text area as input
         display: flex;
         align-items: center;
 
@@ -549,6 +567,12 @@ const handleHoverMessage = (index: number) => {
         background-color: var(--text-input-bg);
         color: var(--f-color);
         resize: none;
+
+        // Hide scrollbar but still scrollable
+        scrollbar-width: none;
+        &::-webkit-scrollbar {
+          display: none;
+        }
       }
       .input-container__icon {
         position: absolute;

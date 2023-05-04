@@ -13,6 +13,7 @@ const authStore = useAuthStore();
 let userSpaces = ref<SpacesType[]>([]);
 let showContentLoadingPlaceholder = ref<boolean>(true);
 let showNoSpacesMessage = ref<boolean>(false);
+
 onMounted(async () => {
   await handleReadSpace();
 });
@@ -99,17 +100,6 @@ function showToast(toastTypeProp: string) {
     toastOpen.value = false;
   }, 5500);
 }
-
-// TEMPORARY: random seed maker for space image:
-
-let generateRandomSeeds = computed(() => {
-  let seeds = [];
-
-  for (let i = 0; i < 10; i++) {
-    seeds.push(Math.floor(Math.random() * 100));
-  }
-  return seeds;
-});
 </script>
 
 <template>
@@ -180,11 +170,7 @@ let generateRandomSeeds = computed(() => {
 
         <!-- Image -->
         <div class="space__image-container">
-          <img
-            :src="`https://picsum.photos/seed/${generateRandomSeeds[index]}/600/300`"
-            :alt="t('spaces.spaceImageAlt')"
-            class="image-container__image"
-          />
+          <img :alt="t('spaces.spaceImageAlt')" class="image-container__image" />
 
           <!-- Go to space -->
           <!-- :to="`/space/${item.id}`" -->

@@ -55,7 +55,7 @@ onMounted(() => {});
       align-items: center;
       justify-content: space-between;
 
-      background-color: var(--bg-100);
+      background-color: var(--bg-300);
       border-radius: 0.5rem;
       margin-bottom: 1rem;
     }

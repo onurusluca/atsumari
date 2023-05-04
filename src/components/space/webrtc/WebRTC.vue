@@ -7,7 +7,7 @@ const generalStore = useGeneralStore();
 const route = useRouter();
 
 const webrtcLocalStorage = useStorage("atsumari_webrtc", {
-  userAuthToken: "511251",
+  userAuthToken: "",
 });
 
 onMounted(() => {});
@@ -39,43 +39,74 @@ const handleCreateRoom = async () => {
 };
 
 const handleJoinRoom = async () => {
+  console.log("local storage", webrtcLocalStorage.value.userAuthToken);
+
   try {
     isLoading.value = true;
-    let authToken = {
+    let authToken: {
+      msg: string;
+      success: boolean;
+      token: string;
+    } = {
+      msg: "",
+      success: false,
       token: "",
     };
 
     // If the auth token is not present in local storage, generate a new one
-    if (webrtcLocalStorage.value.userAuthToken === "") {
+    if (
+      !webrtcLocalStorage.value.userAuthToken ||
+      webrtcLocalStorage.value.userAuthToken === ""
+    ) {
       authToken = await generateAuthToken(
         "644f705b6fe6e1cc9d167ee4",
-        generalStore.userId
-        /*
-        role: 'host' */
+        generalStore.userId,
+        "host"
+        // role: 'host'
       );
+
+      console.log("authToken", authToken);
 
       webrtcLocalStorage.value.userAuthToken = authToken.token;
 
       // Else, use the one present in local storage
     } else {
-      authToken = {
-        token: webrtcLocalStorage.value.userAuthToken,
-      };
+      authToken.token = webrtcLocalStorage.value.userAuthToken;
     }
 
-    hmsActions.join({
-      userName: formData.name,
-      authToken: authToken.token,
-      settings: {
-        isAudioMuted: true, // Join with audio muted
-        isVideoMuted: true, // Join with video muted
-      },
-    });
+    if (authToken.token !== "") {
+      hmsActions.join({
+        userName: formData.name,
+        authToken: authToken.token,
+        settings: {
+          isAudioMuted: true, // Join with audio muted
+          isVideoMuted: true, // Join with video muted
+        },
+      });
+    }
   } catch (error) {
     alert(error);
   }
 
   isLoading.value = false;
+};
+
+const tokentest = async () => {
+  let authToken = {
+    token: "",
+  };
+  try {
+    authToken = await generateAuthToken(
+      "644f705b6fe6e1cc9d167ee4",
+      generalStore.userId,
+      "guest"
+      // role: 'host'
+    );
+
+    console.log("authToken", authToken);
+  } catch (error) {
+    console.log(error);
+  }
 };
 </script>
 

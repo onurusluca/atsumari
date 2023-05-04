@@ -243,14 +243,12 @@ export async function createCanvasApp({
     ctx.fillText(`FPS: ${fps}`, 10, 20);
 
     // Check the browser and use the appropriate fps limiter because every browser has its own way of doing it
-    /*  if (userAgent.indexOf("Firefox") > -1) {
+    if (userAgent.indexOf("Firefox") > -1) {
       // FIXME: Can't limit fps in Firefox
       requestAnimationFrame(gameLoop);
     } else {
       setTimeout(gameLoop, refreshInterval);
-    } */
-
-    requestAnimationFrame(gameLoop);
+    }
   }
 
   // Init game loop

@@ -25,7 +25,16 @@ enum MediaState {
 }
 
 onUnmounted(() => {
-  if (allPeers.value.length) leaveMeeting();
+  if (allPeers.value.length) {
+    console.log("leaving meeting");
+
+    leaveMeeting();
+  }
+});
+
+// Leave the meeting when the user closes or refreshes the
+window.addEventListener("beforeunload", () => {
+  leaveMeeting();
 });
 
 const leaveMeeting = () => {
@@ -101,8 +110,6 @@ const toggleVideo = async () => {
 hmsStore.subscribe(renderPeers, selectPeers);
 hmsStore.subscribe(onAudioChange, selectIsLocalAudioEnabled);
 hmsStore.subscribe(onVideoChange, selectIsLocalVideoEnabled);
-
-// Remove
 </script>
 
 <template>

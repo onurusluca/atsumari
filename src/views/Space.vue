@@ -29,6 +29,7 @@ const canvasLocalStorage = useStorage("atsumari_canvas", {
 
 let users = reactive<Array<User>>([]);
 
+// FIXME: this is broken
 // Request animation frame every ..ms
 let canvasFrameRate = ref<number>(60);
 let canvasLoaded = ref<boolean>(false);
@@ -605,6 +606,9 @@ const handleChatMenuOpen = () => {
       image-rendering: pixelated;
       margin-left: 0;
       margin-top: 0;
+
+      /*Ensure that the canvas and its contents are rendered on the GPU where possible. We can force GPU compositing by adding a 3D transform to the canvas CSS: */
+      transform: translateZ(0);
     }
 
     .canvas-container__right-click-menu {
