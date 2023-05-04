@@ -15,7 +15,9 @@ let showContentLoadingPlaceholder = ref<boolean>(true);
 let showNoSpacesMessage = ref<boolean>(false);
 
 onMounted(async () => {
-  await handleReadSpace();
+  nextTick(async () => {
+    await handleReadSpace();
+  });
 });
 
 /****************************************
@@ -48,7 +50,7 @@ const handleReadSpace = async () => {
 };
 
 // Realtime
-/* supabase
+supabase
   .channel("custom-all-channel")
   .on(
     "postgres_changes",
@@ -58,7 +60,7 @@ const handleReadSpace = async () => {
       await handleReadSpace();
     }
   )
-  .subscribe(); */
+  .subscribe();
 
 /****************************************
  * UI

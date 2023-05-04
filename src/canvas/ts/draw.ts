@@ -52,58 +52,6 @@ function drawCharacter(
   );
 }
 
-function drawPlayerNameBackground(
-  ctx: CanvasRenderingContext2D,
-  textWidth: number,
-  zoomFactor: number,
-  backgroundX: number,
-  backgroundY: number
-): void {
-  ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-  ctx.font = `${14 * zoomFactor}px Poppins`;
-
-  const padding = 10 * zoomFactor;
-  const backgroundHeight = 20 * zoomFactor;
-  const backgroundWidth = textWidth + padding * 3;
-
-  ctx.beginPath();
-
-  // Left half circle
-  ctx.arc(
-    backgroundX + backgroundHeight / 2,
-    backgroundY + backgroundHeight / 2,
-    backgroundHeight / 2,
-    Math.PI / 2,
-    (3 * Math.PI) / 2
-  );
-
-  // Right half circle
-  ctx.arc(
-    backgroundX + backgroundWidth - backgroundHeight / 2,
-    backgroundY + backgroundHeight / 2,
-    backgroundHeight / 2,
-    (3 * Math.PI) / 2,
-    Math.PI / 2
-  );
-
-  ctx.closePath();
-  ctx.fill();
-}
-
-function drawUserStatusIcon(
-  ctx: CanvasRenderingContext2D,
-  userStatus: string,
-  zoomFactor: number,
-  statusX: number,
-  statusY: number
-): void {
-  const statusRadius = 5 * zoomFactor;
-  ctx.fillStyle = userStatusColors(userStatus);
-  ctx.beginPath();
-  ctx.arc(statusX, statusY, statusRadius, 0, 2 * Math.PI);
-  ctx.fill();
-}
-
 function userStatusColors(userStatus: string): string {
   switch (userStatus) {
     case "online":
@@ -115,19 +63,6 @@ function userStatusColors(userStatus: string): string {
     default:
       return "gray";
   }
-}
-
-function drawPlayerName(
-  ctx: CanvasRenderingContext2D,
-  playerName: string,
-  zoomFactor: number,
-  backgroundX: number,
-  backgroundY: number,
-  padding: number
-): void {
-  ctx.fillStyle = "white";
-  ctx.font = `${14 * zoomFactor}px Poppins`;
-  ctx.fillText(playerName, backgroundX + padding * 2, backgroundY + 15 * zoomFactor);
 }
 
 export function drawPlayer(
@@ -155,35 +90,81 @@ export function drawPlayer(
     characterY,
     zoomFactor
   );
+}
 
-  ctx.font = `${14 * zoomFactor}px Poppins`;
+// Player name background, player name, and user status
+export function drawPlayerBanner(
+  ctx: CanvasRenderingContext2D,
+  player: User,
+  cameraX: number,
+  cameraY: number,
+  zoomFactor: number
+) {
+  // Calculate character position
+  const characterX = (player.x - cameraX - 4) * zoomFactor;
+  const characterY = (player.y - cameraY - 4) * zoomFactor;
+
+  // Calculate background position
   const userNameTextWidth = ctx.measureText(player.userName).width;
-
   const backgroundX = characterX + (32 * zoomFactor - userNameTextWidth) / 2;
   const backgroundY = characterY - 30 * zoomFactor;
 
-  drawPlayerNameBackground(
-    ctx,
-    userNameTextWidth,
-    zoomFactor,
-    backgroundX,
-    backgroundY
-  );
+  // Draw player name background
+  ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+  ctx.font = `${14 * zoomFactor}px Poppins`;
 
   const padding = 10 * zoomFactor;
-  drawUserStatusIcon(
-    ctx,
-    userStatus,
-    zoomFactor,
-    backgroundX + padding,
-    backgroundY + (20 * zoomFactor) / 2
+  const backgroundHeight = 20 * zoomFactor;
+  const playerNameTextWidth = ctx.measureText(player.userName).width;
+  const backgroundWidth = playerNameTextWidth + padding * 3;
+
+  ctx.beginPath();
+
+  // Left half circle
+  ctx.arc(
+    backgroundX + backgroundHeight / 2,
+    backgroundY + backgroundHeight / 2,
+    backgroundHeight / 2,
+    Math.PI / 2,
+    (3 * Math.PI) / 2
   );
 
-  drawPlayerName(ctx, player.userName, zoomFactor, backgroundX, backgroundY, padding);
+  // Right half circle
+  ctx.arc(
+    backgroundX + backgroundWidth - backgroundHeight / 2,
+    backgroundY + backgroundHeight / 2,
+    backgroundHeight / 2,
+    (3 * Math.PI) / 2,
+    Math.PI / 2
+  );
+
+  ctx.closePath();
+  ctx.fill();
+
+  // Draw user status icon
+  const statusRadius = 5 * zoomFactor;
+  ctx.fillStyle = userStatusColors(player.userStatus);
+  ctx.beginPath();
+  ctx.arc(
+    backgroundX + padding,
+    backgroundY + (20 * zoomFactor) / 2,
+    statusRadius,
+    0,
+    2 * Math.PI
+  );
+  ctx.fill();
+
+  // Draw player name
+  ctx.fillStyle = "white";
+  ctx.font = `${14 * zoomFactor}px Poppins`;
+  ctx.fillText(
+    player.userName,
+    backgroundX + padding * 2,
+    backgroundY + 15 * zoomFactor
+  );
 }
 
 // Draw the map
-// Add the following function
 export function drawWorld(
   ctx: CanvasRenderingContext2D,
   worldImg: HTMLImageElement,

@@ -2,7 +2,7 @@ import { emitter } from "@/composables/useEmit";
 import type { User } from "@/types/general";
 import type { CanvasAppOptions, Camera } from "@/types/canvasTypes";
 import { loadImage, isColliding, matchUserFacingToAnimationState } from "./utilities";
-import { drawPlayer, drawWorld } from "./draw";
+import { drawWorld, drawPlayerBanner, drawPlayer } from "./draw";
 import { updateAnimationFrame } from "./animations";
 import { keyDownEventListener, keyUpEventListener } from "./keyboardEvents";
 import { rightClickEventListener, wheelEventListener } from "./mouseEvents";
@@ -98,6 +98,8 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
         drawOtherPlayers();
 
         drawMyPlayer();
+
+        drawAllPlayerNames();
 
         updateAnimation();
 
@@ -229,6 +231,18 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
       myPlayer.userStatus,
       isMouseOver
     );
+  }
+
+  function drawAllPlayerNames() {
+    // Draw other players' names
+    users.forEach((user) => {
+      if (user.id !== myPlayerId) {
+        drawPlayerBanner(ctx, user, camera.cameraX, camera.cameraY, camera.zoomFactor);
+      }
+    });
+
+    // Draw your player's name
+    drawPlayerBanner(ctx, myPlayer, camera.cameraX, camera.cameraY, camera.zoomFactor);
   }
 
   function updateAnimation() {

@@ -19,9 +19,9 @@ const handleTouchMove = (event: TouchEvent) => {
   const deltaX = touch.clientX - initialTouchX.value;
   const deltaY = touch.clientY - initialTouchY.value;
 
+  // Limit the joystick's movement within the defined radius
   const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
   const maxRadius = 50;
-
   if (distance <= maxRadius) {
     positionX.value = deltaX;
     positionY.value = deltaY;
@@ -38,6 +38,7 @@ const handleTouchMove = (event: TouchEvent) => {
     direction = deltaY > 0 ? "down" : "up";
   }
 
+  // Emit the direction of the joystick to canvas
   if (direction !== "") {
     emitter.emit("joystickMove", direction);
   }
