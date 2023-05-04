@@ -23,6 +23,21 @@ enum MediaState {
   isAudioEnabled = "isAudioEnabled",
   isVideoEnabled = "isVideoEnabled",
 }
+let isJoined = ref<boolean>(false);
+emitter.on("playerInRoom", (data: any) => {
+  if (data === false && isJoined.value) {
+    console.log("leaving room", data);
+    if (allPeers.value.length) {
+      console.log("leaving meeting");
+
+      leaveMeeting();
+      isJoined.value = false;
+    }
+  } else if (data === true && !isJoined.value) {
+    console.log("joining room", data);
+    isJoined.value = true;
+  }
+});
 
 onUnmounted(() => {
   if (allPeers.value.length) {

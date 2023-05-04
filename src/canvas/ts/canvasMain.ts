@@ -6,6 +6,7 @@ import { drawWorld, drawPlayerBanner, drawPlayer } from "./draw";
 import { updateAnimationFrame } from "./animations";
 import { keyDownEventListener, keyUpEventListener } from "./keyboardEvents";
 import { rightClickEventListener, wheelEventListener } from "./mouseEvents";
+import { isPlayerInRoom } from "./roomDetection";
 
 async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
   const {
@@ -68,6 +69,10 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
   let mouseX = 0;
   let mouseY = 0;
 
+  const roomLayer: { data: number[] } = {
+    data: [],
+  };
+
   // Track mouse position (used for checking if mouse is hovering over a player)
   canvas.addEventListener("mousemove", (e: MouseEvent) => {
     mouseX = e.clientX;
@@ -104,6 +109,24 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
         updateAnimation();
 
         drawFPS();
+
+        const playerTilePosition = getPlayerTilePosition();
+        console.log(playerTilePosition);
+
+        if (
+          playerTilePosition.x >= 13 &&
+          playerTilePosition.y <= 20 &&
+          playerTilePosition.y <= 6 &&
+          playerTilePosition.y >= 2
+        ) {
+          console.log("in room");
+          emitter.emit("playerInRoom", true);
+        } else {
+          console.log("not in room");
+          emitter.emit("playerInRoom", false);
+        }
+
+        /*   const inRoom = isPlayerInRoom(roomLayer, playerTilePosition, mapWidth); */
       }
       lastUpdateTime = timestamp;
     }
@@ -243,6 +266,19 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
 
     // Draw your player's name
     drawPlayerBanner(ctx, myPlayer, camera.cameraX, camera.cameraY, camera.zoomFactor);
+  }
+
+  function getPlayerTilePosition(): {
+    x: number;
+    y: number;
+  } {
+    const tileWidth = 32; // Set the width of a tile in your map
+    const tileHeight = 32; // Set the height of a tile in your map
+
+    return {
+      x: Math.floor(myPlayer.x / tileWidth),
+      y: Math.floor(myPlayer.y / tileHeight),
+    };
   }
 
   function updateAnimation() {

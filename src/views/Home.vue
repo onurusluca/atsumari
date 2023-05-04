@@ -18,6 +18,14 @@ onMounted(async () => {
   nextTick(async () => {
     await handleReadSpace();
   });
+
+  /*  window.addEventListener('load', async () => {
+    await handleReadSpace();
+  });
+
+  onUnmounted(() => {
+  window.removeEventListener('load', handleReadSpace);
+});*/
 });
 
 /****************************************

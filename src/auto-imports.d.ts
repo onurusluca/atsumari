@@ -29,7 +29,6 @@ declare global {
   const effectScope: typeof import('vue')['effectScope']
   const emitter: typeof import('./composables/useEmit')['emitter']
   const extendRef: typeof import('@vueuse/core')['extendRef']
-  const fetchToken: typeof import('./composables/useWebrtc')['fetchToken']
   const generateAuthToken: typeof import('./composables/useWebrtc')['generateAuthToken']
   const getCurrentInstance: typeof import('vue')['getCurrentInstance']
   const getCurrentScope: typeof import('vue')['getCurrentScope']

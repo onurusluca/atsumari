@@ -12,6 +12,18 @@ const webrtcLocalStorage = useStorage("atsumari_webrtc", {
 
 onMounted(() => {});
 
+let isJoined = ref<boolean>(false);
+emitter.on("playerInRoom", (data: any) => {
+  if (data === true && !isJoined.value) {
+    console.log("joining room", data);
+    handleJoinRoom();
+    isJoined.value = true;
+  } else if (data === false && isJoined.value) {
+    console.log("leaving room", data);
+    isJoined.value = false;
+  }
+});
+
 let roomName = ref<string>("");
 let roomDescription = ref<string>("my room");
 let roomTemplateId = ref<string>("64490b580ca9b196e73dadbf");
