@@ -1,22 +1,29 @@
-type RoomLayer = {
-  data: number[];
+type CollisionData = {
+  width: number;
+  height: number;
+  data: number[][];
 };
 
-type TilePosition = {
-  x: number;
-  y: number;
-};
+export function parseCollisionLayer(mapJson: any): CollisionData {
+  const collisionLayer = mapJson.layers.find(
+    (layer: any) => layer.name === "Collision"
+  );
+  if (!collisionLayer) {
+    throw new Error("Collision layer not found");
+  }
 
-export function isPlayerInRoom(
-  roomLayer: RoomLayer,
-  playerPosition: TilePosition,
-  mapWidth: number
-): boolean {
-  const { data } = roomLayer;
-  const { x, y } = playerPosition;
+  const data = [];
+  for (let y = 0; y < collisionLayer.height; y++) {
+    const row = [];
+    for (let x = 0; x < collisionLayer.width; x++) {
+      row.push(collisionLayer.data[y * collisionLayer.width + x]);
+    }
+    data.push(row);
+  }
 
-  const index = y * mapWidth + x;
-
-  // A non-zero value means the player is in a room
-  return data[index] !== 0;
+  return {
+    width: collisionLayer.width,
+    height: collisionLayer.height,
+    data: data,
+  };
 }
