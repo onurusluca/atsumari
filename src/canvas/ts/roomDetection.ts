@@ -1,8 +1,4 @@
-type CollisionData = {
-  width: number;
-  height: number;
-  data: number[][];
-};
+import type { CollisionData } from "@/types/canvasTypes";
 
 export function parseCollisionLayer(mapJson: any): CollisionData {
   const collisionLayer = mapJson.layers.find(

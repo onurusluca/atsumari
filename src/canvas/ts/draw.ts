@@ -2,13 +2,15 @@ import { characterAnimations } from "./animations";
 import type { User } from "@/types/general";
 import { loadImage } from "./utilities";
 import shadowImage from "../images/shadow.png";
-import type { Camera } from "@/types/canvasTypes";
+import type { Camera, TileMap } from "@/types/canvasTypes";
 // Load images
 let shadowSprite: HTMLImageElement;
 async function loadAssets(): Promise<void> {
   shadowSprite = await loadImage(shadowImage);
 }
 loadAssets();
+
+const mapZoomFactor = 3;
 
 function drawShadow(
   ctx: CanvasRenderingContext2D,
@@ -17,11 +19,11 @@ function drawShadow(
   zoomFactor: number,
   isMouseOver: boolean
 ): void {
-  const shadowSize = 48;
+  const shadowSize = 48 / mapZoomFactor;
   ctx.drawImage(
     shadowSprite,
-    shadowX + 8 * zoomFactor,
-    shadowY + 24 * zoomFactor,
+    shadowX + 3 * zoomFactor,
+    shadowY + 8 * zoomFactor,
     shadowSize * zoomFactor,
     shadowSize * zoomFactor
   );
@@ -47,8 +49,8 @@ function drawCharacter(
     16,
     shadowX,
     shadowY,
-    64 * zoomFactor,
-    64 * zoomFactor
+    (64 / mapZoomFactor) * zoomFactor,
+    (64 / mapZoomFactor) * zoomFactor
   );
 }
 
@@ -101,20 +103,20 @@ export function drawPlayerBanner(
   zoomFactor: number
 ) {
   // Calculate character position
-  const characterX = (player.x - cameraX - 4) * zoomFactor;
-  const characterY = (player.y - cameraY - 4) * zoomFactor;
+  const characterX = (player.x - cameraX) * zoomFactor;
+  const characterY = (player.y - cameraY) * zoomFactor;
 
   // Calculate background position
   const userNameTextWidth = ctx.measureText(player.userName).width;
-  const backgroundX = characterX + (32 * zoomFactor - userNameTextWidth) / 2;
-  const backgroundY = characterY - 30 * zoomFactor;
+  const backgroundX = characterX + (4 * zoomFactor - userNameTextWidth) / 2;
+  const backgroundY = characterY - 14 * zoomFactor;
 
   // Draw player name background
   ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-  ctx.font = `${14 * zoomFactor}px Poppins`;
+  ctx.font = `${(14 / mapZoomFactor) * zoomFactor}px Poppins`;
 
-  const padding = 10 * zoomFactor;
-  const backgroundHeight = 20 * zoomFactor;
+  const padding = (10 / mapZoomFactor) * zoomFactor;
+  const backgroundHeight = (20 / mapZoomFactor) * zoomFactor;
   const playerNameTextWidth = ctx.measureText(player.userName).width;
   const backgroundWidth = playerNameTextWidth + padding * 3;
 
@@ -142,12 +144,12 @@ export function drawPlayerBanner(
   ctx.fill();
 
   // Draw user status icon
-  const statusRadius = 5 * zoomFactor;
+  const statusRadius = (6 * zoomFactor) / mapZoomFactor;
   ctx.fillStyle = userStatusColors(player.userStatus);
   ctx.beginPath();
   ctx.arc(
     backgroundX + padding,
-    backgroundY + (20 * zoomFactor) / 2,
+    backgroundY + (7 * zoomFactor) / 2,
     statusRadius,
     0,
     2 * Math.PI
@@ -156,29 +158,49 @@ export function drawPlayerBanner(
 
   // Draw player name
   ctx.fillStyle = "white";
-  ctx.font = `${14 * zoomFactor}px Poppins`;
+  ctx.font = `${(14 / mapZoomFactor) * zoomFactor}px Poppins`;
   ctx.fillText(
     player.userName,
     backgroundX + padding * 2,
-    backgroundY + 15 * zoomFactor
+    backgroundY + 5 * zoomFactor
   );
 }
 
 // Draw the map
-export function drawWorld(
+export async function drawTileMap(
   ctx: CanvasRenderingContext2D,
-  worldImg: HTMLImageElement,
-  camera: Camera
-) {
-  ctx.drawImage(
-    worldImg,
-    0,
-    0,
-    worldImg.width,
-    worldImg.height,
-    (-camera.cameraX - worldImg.height / 2) * camera.zoomFactor,
-    (-camera.cameraY - worldImg.width / 2) * camera.zoomFactor,
-    worldImg.width * camera.zoomFactor,
-    worldImg.height * camera.zoomFactor
-  );
+  camera: Camera,
+  tileMap: TileMap,
+  tilesetImage: HTMLImageElement
+): Promise<void> {
+  const tileWidth = tileMap.tilewidth;
+  const tileHeight = tileMap.tileheight;
+  const offsetX =
+    (-camera.cameraX - (tileMap.width * tileWidth) / 2) * camera.zoomFactor;
+  const offsetY =
+    (-camera.cameraY - (tileMap.height * tileHeight) / 2) * camera.zoomFactor;
+
+  for (const layer of tileMap.layers) {
+    for (let y = 0; y < layer.height; y++) {
+      for (let x = 0; x < layer.width; x++) {
+        const tileId = layer.data[y * layer.width + x] - 1;
+        if (tileId >= 0) {
+          const tileX = (tileId * tileWidth) % tilesetImage.width;
+          const tileY =
+            Math.floor((tileId * tileWidth) / tilesetImage.width) * tileHeight;
+          ctx.drawImage(
+            tilesetImage,
+            tileX,
+            tileY,
+            tileWidth,
+            tileHeight,
+            x * tileWidth * camera.zoomFactor + offsetX,
+            y * tileHeight * camera.zoomFactor + offsetY,
+            tileWidth * camera.zoomFactor,
+            tileHeight * camera.zoomFactor
+          );
+        }
+      }
+    }
+  }
 }

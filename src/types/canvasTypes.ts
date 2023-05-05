@@ -24,3 +24,32 @@ export type Camera = {
   cameraY: number;
   zoomFactor: number;
 };
+
+export type CollisionData = {
+  width: number;
+  height: number;
+  data: number[][];
+};
+
+export type Layer = {
+  id: number;
+  name: string;
+  data: number[];
+  width: number;
+  height: number;
+};
+
+export type TileMap = {
+  width: number;
+  height: number;
+  tilewidth: number;
+  tileheight: number;
+  layers: Layer[];
+};
+
+export type Rect = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};

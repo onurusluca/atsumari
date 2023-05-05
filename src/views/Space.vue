@@ -34,7 +34,7 @@ let users = reactive<Array<User>>([]);
 let canvasFrameRate = ref<number>(60);
 let canvasLoaded = ref<boolean>(false);
 // Need to change user speed based on canvasFrameRate
-let speed = canvasFrameRate.value === 30 ? 4 : canvasFrameRate.value === 60 ? 6 : 6;
+let speed = canvasFrameRate.value === 30 ? 2 : canvasFrameRate.value === 60 ? 3 : 3;
 
 let initialUserPosition = {
   x: 100,

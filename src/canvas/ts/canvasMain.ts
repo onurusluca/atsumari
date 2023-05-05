@@ -1,9 +1,8 @@
 import { emitter } from "@/composables/useEmit";
 import type { User } from "@/types/general";
-import type { CanvasAppOptions, Camera } from "@/types/canvasTypes";
-import { drawTileMap, loadJson } from "./parseTmx";
+import type { CanvasAppOptions, Camera, CollisionData } from "@/types/canvasTypes";
 import { loadImage, isColliding, matchUserFacingToAnimationState } from "./utilities";
-import { drawWorld, drawPlayerBanner, drawPlayer } from "./draw";
+import { drawTileMap, drawPlayerBanner, drawPlayer } from "./draw";
 import { updateAnimationFrame } from "./animations";
 import { keyDownEventListener, keyUpEventListener } from "./keyboardEvents";
 import { rightClickEventListener, wheelEventListener } from "./mouseEvents";
@@ -26,8 +25,7 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
 
   const ctx = canvas.getContext("2d")!;
 
-  const [worldImg, characterImg, characterImgMyPlayer, worldMap] = await Promise.all([
-    loadImage(spaceMap),
+  const [characterImg, characterImgMyPlayer, worldMap] = await Promise.all([
     loadImage(myCharacterSprite),
     loadImage(myCharacterSprite),
     loadImage(WorldMapTileset),
@@ -36,7 +34,7 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
   let camera: Camera = {
     cameraX: 200,
     cameraY: 200,
-    zoomFactor: 1,
+    zoomFactor: 3,
   };
 
   let myPlayer: User = {
@@ -115,9 +113,9 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
 
         drawFPS();
 
-        const playerTilePosition = getPlayerTilePosition();
+        // const playerTilePosition = getPlayerTilePosition();
 
-        if (
+        /*   if (
           playerTilePosition.x >= 13 &&
           playerTilePosition.y <= 20 &&
           playerTilePosition.y <= 6 &&
@@ -126,7 +124,7 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
           emitter.emit("playerInRoom", true);
         } else {
           emitter.emit("playerInRoom", false);
-        }
+        } */
 
         /*   const inRoom = isPlayerInRoom(roomLayer, playerTilePosition, mapWidth); */
       }
@@ -139,7 +137,7 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
   // HELPER FUNCTIONS
 
   async function drawMap() {
-    drawTileMap(ctx, camera, WorldMapJson, worldMap, 2);
+    drawTileMap(ctx, camera, WorldMapJson, worldMap);
   }
 
   // Move my player but only if no other key is pressed(prevent diagonal movement). Also, if the user releases the second pressed key, the character should continue moving in the direction of the first pressed key
@@ -176,8 +174,8 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
       }
 
       // Check for collisions with other players
-      const playerWidth = 48 * camera.zoomFactor;
-      const playerHeight = 64 * camera.zoomFactor;
+      const playerWidth = (18 * camera.zoomFactor) / 3;
+      const playerHeight = (22 * camera.zoomFactor) / 3;
       let collision = false;
       for (const user of users) {
         if (
@@ -199,6 +197,8 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
 
       if (!collision) {
         if (!isPlayerColliding(newPlayerX, newPlayerY, collisionData)) {
+          console.log("NO COLLISION");
+
           myPlayer.x = newPlayerX;
           myPlayer.y = newPlayerY;
         } else {
@@ -214,8 +214,8 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
         const playerRect = {
           x: (user.x - camera.cameraX - 8) * camera.zoomFactor,
           y: (user.y - camera.cameraY - 8) * camera.zoomFactor,
-          width: 96 * camera.zoomFactor,
-          height: 96 * camera.zoomFactor,
+          width: 18 * camera.zoomFactor,
+          height: 18 * camera.zoomFactor,
         };
 
         // Check if mouse is over the player
@@ -244,8 +244,8 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
     const playerRect = {
       x: (myPlayer.x - camera.cameraX - 8) * camera.zoomFactor,
       y: (myPlayer.y - camera.cameraY - 8) * camera.zoomFactor,
-      width: 96 * camera.zoomFactor,
-      height: 96 * camera.zoomFactor,
+      width: 18 * camera.zoomFactor,
+      height: 18 * camera.zoomFactor,
     };
     const isMouseOver = isColliding(
       { x: mouseX, y: mouseY, width: 1, height: 1 },
@@ -269,6 +269,8 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
   // We need to draw the names separately because we want them to be drawn on top of everything else
   function drawAllPlayerNames() {
     // Draw other players' names
+
+    //FIXME: For some reason, zoomed other players' names won't stay in place
     users.forEach((user) => {
       if (user.id !== myPlayerId) {
         drawPlayerBanner(ctx, user, camera.cameraX, camera.cameraY, camera.zoomFactor);
@@ -319,8 +321,8 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
     y: number,
     collisionData: CollisionData
   ): boolean {
-    const tileX = Math.floor(x / WorldMapJson.tilewidth);
-    const tileY = Math.floor(y / WorldMapJson.tileheight);
+    const tileX = Math.floor(x / WorldMapJson.tilewidth / camera.zoomFactor);
+    const tileY = Math.floor(y / WorldMapJson.tileheight / camera.zoomFactor);
 
     if (
       tileX >= 0 &&
@@ -339,7 +341,6 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
     if (
       users.length > 0 &&
       myPlayerId !== "" &&
-      speed !== 0 &&
       spaceMap !== "" &&
       initialSetupCompleted
     ) {
@@ -349,7 +350,6 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
         if (
           users.length > 0 &&
           myPlayerId !== "" &&
-          speed !== 0 &&
           spaceMap !== "" &&
           initialSetupCompleted
         ) {
