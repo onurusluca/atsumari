@@ -1,12 +1,22 @@
 import { emitter } from "@/composables/useEmit";
 import type { User } from "@/types/general";
-import type { CanvasAppOptions, Camera, CollisionData } from "@/types/canvasTypes";
-import { loadImage, isColliding, matchUserFacingToAnimationState } from "./utilities";
+import type {
+  CanvasAppOptions,
+  Camera,
+  CollisionData,
+  TileMap,
+} from "@/types/canvasTypes";
+
+import {
+  loadImage,
+  isColliding,
+  matchUserFacingToAnimationState,
+  parseCollisionLayer,
+} from "./utilities";
 import { drawTileMap, drawPlayerBanner, drawPlayer } from "./draw";
 import { updateAnimationFrame } from "./animations";
 import { keyDownEventListener, keyUpEventListener } from "./keyboardEvents";
 import { rightClickEventListener, wheelEventListener } from "./mouseEvents";
-import { parseCollisionLayer } from "./roomDetection";
 
 import WorldMapJson from "../images/newworld.json";
 import WorldMapTileset from "../images/tileset.png";
@@ -97,8 +107,6 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
         camera.cameraX = myPlayer.x - canvas.width / (2.2 * camera.zoomFactor);
         camera.cameraY = myPlayer.y - canvas.height / (2.2 * camera.zoomFactor);
 
-        // drawWorld(ctx, worldImg, camera);
-
         drawMap();
 
         handlePlayerMovement();
@@ -113,17 +121,17 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
 
         drawFPS();
 
-        // const playerTilePosition = getPlayerTilePosition();
-
-        /*   if (
-          playerTilePosition.x >= 13 &&
-          playerTilePosition.y <= 20 &&
-          playerTilePosition.y <= 6 &&
+        /*         if (
+          playerTilePosition.x >= 4 &&
+          playerTilePosition.y <= 0 &&
+          playerTilePosition.y <= 4 &&
           playerTilePosition.y >= 2
         ) {
-          emitter.emit("playerInRoom", true);
+          console.log("player in room");
+
+          // emitter.emit("playerInRoom", true);
         } else {
-          emitter.emit("playerInRoom", false);
+          //emitter.emit("playerInRoom", false);
         } */
 
         /*   const inRoom = isPlayerInRoom(roomLayer, playerTilePosition, mapWidth); */
@@ -137,7 +145,23 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
   // HELPER FUNCTIONS
 
   async function drawMap() {
+    const offsetX =
+      (-camera.cameraX - (WorldMapJson.width * WorldMapJson.tilewidth) / 2) *
+      camera.zoomFactor;
+    const offsetY =
+      (-camera.cameraY - (WorldMapJson.height * WorldMapJson.tileheight) / 2) *
+      camera.zoomFactor;
+
     drawTileMap(ctx, camera, WorldMapJson, worldMap);
+    drawCollisionSpots(
+      ctx,
+      collisionData,
+      WorldMapJson.tilewidth,
+      WorldMapJson.tileheight,
+      camera,
+      offsetX,
+      offsetY
+    );
   }
 
   // Move my player but only if no other key is pressed(prevent diagonal movement). Also, if the user releases the second pressed key, the character should continue moving in the direction of the first pressed key
@@ -173,6 +197,8 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
         }
       }
 
+      console.log("New player position:", newPlayerX, newPlayerY);
+
       // Check for collisions with other players
       const playerWidth = (18 * camera.zoomFactor) / 3;
       const playerHeight = (22 * camera.zoomFactor) / 3;
@@ -196,14 +222,13 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
       }
 
       if (!collision) {
-        if (!isPlayerColliding(newPlayerX, newPlayerY, collisionData)) {
-          console.log("NO COLLISION");
-
-          myPlayer.x = newPlayerX;
-          myPlayer.y = newPlayerY;
-        } else {
-          console.log("COLLISION");
-        }
+        myPlayer.x = newPlayerX;
+        myPlayer.y = newPlayerY;
+      }
+      if (!isPlayerColliding(newPlayerX, newPlayerY, collisionData, WorldMapJson)) {
+        console.log("No collision");
+      } else {
+        console.log("Collision");
       }
     }
   }
@@ -281,19 +306,6 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
     drawPlayerBanner(ctx, myPlayer, camera.cameraX, camera.cameraY, camera.zoomFactor);
   }
 
-  function getPlayerTilePosition(): {
-    x: number;
-    y: number;
-  } {
-    const tileWidth = 32; // Set the width of a tile in your map
-    const tileHeight = 32; // Set the height of a tile in your map
-
-    return {
-      x: Math.floor(myPlayer.x / tileWidth),
-      y: Math.floor(myPlayer.y / tileHeight),
-    };
-  }
-
   function updateAnimation() {
     [animationFrame, animationTick] = updateAnimationFrame(
       pressedKeys,
@@ -319,21 +331,51 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
   function isPlayerColliding(
     x: number,
     y: number,
-    collisionData: CollisionData
+    collisionData: CollisionData,
+    tileMap: TileMap
   ): boolean {
-    const tileX = Math.floor(x / WorldMapJson.tilewidth / camera.zoomFactor);
-    const tileY = Math.floor(y / WorldMapJson.tileheight / camera.zoomFactor);
+    const tileWidth = tileMap.tilewidth;
+    const tileHeight = tileMap.tileheight;
+    const offsetX =
+      (-camera.cameraX - (tileMap.width * tileWidth) / 2) * camera.zoomFactor;
+    const offsetY =
+      (-camera.cameraY - (tileMap.height * tileHeight) / 2) * camera.zoomFactor;
 
-    if (
-      tileX >= 0 &&
-      tileX < collisionData.width &&
-      tileY >= 0 &&
-      tileY < collisionData.height
-    ) {
-      return collisionData.data[tileY][tileX] !== 0;
+    const playerTilePosition = {
+      x: Math.floor((x - offsetX) / (tileWidth * camera.zoomFactor)),
+      y: Math.floor((y - offsetY) / (tileHeight * camera.zoomFactor)),
+    };
+
+    // Check if the player is colliding with a tile
+    if (collisionData.data[playerTilePosition.y][playerTilePosition.x] !== 0) {
+      return true;
     }
 
-    return true;
+    return false;
+  }
+
+  function drawCollisionSpots(
+    ctx: CanvasRenderingContext2D,
+    collisionData: CollisionData,
+    tileWidth: number,
+    tileHeight: number,
+    camera: Camera,
+    offsetX: number,
+    offsetY: number
+  ) {
+    ctx.fillStyle = "rgba(255, 0, 0, 0.5)";
+    for (let y = 0; y < collisionData.height; y++) {
+      for (let x = 0; x < collisionData.width; x++) {
+        if (collisionData.data[y][x] !== 0) {
+          ctx.fillRect(
+            x * tileWidth * camera.zoomFactor + offsetX,
+            y * tileHeight * camera.zoomFactor + offsetY,
+            tileWidth * camera.zoomFactor,
+            tileHeight * camera.zoomFactor
+          );
+        }
+      }
+    }
   }
 
   // Start the game loop
