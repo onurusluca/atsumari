@@ -40,7 +40,7 @@ export function keyUpEventListener(
 
     if (validKeys.includes(key)) {
       emitter.emit("playerMove", myPlayer);
-      console.log("EMITTED PLAYER MOVE", myPlayer);
+      // console.log("EMITTED PLAYER MOVE", myPlayer);
     }
 
     const index = keyPressOrder.indexOf(key);

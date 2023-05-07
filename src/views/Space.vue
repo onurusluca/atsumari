@@ -156,7 +156,7 @@ const initialPreparations = async () => {
         canvasLocalStorage.value = {
           lastUserPosition: { x: user.x, y: user.y },
         };
-        console.log("User move received,saved and updated");
+        // console.log("User move received,saved and updated");
       }
     });
   });
@@ -246,9 +246,9 @@ const initialPreparations = async () => {
 const moveUserToRightClickedPosition = async () => {
   users.forEach(async (user) => {
     if (user.id === userId) {
-      // Update user position (-24 because of the sprite size)
-      user.x = rightClickWorldPosition.value.x - 24;
-      user.y = rightClickWorldPosition.value.y - 24;
+      // Update user position
+      user.x = rightClickWorldPosition.value.x;
+      user.y = rightClickWorldPosition.value.y;
       // Set to default
       user.facingTo = "down";
 
@@ -453,7 +453,7 @@ const sendUserAction = async (x: number, y: number, facingTo: string) => {
       facingTo: facingTo,
     },
   });
-  console.log("Sent broadcast event", { x, y, userName, facingTo });
+  /*   console.log("Sent broadcast event", { x, y, userName, facingTo }); */
 };
 
 // Unsubscribe from channel when component is unmounted

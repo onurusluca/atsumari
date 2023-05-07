@@ -1,4 +1,5 @@
 import type { User } from "@/types/general";
+import type { Camera } from "@/types/canvasTypes";
 import { isColliding } from "./utilities";
 
 function getUserCollision(
@@ -30,21 +31,20 @@ function getUserCollision(
 
 function handleRightClick(
   e: MouseEvent,
-  getCamera: () => { cameraX: number; cameraY: number; zoomFactor: number },
+  camera: Camera,
   users: User[],
   myPlayerId: string
 ): void {
   const { clientX: mouseX, clientY: mouseY } = e;
-  const { cameraX, cameraY, zoomFactor } = getCamera();
 
-  const worldX = mouseX + cameraX;
-  const worldY = mouseY + cameraY;
+  const worldX = mouseX / camera.zoomFactor + camera.cameraX;
+  const worldY = mouseY / camera.zoomFactor + camera.cameraY;
 
   const mousePos = { mouseX, mouseY };
   const worldPos = { worldX, worldY };
 
-  const playerWidth = 48 * zoomFactor;
-  const playerHeight = 48 * zoomFactor;
+  const playerWidth = (18 * camera.zoomFactor) / 3;
+  const playerHeight = (22 * camera.zoomFactor) / 3;
 
   // Check if the right-click is on any user, if so, don't emit right click event
   const collision = getUserCollision(
@@ -56,9 +56,8 @@ function handleRightClick(
     playerHeight
   );
 
-  console.log("right click", worldPos);
-
   if (!collision) {
+    // Emit right click event to Space.vue
     emitter.emit("rightClick", { mousePos, worldPos });
   }
   e.preventDefault();
@@ -66,12 +65,12 @@ function handleRightClick(
 
 export function rightClickEventListener(
   canvas: HTMLCanvasElement,
-  getCamera: () => { cameraX: number; cameraY: number; zoomFactor: number },
+  camera: Camera,
   users: User[],
   myPlayerId: string
 ): void {
   canvas.addEventListener("contextmenu", (e) =>
-    handleRightClick(e, getCamera, users, myPlayerId)
+    handleRightClick(e, camera, users, myPlayerId)
   );
 }
 
