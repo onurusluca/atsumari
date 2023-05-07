@@ -15,17 +15,7 @@ let showContentLoadingPlaceholder = ref<boolean>(true);
 let showNoSpacesMessage = ref<boolean>(false);
 
 onMounted(async () => {
-  nextTick(async () => {
-    await handleReadSpace();
-  });
-
-  /*  window.addEventListener('load', async () => {
-    await handleReadSpace();
-  });
-
-  onUnmounted(() => {
-  window.removeEventListener('load', handleReadSpace);
-});*/
+  await handleReadSpace();
 });
 
 /****************************************
@@ -180,7 +170,11 @@ function showToast(toastTypeProp: string) {
 
         <!-- Image -->
         <div class="space__image-container">
-          <img :alt="t('spaces.spaceImageAlt')" class="image-container__image" />
+          <img
+            src="@/assets/images/mockup/temporary-space-background.jpg"
+            :alt="t('spaces.spaceImageAlt')"
+            class="image-container__image"
+          />
 
           <!-- Go to space -->
           <!-- :to="`/space/${item.id}`" -->

@@ -489,9 +489,9 @@ const handleChatMenuOpen = () => {
 
 <template>
   <!-- Loading animation to show until app mount -->
-  <!--   <section v-if="!canvasLoaded" class="route-loading-overlay">
+  <section v-if="!canvasLoaded" class="route-loading-overlay">
     <span class="loader"></span>
-  </section> -->
+  </section>
 
   <div class="space">
     <div class="canvas-container">
@@ -584,9 +584,10 @@ const handleChatMenuOpen = () => {
       <WebRTC v-else />
     </section>
 
-    <!-- Joystick -->
+    <!-- Joystick for mobile -->
     <Joystick />
 
+    <!-- Initial setup modal -->
     <InitialCharacterSetupModal
       v-if="!initialSetupCompleted"
       :space-id="spaceId"

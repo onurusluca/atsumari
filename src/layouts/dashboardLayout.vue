@@ -3,11 +3,16 @@
   <Sidebar />
   <main class="content">
     <router-view v-slot="{ Component }">
-      <keep-alive>
-        <component :is="Component" />
-      </keep-alive>
+      <component :is="Component" />
     </router-view>
   </main>
+
+  <!--
+    Don't use keep-alive for now, it's causing issues with loading async stuff
+     <keep-alive>
+        <component :is="Component" />
+      </keep-alive>
+   -->
 </template>
 
 <style scoped lang="scss">

@@ -51,6 +51,7 @@ declare module '@vue/runtime-core' {
     'Ion:enterOutline': typeof import('~icons/ion/enter-outline')['default']
     Joystick: typeof import('./components/space/Joystick.vue')['default']
     Loading: typeof import('./components/nav/Loading.vue')['default']
+    LoadingScreen: typeof import('./components/space/LoadingScreen.vue')['default']
     Login: typeof import('./components/auth/Login.vue')['default']
     'Logos:googleIcon': typeof import('~icons/logos/google-icon')['default']
     MainMenu: typeof import('./components/space/MainMenu.vue')['default']

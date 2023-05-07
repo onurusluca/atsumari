@@ -15,12 +15,14 @@ onMounted(() => {});
 let isJoined = ref<boolean>(false);
 emitter.on("playerInRoom", (data: any) => {
   if (data === true && !isJoined.value) {
+    isJoined.value = true;
+
     console.log("joining room", data);
     handleJoinRoom();
-    isJoined.value = true;
   } else if (data === false && isJoined.value) {
-    console.log("leaving room", data);
     isJoined.value = false;
+
+    console.log("leaving room", data);
   }
 });
 

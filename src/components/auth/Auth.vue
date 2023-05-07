@@ -46,8 +46,6 @@ const handleLogin = async () => {
       });
     }
     if (error) {
-      console.log("err");
-
       errorUi.value = t("auth.login.invalidCredentials");
       errorUiSecond.value = t("auth.login.tryAgain");
     } else {
@@ -80,6 +78,28 @@ const handleRegister = async () => {
   } catch (error) {
     if (error instanceof Error) {
       alert(error.message);
+    }
+  } finally {
+    loading.value = false;
+  }
+};
+
+const handleGoogleAuth = async () => {
+  try {
+    loading.value = true;
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+    });
+
+    if (error) {
+      errorUi.value = t("auth.login.invalidCredentials");
+      errorUiSecond.value = t("auth.login.tryAgain");
+    } else {
+      router.push({ name: "Home" });
+    }
+  } catch (error) {
+    if (error instanceof Error) {
+      console.log(error.message);
     }
   } finally {
     loading.value = false;
@@ -132,7 +152,7 @@ const { pressed } = useMousePressed({ target: revealPasswordButtonRef });
 
     <!-- OAuth -->
     <div class="auth__oauth">
-      <button class="btn btn-outline oauth__signin-button">
+      <button @click="handleGoogleAuth" class="btn btn-outline oauth__signin-button">
         <logos:google-icon class="mr-s" />
         {{ t("auth.shared.signInWithGoogle") }}
       </button>

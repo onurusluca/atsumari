@@ -203,6 +203,8 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
         emitter.emit("playerInRoom", false);
       }
 
+      console.log(mapCollision);
+
       // console.log(`x: ${myPlayer.x}, y: ${myPlayer.y}`);
     }
   }
@@ -269,7 +271,6 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
   function drawAllPlayerNames() {
     // Draw other players' names
 
-    //FIXME: For some reason, zoomed other players' names won't stay in place
     users.forEach((user) => {
       if (user.id !== myPlayerId) {
         drawPlayerBanner(ctx, user, camera.cameraX, camera.cameraY, camera.zoomFactor);
@@ -277,6 +278,8 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
     });
 
     // Draw your player's name
+
+    //FIXME: For some reason, players' names won't stay in place
     drawPlayerBanner(ctx, myPlayer, camera.cameraX, camera.cameraY, camera.zoomFactor);
   }
 
