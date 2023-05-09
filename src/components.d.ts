@@ -49,6 +49,7 @@ declare module '@vue/runtime-core' {
     InitialCharacterSetup: typeof import('./components/global/InitialCharacterSetup.vue')['default']
     InitialCharacterSetupModal: typeof import('./components/global/InitialCharacterSetupModal.vue')['default']
     'Ion:enterOutline': typeof import('~icons/ion/enter-outline')['default']
+    Join: typeof import('./components/space/webrtc/Join.vue')['default']
     Joystick: typeof import('./components/space/Joystick.vue')['default']
     Loading: typeof import('./components/nav/Loading.vue')['default']
     LoadingScreen: typeof import('./components/space/LoadingScreen.vue')['default']

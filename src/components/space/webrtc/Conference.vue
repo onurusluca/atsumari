@@ -5,6 +5,8 @@ import {
   selectIsLocalVideoEnabled,
   selectIsPeerAudioEnabled,
   selectIsPeerVideoEnabled,
+  selectIsSomeoneScreenSharing,
+  selectScreenShareByPeerID,
   selectIsLocalAudioPluginPresent,
   selectConnectionQualityByPeerID,
 } from "@100mslive/hms-video-store";
@@ -19,15 +21,21 @@ const generalStore = useGeneralStore();
 const route = useRouter();
 
 const videoRefs: any = reactive({});
+const screenShareRef: any = ref(null);
+
 const remotePeerProps: any = reactive({});
 const allPeers = ref<HMSPeer[]>([]);
 const isAudioEnabled = ref(hmsStore.getState(selectIsLocalAudioEnabled));
 const isVideoEnabled = ref(hmsStore.getState(selectIsLocalVideoEnabled));
+const isScreenShareEnabled = ref(hmsStore.getState(selectIsSomeoneScreenSharing));
 const noiseSuppressionPlugin = new HMSNoiseSuppressionPlugin();
+
+const isScreenSharingEnabled = ref(false);
 
 enum MediaState {
   isAudioEnabled = "isAudioEnabled",
   isVideoEnabled = "isVideoEnabled",
+  isScreenShareEnabled = "isScreenShareEnabled",
 }
 let isJoined = ref<boolean>(false);
 emitter.on("playerInRoom", (data: any) => {
@@ -115,6 +123,9 @@ const onAudioChange = (newAudioState: boolean) => {
 const onVideoChange = (newVideoState: boolean) => {
   isVideoEnabled.value = newVideoState;
 };
+const onScreenShareChange = (newScreenShareState: boolean) => {
+  isScreenShareEnabled.value = newScreenShareState;
+};
 
 const onPeerAudioChange = (isEnabled: boolean, peerId: string) => {
   if (videoRefs[peerId]) {
@@ -124,6 +135,11 @@ const onPeerAudioChange = (isEnabled: boolean, peerId: string) => {
 const onPeerVideoChange = (isEnabled: boolean, peerId: string) => {
   if (videoRefs[peerId]) {
     remotePeerProps[peerId][MediaState.isVideoEnabled] = isEnabled;
+  }
+};
+const onPeerScreenShareChange = (isEnabled: boolean, peerId: string) => {
+  if (videoRefs[peerId]) {
+    remotePeerProps[peerId][MediaState.isScreenShareEnabled] = isEnabled;
   }
 };
 
@@ -148,6 +164,9 @@ const renderPeers = (peers: HMSPeer[]) => {
         remotePeerProps[peer.id][MediaState.isVideoEnabled] = hmsStore.getState(
           selectIsPeerVideoEnabled(peer.id)
         );
+        remotePeerProps[peer.id][MediaState.isScreenShareEnabled] = hmsStore.getState(
+          selectScreenShareByPeerID(peer.id)
+        );
 
         // Subscribe to the audio and video changes of the remote peer
         hmsStore.subscribe(
@@ -157,6 +176,10 @@ const renderPeers = (peers: HMSPeer[]) => {
         hmsStore.subscribe(
           (isEnabled) => onPeerVideoChange(isEnabled, peer.id),
           selectIsPeerVideoEnabled(peer.id)
+        );
+        hmsStore.subscribe(
+          (isEnabled) => onPeerScreenShareChange(isEnabled, peer.id),
+          selectScreenShareByPeerID(peer.id)
         );
 
         // Subscribe to the connection quality of the remote peer. Only activates if a peer is available
@@ -172,6 +195,7 @@ const renderPeers = (peers: HMSPeer[]) => {
 
         console.log("allPeers connected", allPeers.value);
 
+        // After the peer is connected, initialize the noise suppression plugin
         await initNoiseSuppression();
       }
     }
@@ -190,18 +214,24 @@ const toggleVideo = async () => {
   renderPeers(hmsStore.getState(selectPeers));
 };
 
+const toggleScreenShare = async () => {
+  const enabled = hmsStore.getState(selectIsSomeoneScreenSharing);
+  await hmsActions.setScreenShareEnabled(!enabled);
+};
+
 // HMS Listeners
 hmsStore.subscribe(renderPeers, selectPeers);
 hmsStore.subscribe(onAudioChange, selectIsLocalAudioEnabled);
 hmsStore.subscribe(onVideoChange, selectIsLocalVideoEnabled);
+hmsStore.subscribe(onScreenShareChange, selectIsSomeoneScreenSharing);
 </script>
 
 <template>
   <main class="main-container">
-    <p>CONNECTION QUALITY: {{ webRtcConnectionQuality }}</p>
+    <p class="connection-quality">CONNECTION QUALITY: {{ webRtcConnectionQuality }}</p>
     <div class="video-grid">
       <div v-for="peer in allPeers" :key="peer.id" class="video-container">
-        <video
+        <!--  <video
           autoplay
           :muted="peer.isLocal"
           playsinline
@@ -211,8 +241,20 @@ hmsStore.subscribe(onVideoChange, selectIsLocalVideoEnabled);
               if (el) videoRefs[peer.id] = el;
             }
           "
+        ></video> -->
+
+        <video
+          autoplay
+          playsinline
+          class="video-element"
+          :ref="
+            (el) => {
+              if (el) videoRefs[peer.id] = el;
+            }
+          "
         ></video>
-        <p class="video-label">
+
+        <div class="video-label">
           <span
             class="audio-icon"
             v-show="
@@ -220,7 +262,7 @@ hmsStore.subscribe(onVideoChange, selectIsLocalVideoEnabled);
               (!peer.isLocal && remotePeerProps?.[peer.id]?.[MediaState.isAudioEnabled])
             "
           >
-            <!-- Audio Enabled SVG -->
+            <!-- Audio Enabled  -->
           </span>
           <span
             class="audio-mute-icon"
@@ -230,14 +272,26 @@ hmsStore.subscribe(onVideoChange, selectIsLocalVideoEnabled);
                 !remotePeerProps?.[peer.id]?.[MediaState.isAudioEnabled])
             "
           >
-            <!-- Audio Disabled SVG -->
+            <!-- Audio Disabled -->
           </span>
           <span class="peer-name">{{
             peer.isLocal ? `You (${peer.name})` : peer.name
           }}</span>
+        </div>
+
+        <!-- Screen share Disabled -->
+        <p
+          class="camera-off-text"
+          v-show="
+            (peer.isLocal && !isScreenSharingEnabled) ||
+            (!peer.isLocal &&
+              !remotePeerProps?.[peer.id]?.[MediaState.isScreenShareEnabled])
+          "
+        >
+          Screen Share Disabled
         </p>
 
-        <p
+        <!--         <p
           class="camera-off-text"
           v-show="
             (peer.isLocal && !isVideoEnabled) ||
@@ -245,7 +299,7 @@ hmsStore.subscribe(onVideoChange, selectIsLocalVideoEnabled);
           "
         >
           Camera Off
-        </p>
+        </p> -->
       </div>
     </div>
 
@@ -256,6 +310,9 @@ hmsStore.subscribe(onVideoChange, selectIsLocalVideoEnabled);
       <button class="video-toggle-button" @click="toggleVideo">
         {{ isVideoEnabled ? "Mute" : "Unmute" }} Camera
       </button>
+      <button class="screenshare-toggle-button" @click="toggleScreenShare">
+        {{ isScreenSharingEnabled ? "Stop Sharing" : "Share Screen" }}
+      </button>
       <button class="leave-meeting-button" @click="leaveMeeting">
         Leave Meeting
       </button>
@@ -265,26 +322,28 @@ hmsStore.subscribe(onVideoChange, selectIsLocalVideoEnabled);
     </div>
   </main>
 </template>
-
 <style scoped lang="scss">
 .main-container {
-  margin: 0 2.5rem;
-  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  margin: 0;
+  background-color: #1a202c; // Dark Background
+  font-family: "Poppins", sans-serif;
+}
+
+.connection-quality {
+  margin-bottom: 1rem;
+  color: #fbbf24; // Amber
+  font-weight: 700;
 }
 
 .video-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 0.5rem;
-  margin-top: 1.5rem;
-
-  @media (min-width: 640px) {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  @media (min-width: 1024px) {
-    grid-template-columns: repeat(3, 1fr);
-  }
 }
 
 .video-container {
@@ -310,12 +369,14 @@ hmsStore.subscribe(onVideoChange, selectIsLocalVideoEnabled);
   position: absolute;
   bottom: 0;
   left: 0;
+  width: 100%;
 }
 
 .audio-icon,
 .audio-mute-icon {
   display: inline-block;
   width: 1.5rem;
+  margin-right: 0.5rem;
 }
 
 .peer-name {
@@ -329,6 +390,7 @@ hmsStore.subscribe(onVideoChange, selectIsLocalVideoEnabled);
   top: 50%;
   right: 0;
   left: 0;
+  transform: translateY(-50%);
 }
 
 .action-buttons {
@@ -338,29 +400,38 @@ hmsStore.subscribe(onVideoChange, selectIsLocalVideoEnabled);
   justify-content: center;
 }
 
-.audio-toggle-button,
-.video-toggle-button,
-.leave-meeting-button {
+.button {
   background-color: #38a169; // Teal
   color: white;
   border-radius: 0.375rem;
   padding: 0.75rem;
   display: block;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.3s ease;
 
   &:hover {
-    cursor: pointer;
     opacity: 0.8;
   }
-}
 
-.video-toggle-button {
-  background-color: #9333ea; // Indigo
-  margin-left: 1.25rem;
-  margin-right: 1.25rem;
-}
+  &.audio-toggle-button {
+    margin-right: 1.25rem;
+  }
 
-.leave-meeting-button {
-  background-color: #b91c1c; // Rose
+  &.video-toggle-button {
+    margin-right: 1.25rem;
+    background-color: #9333ea; // Indigo
+  }
+
+  &.leave-meeting-button {
+    background-color: #b91c1c; // Rose
+  }
+
+  &.screenshare-toggle-button {
+    margin-right: 1.25rem;
+    background-color: #4f46e5; // Violet
+  }
 }
 
 .loading-text {

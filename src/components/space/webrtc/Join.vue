@@ -32,10 +32,6 @@ let roomDescription = ref<string>("my room");
 let roomTemplateId = ref<string>("64490b580ca9b196e73dadbf");
 let roomRegion = ref<string>("us");
 const isLoading = ref(false);
-const formData = reactive({
-  name: "",
-  room: roomName,
-});
 
 const handleCreateRoom = async () => {
   try {
@@ -108,7 +104,7 @@ const handleJoinRoom = async () => {
         console.log("trying to join room");
 
         hmsActions.join({
-          userName: formData.name,
+          userName: generalStore.userName,
           authToken: authToken.token,
           settings: {
             isAudioMuted: true, // Join with audio muted
@@ -134,7 +130,7 @@ const handleJoinRoom = async () => {
           webrtcLocalStorage.value.userAuthToken = authToken.token;
 
           hmsActions.join({
-            userName: formData.name,
+            userName: generalStore.userName,
             authToken: authToken.token,
             settings: {
               isAudioMuted: true, // Join with audio muted

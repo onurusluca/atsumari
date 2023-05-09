@@ -51,6 +51,11 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
     facingTo: "",
     userStatus: "",
   };
+  const playerWidth = ((18 * camera.zoomFactor) / 3) as number;
+  const playerHeight = ((22 * camera.zoomFactor) / 3) as number;
+  let isPlayerInARoom = false;
+  let tempPlayerX = 0 as number;
+  let tempPlayerY = 0 as number;
 
   // Tracks the order of movement keys (W, A, S, D) being pressed. It helps determine the character's movement direction when multiple keys are pressed, prioritizing the last valid key pressed.
   let keyPressOrder: string[] = [];
@@ -115,6 +120,18 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
         updateAnimation();
 
         drawFPS();
+
+        // Check if my player is in a room at startup
+        const collisionWithMap = checkCollisionWithMap(
+          myPlayer.x,
+          myPlayer.y,
+          playerWidth,
+          playerHeight
+        );
+        if (isPlayerInARoom || collisionWithMap) {
+          handleInRoomState();
+          emitter.emit("playerInRoom", true);
+        }
       }
       lastUpdateTime = timestamp;
     }
@@ -130,14 +147,13 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
   }
 
   // Move my player but only if no other key is pressed(prevent diagonal movement). Also, if the user releases the second pressed key, the character should continue moving in the direction of the first pressed key
+
   function handlePlayerMovement() {
     if (keyPressOrder.length > 0) {
-      let newPlayerX = myPlayer.x;
-      let newPlayerY = myPlayer.y;
       const lastValidKey = keyPressOrder[keyPressOrder.length - 1];
 
-      let tempPlayerX = newPlayerX;
-      let tempPlayerY = newPlayerY;
+      tempPlayerX = myPlayer.x;
+      tempPlayerY = myPlayer.y;
 
       if (pressedKeys.w || pressedKeys.a || pressedKeys.s || pressedKeys.d) {
         switch (lastValidKey) {
@@ -164,8 +180,7 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
         }
       }
 
-      const playerWidth = (18 * camera.zoomFactor) / 3;
-      const playerHeight = (22 * camera.zoomFactor) / 3;
+      // Check for collision with other players
       let collisionWithOtherUsers = false;
       for (const user of users) {
         if (
@@ -184,23 +199,26 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
           break;
         }
       }
+      if (!collisionWithOtherUsers) {
+        myPlayer.x = tempPlayerX;
+        myPlayer.y = tempPlayerY;
+      }
 
-      const mapCollision = checkCollisionWithMap(
+      // Check for collision with map
+      const collisionWithMap = checkCollisionWithMap(
         tempPlayerX,
         tempPlayerY,
         playerWidth,
         playerHeight
       );
 
-      if (!collisionWithOtherUsers) {
-        myPlayer.x = tempPlayerX;
-        myPlayer.y = tempPlayerY;
-      }
-      if (mapCollision) {
+      if (collisionWithMap) {
         console.log("map collision");
         emitter.emit("playerInRoom", true);
+        isPlayerInARoom = true;
       } else {
         emitter.emit("playerInRoom", false);
+        isPlayerInARoom = false;
       }
 
       // console.log(`x: ${myPlayer.x}, y: ${myPlayer.y}`);
@@ -276,7 +294,6 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
     });
 
     // Draw your player's name
-
     //FIXME: For some reason, players' names won't stay in place
     drawPlayerBanner(ctx, myPlayer, camera.cameraX, camera.cameraY, camera.zoomFactor);
   }
@@ -345,11 +362,9 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
     const offsetYCorrection = 4; // Add an offset to the player's Y position
 
     const offsetX =
-      (-camera.cameraX - (WorldMapJson.width * WorldMapJson.tilewidth) / 2) *
-      camera.zoomFactor;
+      (-camera.cameraX - (WorldMapJson.width * tileWidth) / 2) * camera.zoomFactor;
     const offsetY =
-      (-camera.cameraY - (WorldMapJson.height * WorldMapJson.tileheight) / 2) *
-      camera.zoomFactor;
+      (-camera.cameraY - (WorldMapJson.height * tileHeight) / 2) * camera.zoomFactor;
 
     ctx.fillStyle = "rgba(255, 0, 0, 0.5)";
     for (let y = 0; y < collisionData.height; y++) {
@@ -376,6 +391,13 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
       }
     }
     return false; // No collision detected
+  }
+
+  // What to do when the player is in the room
+  function handleInRoomState() {
+    // Draw a transparent black rectangle over the canvas
+    ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
 
   // Start the game loop
