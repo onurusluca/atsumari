@@ -8,6 +8,7 @@ const route = useRouter();
 
 const webrtcLocalStorage = useStorage("atsumari_webrtc", {
   userAuthToken: "",
+  userAuthTokenExpiry: "",
 });
 
 onMounted(() => {});
@@ -53,53 +54,98 @@ const handleCreateRoom = async () => {
 };
 
 const handleJoinRoom = async () => {
-  console.log("local storage", webrtcLocalStorage.value.userAuthToken);
+  isLoading.value = true;
 
-  try {
-    isLoading.value = true;
-    let authToken: {
-      msg: string;
-      success: boolean;
-      token: string;
-    } = {
-      msg: "",
-      success: false,
-      token: "",
-    };
+  let authToken: {
+    msg: string;
+    success: boolean;
+    token: string;
+  } = {
+    msg: "",
+    success: false,
+    token: "",
+  };
 
-    // If the auth token is not present in local storage, generate a new one
-    if (
-      !webrtcLocalStorage.value.userAuthToken ||
-      webrtcLocalStorage.value.userAuthToken === ""
-    ) {
-      authToken = await generateAuthToken(
-        "644f705b6fe6e1cc9d167ee4",
-        generalStore.userId,
-        "host"
-        // role: 'host'
-      );
+  // Delete the auth token from local storage if it is non-existent or expired or the auth token is not present
+  if (
+    !webrtcLocalStorage.value.userAuthTokenExpiry ||
+    new Date(webrtcLocalStorage.value.userAuthTokenExpiry) < new Date() ||
+    !webrtcLocalStorage.value.userAuthToken ||
+    webrtcLocalStorage.value.userAuthToken === ""
+  ) {
+    console.log(
+      "there is no token expiration in local storage or it is expired or there is no token in local storage "
+    );
 
-      console.log("authToken", authToken);
+    webrtcLocalStorage.value.userAuthToken = "";
+    webrtcLocalStorage.value.userAuthTokenExpiry = "";
 
-      webrtcLocalStorage.value.userAuthToken = authToken.token;
+    // Create a new auth token
+    authToken = await generateAuthToken(
+      "644f705b6fe6e1cc9d167ee4",
+      generalStore.userId,
+      "host"
+      // role: 'host'
+    );
 
-      // Else, use the one present in local storage
-    } else {
-      authToken.token = webrtcLocalStorage.value.userAuthToken;
-    }
+    // Set the auth token in local storage
+    webrtcLocalStorage.value.userAuthToken = authToken.token;
+
+    // Set the expiry of the auth token to 23 hours from now
+    webrtcLocalStorage.value.userAuthTokenExpiry = new Date(
+      new Date().getTime() + 23 * 60 * 60 * 1000
+    ).toISOString(); // 23 hours from creation
+
+    // Else, use the one present in local storage
+  } else {
+    console.log("the token is not expired");
+
+    authToken.token = webrtcLocalStorage.value.userAuthToken;
 
     if (authToken.token !== "") {
-      hmsActions.join({
-        userName: formData.name,
-        authToken: authToken.token,
-        settings: {
-          isAudioMuted: true, // Join with audio muted
-          isVideoMuted: true, // Join with video muted
-        },
-      });
+      console.log("there is a token expiration in local storage and it is not expired");
+      try {
+        console.log("trying to join room");
+
+        hmsActions.join({
+          userName: formData.name,
+          authToken: authToken.token,
+          settings: {
+            isAudioMuted: true, // Join with audio muted
+            isVideoMuted: true, // Join with video muted
+          },
+        });
+      } catch (error) {
+        console.log("error joining room", error);
+
+        // If the auth token is expired, generate a new one, and then join the room
+        if (error?.message! === "token is expired") {
+          console.log("token is expired");
+
+          authToken = await generateAuthToken(
+            "644f705b6fe6e1cc9d167ee4",
+            generalStore.userId,
+            "host"
+            // role: 'host'
+          );
+
+          console.log("authToken", authToken);
+
+          webrtcLocalStorage.value.userAuthToken = authToken.token;
+
+          hmsActions.join({
+            userName: formData.name,
+            authToken: authToken.token,
+            settings: {
+              isAudioMuted: true, // Join with audio muted
+              isVideoMuted: true, // Join with video muted
+            },
+          });
+        } else {
+          alert(error);
+        }
+      }
     }
-  } catch (error) {
-    alert(error);
   }
 
   isLoading.value = false;
@@ -113,7 +159,7 @@ const tokentest = async () => {
     authToken = await generateAuthToken(
       "644f705b6fe6e1cc9d167ee4",
       generalStore.userId,
-      "guest"
+      "normal-room"
       // role: 'host'
     );
 

@@ -203,8 +203,6 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
         emitter.emit("playerInRoom", false);
       }
 
-      console.log(mapCollision);
-
       // console.log(`x: ${myPlayer.x}, y: ${myPlayer.y}`);
     }
   }

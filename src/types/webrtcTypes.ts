@@ -3,3 +3,8 @@ export type HmsTokenResponse = {
   room_id?: String;
   token: String;
 };
+
+export interface HMSConnectionQuality {
+  peerID: string;
+  downlinkQuality: number;
+}

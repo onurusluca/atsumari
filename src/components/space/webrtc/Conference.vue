@@ -5,8 +5,13 @@ import {
   selectIsLocalVideoEnabled,
   selectIsPeerAudioEnabled,
   selectIsPeerVideoEnabled,
+  selectIsLocalAudioPluginPresent,
+  selectConnectionQualityByPeerID,
 } from "@100mslive/hms-video-store";
 import type { HMSPeer, HMSTrackID } from "@100mslive/hms-video-store";
+import { HMSNoiseSuppressionPlugin } from "@100mslive/hms-noise-suppression";
+
+import type { HMSConnectionQuality } from "@/types/webrtcTypes";
 
 const { t } = useI18n();
 const authStore = useAuthStore();
@@ -18,6 +23,7 @@ const remotePeerProps: any = reactive({});
 const allPeers = ref<HMSPeer[]>([]);
 const isAudioEnabled = ref(hmsStore.getState(selectIsLocalAudioEnabled));
 const isVideoEnabled = ref(hmsStore.getState(selectIsLocalVideoEnabled));
+const noiseSuppressionPlugin = new HMSNoiseSuppressionPlugin();
 
 enum MediaState {
   isAudioEnabled = "isAudioEnabled",
@@ -26,23 +32,21 @@ enum MediaState {
 let isJoined = ref<boolean>(false);
 emitter.on("playerInRoom", (data: any) => {
   if (data === false && isJoined.value) {
-    console.log("leaving room", data);
+    // console.log("leaving room", data);
     if (allPeers.value.length) {
-      console.log("leaving meeting");
+      //  console.log("leaving meeting");
 
       leaveMeeting();
       isJoined.value = false;
     }
   } else if (data === true && !isJoined.value) {
-    console.log("joining room", data);
+    //  console.log("joining room", data);
     isJoined.value = true;
   }
 });
 
 onUnmounted(() => {
   if (allPeers.value.length) {
-    console.log("leaving meeting");
-
     leaveMeeting();
   }
 });
@@ -55,6 +59,55 @@ window.addEventListener("beforeunload", () => {
 const leaveMeeting = () => {
   hmsActions.leave();
 };
+
+// Nose suppression plugin support checck
+async function checkSuppressionPluginSupport(): Promise<boolean> {
+  const pluginSupport = hmsActions.validateAudioPluginSupport(noiseSuppressionPlugin);
+  if (pluginSupport.isSupported) {
+    // console.log("Plugin is supported");
+    return true;
+  } else {
+    const err = pluginSupport.errMsg;
+    console.error(
+      "Nose suppression plugin support failed. Probably doesn't support.",
+      err
+    );
+    return false;
+  }
+}
+async function toggleNoiseSuppression() {
+  const isNoiseSuppressed = hmsStore.getState(
+    selectIsLocalAudioPluginPresent(noiseSuppressionPlugin.getName())
+  );
+  try {
+    if (!isNoiseSuppressed) {
+      // add background noise suppression
+      await hmsActions.addPluginToAudioTrack(noiseSuppressionPlugin);
+
+      //console.log("noise suppression success - ", isNoiseSuppressed);
+    } else {
+      // remove background noise suppression
+      await hmsActions.removePluginFromAudioTrack(noiseSuppressionPlugin);
+    }
+  } catch (err) {
+    console.log("noise suppression failure - ", isNoiseSuppressed, err);
+  }
+}
+async function initNoiseSuppression() {
+  //console.log("allPeers connected", allPeers.value);
+  let doesBrowserSupportNoiseSuppression = false;
+  checkSuppressionPluginSupport().then((res) => {
+    doesBrowserSupportNoiseSuppression = res;
+    if (doesBrowserSupportNoiseSuppression) {
+      //console.log("adding noise suppression plugin");
+
+      noiseSuppressionPlugin.init();
+      toggleNoiseSuppression();
+    } else {
+      console.log("browser does not support noise suppression plugin");
+    }
+  });
+}
 
 const onAudioChange = (newAudioState: boolean) => {
   isAudioEnabled.value = newAudioState;
@@ -74,11 +127,12 @@ const onPeerVideoChange = (isEnabled: boolean, peerId: string) => {
   }
 };
 
+let webRtcConnectionQuality = ref<HMSConnectionQuality | null>(null);
 const renderPeers = (peers: HMSPeer[]) => {
-  console.log("renderPeers", peers);
+  // console.log("renderPeers", peers);
 
   allPeers.value = peers;
-  peers.forEach((peer: HMSPeer) => {
+  peers.forEach(async (peer: HMSPeer) => {
     if (videoRefs[peer.id]) {
       hmsActions.attachVideo(peer.videoTrack as HMSTrackID, videoRefs[peer.id]);
 
@@ -104,6 +158,21 @@ const renderPeers = (peers: HMSPeer[]) => {
           (isEnabled) => onPeerVideoChange(isEnabled, peer.id),
           selectIsPeerVideoEnabled(peer.id)
         );
+
+        // Subscribe to the connection quality of the remote peer. Only activates if a peer is available
+        hmsStore.subscribe((connectionQuality) => {
+          console.log("subscribed to connection quality");
+
+          if (connectionQuality) {
+            webRtcConnectionQuality.value = connectionQuality.downlinkQuality;
+
+            console.log("connectionQuality", connectionQuality.downlinkQuality);
+          }
+        }, selectConnectionQualityByPeerID(peer.id));
+
+        console.log("allPeers connected", allPeers.value);
+
+        await initNoiseSuppression();
       }
     }
   });
@@ -129,6 +198,7 @@ hmsStore.subscribe(onVideoChange, selectIsLocalVideoEnabled);
 
 <template>
   <main class="main-container">
+    <p>CONNECTION QUALITY: {{ webRtcConnectionQuality }}</p>
     <div class="video-grid">
       <div v-for="peer in allPeers" :key="peer.id" class="video-container">
         <video
