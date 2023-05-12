@@ -570,7 +570,7 @@ const handleChatMenuOpen = () => {
 
     <!-- LiveKit Stuff -->
     <section class="space__webrtc">
-      <Conference />
+      <Join />
     </section>
 
     <!-- Joystick for mobile -->

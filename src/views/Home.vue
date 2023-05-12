@@ -64,6 +64,10 @@ supabase
  * UI
  ****************************************/
 
+const handleClickOnEnterSpace = (spaceId: string, spaceName: string) => {
+  console.log("spaceId: ", spaceId);
+};
+
 // Settings menu dropdown
 const settingsMenuDropDownOpen = ref<Boolean>(false);
 let settingsMenuDropDownIndex = ref<number>(0);
@@ -180,6 +184,7 @@ function showToast(toastTypeProp: string) {
           <!-- :to="`/space/${item.id}`" -->
           <router-link
             class="btn btn-save image-container__enter-btn"
+            @click="handleClickOnEnterSpace(item)"
             :to="{
               name: 'Space',
               params: {
