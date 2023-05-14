@@ -12,11 +12,14 @@ let isScreenShareEnabled = ref<boolean>(false);
 onMounted(() => {});
 
 const handleToggleMicrophone = () => {
-  console.log("toggle microphone");
   if (isMicEnabled.value) {
     isMicEnabled.value = false;
+    webRtcStore.devices.isMicrophoneEnabled = false;
   } else {
+    console.log("toggle microphone ON");
+
     isMicEnabled.value = true;
+    webRtcStore.devices.isMicrophoneEnabled = true;
   }
 };
 
@@ -24,8 +27,10 @@ const handleToggleCamera = () => {
   console.log("toggle camera");
   if (isCameraEnabled.value) {
     isCameraEnabled.value = false;
+    webRtcStore.devices.isCameraEnabled = false;
   } else {
     isCameraEnabled.value = true;
+    webRtcStore.devices.isCameraEnabled = true;
   }
 };
 
@@ -33,10 +38,36 @@ const handleToggleScreenShare = () => {
   console.log("toggle screen share");
   if (isScreenShareEnabled.value) {
     isScreenShareEnabled.value = false;
+    webRtcStore.devices.isScreenSharing = false;
   } else {
     isScreenShareEnabled.value = true;
+    webRtcStore.devices.isScreenSharing = true;
   }
 };
+
+// WATCHERS: Watch webRtcStore.devices and update accordingly
+watch(
+  () => webRtcStore.devices.isMicrophoneEnabled,
+  (newValue, oldValue) => {
+    console.log("isMicrophoneMuted changed");
+
+    isMicEnabled.value = newValue;
+  }
+);
+
+watch(
+  () => webRtcStore.devices.isCameraEnabled,
+  (newValue, oldValue) => {
+    isCameraEnabled.value = newValue;
+  }
+);
+
+watch(
+  () => webRtcStore.devices.isScreenSharing,
+  (newValue, oldValue) => {
+    isScreenShareEnabled.value = newValue;
+  }
+);
 </script>
 
 <template>

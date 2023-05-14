@@ -6,22 +6,50 @@ import { Room, RoomEvent, Participant } from "livekit-client";
 const { t } = useI18n();
 const authStore = useAuthStore();
 const generalStore = useGeneralStore();
+const webRtcStore = useWebRtcStore();
 const route = useRouter();
+const webrtcLocalStorage = useStorage("atsumari_webrtc", {
+  userAuthToken: "",
+  userAuthTokenExpiry: "",
+});
 
 let wssUrl = ref("wss://atsumari.livekit.cloud");
 let roomName = ref<string>("new-room");
 
 onMounted(() => {});
 
+let isUserInARoom = ref<boolean>(false);
+emitter.on("playerInRoom", (data: any) => {
+  if (data === true && !isUserInARoom.value) {
+    console.log("joining room");
+    isUserInARoom.value = true;
+  } else if (data === false && isUserInARoom.value) {
+    console.log("leaving room");
+    isUserInARoom.value = false;
+  }
+});
+
 const room = new Room();
 const userToken = ref<string>("");
 const remoteVideoContainer = ref();
 
 const createAuthToken = async () => {
-  return await createAccessToken(roomName.value, generalStore.userName);
+  let createdToken = (await createAccessToken(
+    roomName.value,
+    generalStore.userName
+  )) as string;
+
+  // Save token to local storage
+  webrtcLocalStorage.value.userAuthToken = createdToken;
+  // Set the expiry of the auth token to 23 hours from now
+  webrtcLocalStorage.value.userAuthTokenExpiry = new Date(
+    new Date().getTime() + 23 * 60 * 60 * 1000
+  ).toISOString(); // 23 hours from creation
+
+  return createdToken;
 };
 
-const joinRoom = async () => {
+const prepareForConnection = async () => {
   await room.prepareConnection(wssUrl.value);
 
   // Subscribe remote video and display it to remoteVideoContainer
@@ -34,17 +62,93 @@ const joinRoom = async () => {
   await room.connect(wssUrl.value, userToken.value);
 
   // Enable camera and microphone
-  await room.localParticipant.enableCameraAndMicrophone();
+  await room.localParticipant.setMicrophoneEnabled(true);
+  webRtcStore.devices.isMicrophoneEnabled = true;
+
+  /*
+room.localParticipant.setCameraEnabled(false)
+room.localParticipant.setMicrophoneEnabled(false)
+room.localParticipant.enableCameraAndMicrophone();
+*/
 };
 
-const shareScreen = async () => {
-  await room.localParticipant.setScreenShareEnabled(true);
+const validateToken = async () => {};
+
+const joinRoom = async () => {
+  if (
+    !webrtcLocalStorage.value.userAuthToken ||
+    webrtcLocalStorage.value.userAuthToken !== "" ||
+    new Date(webrtcLocalStorage.value.userAuthTokenExpiry) < new Date()
+  ) {
+    userToken.value = await createAuthToken();
+
+    if (userToken.value !== "") {
+      await prepareForConnection();
+    }
+  } else {
+    userToken.value = webrtcLocalStorage.value.userAuthToken;
+    await prepareForConnection();
+  }
 };
+
+// WATCHERS
+let isMicEnabled = ref<boolean>(false);
+let isCameraEnabled = ref<boolean>(false);
+let isScreenShareEnabled = ref<boolean>(false);
+
+watch(
+  () => webRtcStore.devices.isMicrophoneEnabled,
+  (newValue, oldValue) => {
+    console.log("isMicrophoneEnabled changed");
+    isMicEnabled.value = newValue;
+
+    if (isMicEnabled.value) {
+      room.localParticipant.setMicrophoneEnabled(true);
+    } else {
+      room.localParticipant.setMicrophoneEnabled(false);
+    }
+  },
+  { immediate: true }
+);
+
+watch(
+  () => webRtcStore.devices.isCameraEnabled,
+  (newValue, oldValue) => {
+    console.log("isCameraEnabled changed");
+    isCameraEnabled.value = newValue;
+
+    if (isCameraEnabled.value) {
+      joinRoom();
+      room.localParticipant.setCameraEnabled(true);
+    } else {
+      room.localParticipant.setCameraEnabled(false);
+    }
+  },
+  { immediate: true }
+);
+
+watch(
+  () => webRtcStore.devices.isScreenSharing,
+  (newValue, oldValue) => {
+    console.log("isScreenSharing changed");
+    isScreenShareEnabled.value = newValue;
+
+    if (isScreenShareEnabled.value) {
+      room.localParticipant.setScreenShareEnabled(true);
+    } else {
+      room.localParticipant.setScreenShareEnabled(false);
+    }
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
   <div class="conference">
     <h1>Conference</h1>
+    <div class="join__video" ref="remoteVideoContainer">remote</div>
+
+    <button @click="joinRoom" class="btn btn-save">JOIN ROOM</button>
   </div>
 </template>
 

@@ -7,7 +7,7 @@ export const useWebRtcStore = defineStore("webrtcStore", {
       devices: {
         microphoneName: "",
         cameraName: "",
-        isMicrophoneEnabled: true,
+        isMicrophoneEnabled: false,
         isCameraEnabled: false,
         isMicrophoneMuted: false,
         isCameraMuted: false,
