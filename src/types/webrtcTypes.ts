@@ -8,3 +8,13 @@ export interface HMSConnectionQuality {
   peerID: string;
   downlinkQuality: number;
 }
+
+export type DevicesStoreTypes = {
+  microphoneName: string;
+  cameraName: string;
+  isMicrophoneEnabled: boolean;
+  isCameraEnabled: boolean;
+  isMicrophoneMuted: boolean;
+  isCameraMuted: boolean;
+  isScreenSharing: boolean;
+};

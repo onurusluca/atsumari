@@ -528,9 +528,12 @@ const handleChatMenuOpen = () => {
           </Transition>
         </div>
         <div class="left__user-menu"></div>
-        <div class="left__media-sharing"></div>
+        <div class="left__media-sharing">
+          <MicCameraScreen />
+        </div>
         <div class="left__emotes"></div>
       </div>
+
       <div class="bottom-control__right">
         <!-- Chat -->
         <div class="right__chat">
@@ -570,7 +573,7 @@ const handleChatMenuOpen = () => {
 
     <!-- LiveKit Stuff -->
     <section class="space__webrtc">
-      <Join />
+      <Conference />
     </section>
 
     <!-- Joystick for mobile -->
@@ -635,6 +638,9 @@ const handleChatMenuOpen = () => {
 
     // create class names for each element with no styles
     .bottom-control__left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
       .left__main-menu {
         .main-menu__btn {
           background-color: var(--primary-100);

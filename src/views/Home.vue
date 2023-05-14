@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { SpacesType } from "@/api/types";
+import type { SpacesType, SpaceType } from "@/api/types";
 import type { OnClickOutsideHandler } from "@vueuse/core";
 import { vOnClickOutside } from "@vueuse/components";
 import { EnvVariables } from "@/envVariables";
@@ -9,6 +9,9 @@ import { slugify } from "@/utils/slugify";
 
 const { t } = useI18n();
 const authStore = useAuthStore();
+const generalLocalStorage = useStorage("atsumari_general", {
+  visitedSpaces: [],
+});
 
 let userSpaces = ref<SpacesType[]>([]);
 let showContentLoadingPlaceholder = ref<boolean>(true);
@@ -64,8 +67,20 @@ supabase
  * UI
  ****************************************/
 
-const handleClickOnEnterSpace = (spaceId: string, spaceName: string) => {
-  console.log("spaceId: ", spaceId);
+const handleClickOnEnterSpace = (space: SpaceType ) => {
+  // Add space to visited spaces if not already in there and it is not a user space(add all of the values of object)
+  if (
+    !generalLocalStorage.value.visitedSpaces.some(
+      (item) => item.id === space.id
+    ) &&
+    space.user_id !== authStore?.session?.user?.id
+  ) {
+    generalLocalStorage.value.visitedSpaces.push(space);
+  }
+  
+
+  
+  
 };
 
 // Settings menu dropdown

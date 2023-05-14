@@ -8,7 +8,6 @@ const authStore = useAuthStore();
 const generalStore = useGeneralStore();
 const route = useRouter();
 
-/* let wssUrl = ref<string>(EnvVariables.webRtcApiBaseUrl.replace("https", "wss")); */
 let wssUrl = ref("wss://atsumari.livekit.cloud");
 
 const userToken = ref<string>(
@@ -21,7 +20,7 @@ const remoteVideoContainer = ref();
 onMounted(async () => {});
 
 const createAuthToken = async () => {
-  return await createAccessToken(roomName.value, generalStore.userName);
+  return await createAccessToken(roomName.value, String(generalStore.userName));
 };
 
 const joinRoom = async () => {
@@ -128,6 +127,7 @@ const handleShareScreen = async () => {
   margin: 0;
   background-color: #1a202c; // Dark Background
   font-family: "Poppins", sans-serif;
+
   &__video {
     background-color: #000;
     display: flex;

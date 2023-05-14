@@ -1,18 +1,18 @@
 import { defineStore } from "pinia";
-import type { User } from "@/types/general";
+import type { DevicesStoreTypes } from "@/types/webrtcTypes";
 
-export const useGeneralStore = defineStore("generalStore", {
+export const useWebRtcStore = defineStore("webrtcStore", {
   state: () => {
     return {
       devices: {
         microphoneName: "",
         cameraName: "",
-        isMicrophoneEnabled: false,
+        isMicrophoneEnabled: true,
         isCameraEnabled: false,
         isMicrophoneMuted: false,
         isCameraMuted: false,
         isScreenSharing: false,
-      },
+      } as DevicesStoreTypes,
     };
   },
 });
