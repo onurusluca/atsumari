@@ -395,7 +395,7 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
 
   // What to do when the player is in the room
   function handleInRoomState() {
-    // Draw a transparent black rectangle over the canvas
+    // Draw a transparent black rectangle over the canvas except for the room
     ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
