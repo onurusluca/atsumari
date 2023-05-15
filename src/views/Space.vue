@@ -691,7 +691,6 @@ const handleChatMenuOpen = () => {
   .space__webrtc {
     position: fixed;
     top: 0;
-    right: 0;
     border: 5px solid red;
   }
 }

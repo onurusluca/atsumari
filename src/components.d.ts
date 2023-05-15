@@ -60,6 +60,7 @@ declare module '@vue/runtime-core' {
     'Ri:vipCrown2Line': typeof import('~icons/ri/vip-crown2-line')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SettingsModal: typeof import('./components/space/SettingsModal.vue')['default']
     Sidebar: typeof import('./components/nav/dashboard/Sidebar.vue')['default']
     SpaceSettingsLeftbar: typeof import('./components/nav/dashboard/SpaceSettingsLeftbar.vue')['default']
     SpaceSettingsTopbar: typeof import('./components/nav/dashboard/SpaceSettingsTopbar.vue')['default']

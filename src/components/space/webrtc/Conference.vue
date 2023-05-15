@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { createAccessToken, listRooms, createRoom } from "@/composables/useWebrtc";
+import { createAccessToken } from "@/composables/useWebrtc";
 import { Room, RoomEvent, Participant } from "livekit-client";
 
 const { t } = useI18n();
@@ -13,7 +13,7 @@ const webrtcLocalStorage = useStorage("atsumari_webrtc", {
 });
 
 const wssUrl = ref("wss://atsumari.livekit.cloud");
-const roomName = ref<string>("new-room");
+const roomName = ref<string>("general-hall-room");
 const isUserInARoom = ref<boolean>(false);
 const userToken = ref<string>("");
 const remoteVideoContainer = ref();
@@ -35,6 +35,7 @@ const createToken = async (): Promise<string> => {
     roomName.value,
     generalStore.userName
   )) as string;
+
   const expiryTime = new Date(new Date().getTime() + 23 * 60 * 60 * 1000).toISOString();
 
   // Save token to local storage
@@ -48,12 +49,25 @@ const createToken = async (): Promise<string> => {
 };
 
 const prepareForConnection = async () => {
-  await room.prepareConnection(wssUrl.value);
+  try {
+    await room.prepareConnection(wssUrl.value);
+  } catch (error) {
+    console.log("Failed to prepare connection.", error);
+  }
 
-  // Subscribe remote video and display it to remoteVideoContainer
+  // Subscribe remote video and display it
   room.on(RoomEvent.TrackSubscribed, function (remoteTrack) {
     const track = remoteTrack.attach();
+    // style the video
+    track.style.width = "90vw";
+    track.style.height = "70vh";
+    track.style.objectFit = "cover";
+    track.style.borderRadius = "1rem";
+    track.style.border = "2px solid #fff";
+    track.style.boxShadow = "0 0 1rem #000";
+
     remoteVideoContainer.value.appendChild(track);
+    console.log("TRACK: ", track);
   });
 
   // Connect to room
@@ -62,16 +76,16 @@ const prepareForConnection = async () => {
   } catch (error) {
     console.log("Failed to connect to room.", error);
 
-    // TODO: don't know which error is thrown when token is invalid
     // If token is invalid, create a new token and try again
-    createToken().then(async () => {
+    createToken().then(async (token: string) => {
+      userToken.value = token;
       await joinRoom();
     });
   }
 
   // Enable camera and microphone
-  await room.localParticipant.setMicrophoneEnabled(true);
-  webRtcStore.devices.isMicrophoneEnabled = true;
+  // await room.localParticipant.setMicrophoneEnabled(true);
+  // webRtcStore.devices.isMicrophoneEnabled = true;
 };
 
 const joinRoom = async () => {
@@ -89,6 +103,8 @@ const joinRoom = async () => {
   }
 
   if (userToken.value) {
+    console.log(userToken.value);
+
     await prepareForConnection();
   }
 };
@@ -132,7 +148,6 @@ watch(
     isCameraEnabled.value = newValue;
 
     if (isCameraEnabled.value) {
-      joinRoom();
       room.localParticipant.setCameraEnabled(true);
     } else {
       room.localParticipant.setCameraEnabled(false);
@@ -159,8 +174,7 @@ watch(
 
 <template>
   <div class="conference">
-    <h1>Conference</h1>
-    <div class="join__video" ref="remoteVideoContainer">remote</div>
+    <div class="conference__video" ref="remoteVideoContainer">remote</div>
 
     <button @click="joinRoom" class="btn btn-save">JOIN ROOM</button>
     <button @click="leaveRoom" class="btn btn-danger">LEAVE ROOM</button>
@@ -169,5 +183,16 @@ watch(
 
 <style scoped lang="scss">
 .conference {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  &__video {
+    width: 20rem;
+    height: 20rem;
+    background-color: black;
+    border: 4px solid blueviolet;
+  }
 }
 </style>

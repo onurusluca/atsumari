@@ -13,7 +13,7 @@ import { updateAnimationFrame } from "./animations";
 import { keyDownEventListener, keyUpEventListener } from "./keyboardEvents";
 import { rightClickEventListener, wheelEventListener } from "./mouseEvents";
 
-import WorldMapJson from "../images/newworld.json";
+import WorldMapJson from "../images/test-map.json";
 import WorldMapTileset from "../images/tileset.png";
 
 async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
