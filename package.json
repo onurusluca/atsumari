@@ -14,7 +14,7 @@
   "dependencies": {
     "@100mslive/hms-video-store": "^0.10.3",
     "@intlify/unplugin-vue-i18n": "^0.10.0",
-    "@supabase/supabase-js": "^2.21.0",
+    "@supabase/supabase-js": "^2.22.0",
     "@vueuse/components": "^9.13.0",
     "@vueuse/core": "^9.13.0",
     "@vueuse/head": "^1.1.26",
@@ -29,7 +29,7 @@
   },
   "devDependencies": {
     "@100mslive/hms-noise-suppression": "^0.9.3",
-    "@iconify/json": "^2.2.64",
+    "@iconify/json": "^2.2.65",
     "@rushstack/eslint-patch": "^1.2.0",
     "@types/node": "^18.16.9",
     "@vitejs/plugin-vue": "^4.2.3",
@@ -43,7 +43,7 @@
     "npm-run-all": "^4.1.5",
     "prettier": "^2.8.8",
     "sass": "^1.62.1",
-    "supabase": "^1.58.1",
+    "supabase": "^1.59.1",
     "typescript": "~4.7.4",
     "unplugin-auto-import": "^0.13.0",
     "unplugin-icons": "^0.15.3",

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { EnvVariables } from "@/envVariables";
 import { createAccessToken, listRooms, createRoom } from "@/composables/useWebrtc";
 import { Room, RoomEvent, Participant } from "livekit-client";
 
@@ -13,38 +12,37 @@ const webrtcLocalStorage = useStorage("atsumari_webrtc", {
   userAuthTokenExpiry: "",
 });
 
-let wssUrl = ref("wss://atsumari.livekit.cloud");
-let roomName = ref<string>("new-room");
-
-onMounted(() => {});
-
-let isUserInARoom = ref<boolean>(false);
-emitter.on("playerInRoom", (data: any) => {
-  if (data === true && !isUserInARoom.value) {
-    console.log("joining room");
-    isUserInARoom.value = true;
-  } else if (data === false && isUserInARoom.value) {
-    console.log("leaving room");
-    isUserInARoom.value = false;
-  }
-});
-
-const room = new Room();
+const wssUrl = ref("wss://atsumari.livekit.cloud");
+const roomName = ref<string>("new-room");
+const isUserInARoom = ref<boolean>(false);
 const userToken = ref<string>("");
 const remoteVideoContainer = ref();
 
-const createAuthToken = async () => {
-  let createdToken = (await createAccessToken(
+onMounted(() => {
+  emitter.on("playerInRoom", handlePlayerInRoom);
+});
+
+const handlePlayerInRoom = (data: any) => {
+  const status = data ? "joining room" : "leaving room";
+  console.log(status);
+  isUserInARoom.value = data;
+};
+
+const room = new Room();
+
+const createToken = async (): Promise<string> => {
+  const createdToken = (await createAccessToken(
     roomName.value,
     generalStore.userName
   )) as string;
+  const expiryTime = new Date(new Date().getTime() + 23 * 60 * 60 * 1000).toISOString();
 
   // Save token to local storage
-  webrtcLocalStorage.value.userAuthToken = createdToken;
   // Set the expiry of the auth token to 23 hours from now
-  webrtcLocalStorage.value.userAuthTokenExpiry = new Date(
-    new Date().getTime() + 23 * 60 * 60 * 1000
-  ).toISOString(); // 23 hours from creation
+  webrtcLocalStorage.value = {
+    userAuthToken: createdToken,
+    userAuthTokenExpiry: expiryTime,
+  };
 
   return createdToken;
 };
@@ -59,36 +57,52 @@ const prepareForConnection = async () => {
   });
 
   // Connect to room
-  await room.connect(wssUrl.value, userToken.value);
+  try {
+    await room.connect(wssUrl.value, userToken.value);
+  } catch (error) {
+    console.log("Failed to connect to room.", error);
+
+    // TODO: don't know which error is thrown when token is invalid
+    // If token is invalid, create a new token and try again
+    createToken().then(async () => {
+      await joinRoom();
+    });
+  }
 
   // Enable camera and microphone
   await room.localParticipant.setMicrophoneEnabled(true);
   webRtcStore.devices.isMicrophoneEnabled = true;
-
-  /*
-room.localParticipant.setCameraEnabled(false)
-room.localParticipant.setMicrophoneEnabled(false)
-room.localParticipant.enableCameraAndMicrophone();
-*/
 };
 
-const validateToken = async () => {};
-
 const joinRoom = async () => {
-  if (
-    !webrtcLocalStorage.value.userAuthToken ||
-    webrtcLocalStorage.value.userAuthToken !== "" ||
-    new Date(webrtcLocalStorage.value.userAuthTokenExpiry) < new Date()
-  ) {
-    userToken.value = await createAuthToken();
-
-    if (userToken.value !== "") {
-      await prepareForConnection();
-    }
+  if (isLocalStorageTokenInvalid()) {
+    console.log("Either no token or token expired. Creating new token.");
+    userToken.value = await createToken();
+    console.log(
+      userToken.value
+        ? "Token created successfully. Joining room."
+        : "Failed to create token."
+    );
   } else {
+    console.log("Token exists and is valid. Joining room.");
     userToken.value = webrtcLocalStorage.value.userAuthToken;
+  }
+
+  if (userToken.value) {
     await prepareForConnection();
   }
+};
+
+const isLocalStorageTokenInvalid = (): boolean => {
+  return (
+    !webrtcLocalStorage.value.userAuthToken ||
+    webrtcLocalStorage.value.userAuthToken === "" ||
+    new Date(webrtcLocalStorage.value.userAuthTokenExpiry) < new Date()
+  );
+};
+
+const leaveRoom = () => {
+  room.disconnect();
 };
 
 // WATCHERS
@@ -149,6 +163,7 @@ watch(
     <div class="join__video" ref="remoteVideoContainer">remote</div>
 
     <button @click="joinRoom" class="btn btn-save">JOIN ROOM</button>
+    <button @click="leaveRoom" class="btn btn-danger">LEAVE ROOM</button>
   </div>
 </template>
 

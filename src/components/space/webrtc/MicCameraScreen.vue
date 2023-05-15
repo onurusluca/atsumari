@@ -49,8 +49,6 @@ const handleToggleScreenShare = () => {
 watch(
   () => webRtcStore.devices.isMicrophoneEnabled,
   (newValue, oldValue) => {
-    console.log("isMicrophoneMuted changed");
-
     isMicEnabled.value = newValue;
   }
 );
@@ -118,29 +116,29 @@ watch(
 }
 
 .device-button-disabled {
-  background-color: rgba(255, 0, 0, 0.247);
+  background-color: rgba(255, 53, 53, 0.25);
   svg {
-    color: rgba(255, 0, 0, 0.808);
+    color: rgba(255, 0, 0, 0.65);
   }
 
   &:hover {
-    background-color: rgba(255, 0, 0, 0.39);
+    background-color: rgba(255, 53, 53, 0.35);
     svg {
-      color: rgba(255, 0, 0, 0.897);
+      color: rgba(255, 0, 0, 0.75);
     }
   }
 }
 
 .device-button-enabled {
-  background-color: rgba(1, 255, 1, 0.247);
+  background-color: rgba(53, 255, 53, 0.25);
   svg {
-    color: rgba(0, 255, 0, 0.808);
+    color: rgba(0, 255, 0, 0.65);
   }
 
   &:hover {
-    background-color: rgba(1, 255, 1, 0.39);
+    background-color: rgba(53, 255, 53, 0.35);
     svg {
-      color: rgba(0, 255, 0, 0.897);
+      color: rgba(0, 255, 0, 0.75);
     }
   }
 }
