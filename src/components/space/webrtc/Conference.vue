@@ -31,21 +31,33 @@ const handlePlayerInRoom = (data: any) => {
 const room = new Room();
 
 const createToken = async (): Promise<string> => {
-  const createdToken = (await createAccessToken(
-    roomName.value,
-    generalStore.userName
-  )) as string;
+  try {
+    const createdToken = (await createAccessToken(
+      roomName.value,
+      generalStore.userName
+    )) as string;
 
-  const expiryTime = new Date(new Date().getTime() + 23 * 60 * 60 * 1000).toISOString();
+    if (createdToken.includes("error")) {
+      console.log("Failed to create token.", createdToken);
+    } else {
+      const expiryTime = new Date(
+        new Date().getTime() + 23 * 60 * 60 * 1000
+      ).toISOString();
 
-  // Save token to local storage
-  // Set the expiry of the auth token to 23 hours from now
-  webrtcLocalStorage.value = {
-    userAuthToken: createdToken,
-    userAuthTokenExpiry: expiryTime,
-  };
+      console.log("CREATED TOKEN", createdToken);
 
-  return createdToken;
+      // Save token to local storage
+      // Set the expiry of the auth token to 23 hours from now
+      webrtcLocalStorage.value = {
+        userAuthToken: createdToken,
+        userAuthTokenExpiry: expiryTime,
+      };
+
+      return createdToken;
+    }
+  } catch (error) {
+    console.log("Catch. Failed to create token.", error);
+  }
 };
 
 const prepareForConnection = async () => {
@@ -94,9 +106,7 @@ const joinRoom = async () => {
     console.log("Either no token or token expired. Creating new token.");
     userToken.value = await createToken();
     console.log(
-      userToken.value
-        ? "Token created successfully. Joining room."
-        : "Failed to create token."
+      userToken.value ? "Token created successfully" : "Failed to create token."
     );
   } else {
     console.log("Token exists and is valid. Joining room.");
@@ -177,6 +187,7 @@ watch(
   <div class="conference">
     <div class="conference__video" ref="remoteVideoContainer">remote</div>
 
+    <button @click="createToken" class="btn btn-outline">CREATE TOKEN</button>
     <button @click="joinRoom" class="btn btn-save">JOIN ROOM</button>
     <button @click="leaveRoom" class="btn btn-danger">LEAVE ROOM</button>
   </div>
