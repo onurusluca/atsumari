@@ -73,6 +73,7 @@ const prepareForConnection = async () => {
   // Connect to room
   try {
     await room.connect(wssUrl.value, userToken.value);
+    console.log("Connected to room.");
   } catch (error) {
     console.log("Failed to connect to room.", error);
 
