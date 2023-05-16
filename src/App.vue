@@ -14,7 +14,7 @@ const authLocalStorage = useStorage("atsumari_auth", {
 
 let session = ref();
 onMounted(async () => {
-  // if token is expired, refresh it
+  /*   // if token is expired, refresh it
   if (authLocalStorage.value.tokenExpiry) {
     const tokenExpiry = authLocalStorage.value.tokenExpiry;
     const now = new Date();
@@ -35,7 +35,7 @@ onMounted(async () => {
         }
       } catch (error) {}
     }
-  }
+  } */
 
   // listen for auth events (e.g. sign in, sign out, refresh)
   // set session based on the auth event

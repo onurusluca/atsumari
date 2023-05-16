@@ -6,6 +6,7 @@ import InitialCharacterSetupModal from "@/components/global/InitialCharacterSetu
 import { emitter } from "@/composables/useEmit";
 
 import type { User } from "@/types/general";
+import type { ProfilesType } from "@/api/types/index";
 // import type { ProfilesType } from "@/api/types/index";
 import Joystick from "@/components/space/Joystick.vue";
 
@@ -57,7 +58,7 @@ window.addEventListener("resize", () => {
   windowHeight.value = window.innerHeight;
 });
 
-let initialSetupCompleted = ref<boolean>(true);
+let initialSetupCompleted = ref<boolean>(false);
 
 /****************************************
  * INITIALIZATION
@@ -83,7 +84,7 @@ const initialPreparations = async () => {
   generalStore.users = users;
 
   await downloadSpaceMap();
-  await downloadmyCharacterSpriteSheet();
+  await downloadCharacterSpriteSheets();
 
   const canvas = document.getElementById("main-canvas") as HTMLCanvasElement;
 
@@ -261,6 +262,7 @@ const moveUserToRightClickedPosition = async () => {
 
 // Initial setups
 let userName = ref<string>("");
+let userProfile = reactive<any>({});
 const handleReadProfile = async () => {
   // TODO: Fix after implementing user name
   try {
@@ -269,18 +271,24 @@ const handleReadProfile = async () => {
       .select("*")
       .eq("id", authStore?.session?.user?.id);
 
-    // Set user name for this space
-    if (profiles[0].user_name_for_each_space != null) {
+    let fetchedUserProfile: ProfilesType = profiles[0];
+    userProfile = fetchedUserProfile;
+
+    // Check if user has a user name and sprite selected for this space
+    if (fetchedUserProfile) {
       console.log("READ PROFILES: ", profiles);
 
       // Find user name for this space
-      let userNameForThisSpace = profiles[0].user_name_for_each_space.find(
-        (space: any) => {
-          return Object.keys(space)[0] === spaceId;
-        }
-      );
+      let userNameForThisSpace = Object(
+        fetchedUserProfile.user_name_for_each_space
+      ).find((space: any) => {
+        return Object.keys(space)[0] === spaceId;
+      });
       console.log("USER NAME FOR THIS SPACE: ", userNameForThisSpace);
-      if (userNameForThisSpace) {
+      if (
+        userNameForThisSpace(fetchedUserProfile.character_sprite != undefined) ||
+        !fetchedUserProfile.character_sprite != null
+      ) {
         initialSetupCompleted.value = true;
       } else {
         initialSetupCompleted.value = false;
@@ -324,11 +332,14 @@ const downloadSpaceMap = async () => {
 
 // Get characters
 let myCharacterSprite = ref<string>("");
-const downloadmyCharacterSpriteSheet = async () => {
+const downloadCharacterSpriteSheets = async () => {
+  // Download my character sprite sheet
   try {
+    console.log(userProfile);
+
     const { data, error } = await supabase.storage
       .from("character-sprites")
-      .download("dummy/sprout-walk.png");
+      .download(`characters/${userProfile.character_sprite}`);
 
     if (data) {
       console.log("DOWNLOAD CHARACTER SPRITE SHEET: ", data);
@@ -338,7 +349,7 @@ const downloadmyCharacterSpriteSheet = async () => {
     }
     if (error) throw error;
   } catch (error: any) {
-    console.log("DOWNLOAD CHARACTER SPRITE SHEET CATCH ERROR: ", error.message);
+    console.log("DOWNLOADED CHARACTER SPRITE SHEET CATCH ERROR: ", error.message);
   }
 };
 

@@ -4,30 +4,32 @@ type CharacterAnimation = {
 
 export const characterAnimations: CharacterAnimation = {
   "walk-down": [
-    [16, 16],
-    [64, 16],
-    [112, 16],
-    [160, 16],
+    [0, 16],
+    [0, 32],
+    [0, 48],
+    [0, 64],
   ],
   "walk-up": [
+    [16, 16],
+    [16, 32],
+    [16, 48],
     [16, 64],
-    [64, 64],
-    [112, 64],
-    [160, 64],
   ],
   "walk-left": [
-    [16, 112],
-    [64, 112],
-    [112, 112],
-    [160, 112],
+    [32, 16],
+    [32, 32],
+    [32, 48],
+    [32, 64],
   ],
   "walk-right": [
-    [16, 160],
-    [64, 160],
-    [112, 160],
-    [160, 160],
+    [48, 16],
+    [48, 32],
+    [48, 48],
+    [48, 64],
   ],
 };
+
+let animationSpeed = 7;
 
 function updateAnimationFrameIfMoving(
   animationState: string,
@@ -36,9 +38,9 @@ function updateAnimationFrameIfMoving(
 ): [number, number] {
   animationTick++;
 
-  if (animationTick >= 7) {
+  if (animationTick >= animationSpeed) {
     animationFrame++;
-    if (animationFrame >= characterAnimations[animationState].length) {
+    if (animationFrame >= characterAnimations[animationState].length - 1) {
       animationFrame = 0;
     }
     animationTick = 0;

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// import type { ProfilesType } from "@/api/types/index";
+import type { Ref } from "vue";
 
 const { t } = useI18n();
 const authStore = useAuthStore();
@@ -12,6 +12,7 @@ const emit = defineEmits(["initialSetupCompleted"]);
 
 onMounted(async () => {
   await handleReadProfile();
+  await downloadCharacterSpriteSheets();
 });
 /****************************************
  * API CALLS
@@ -55,6 +56,50 @@ const handleReadProfile = async () => {
   }
 };
 
+let characterSpriteSheets = ref<Array<Object>>([]);
+let selectedCharacterSpriteSheet = ref<string>("");
+const downloadCharacterSpriteSheets = async () => {
+  try {
+    // List all sprite sheets
+    const allSpriteSheets = await supabase.storage
+      .from("character-sprites")
+      .list("characters", {
+        limit: 100,
+        offset: 0,
+        sortBy: { column: "name", order: "asc" },
+      });
+
+    if (allSpriteSheets.data) {
+      // For each sprite sheet, download it
+      allSpriteSheets.data.forEach(async (spriteSheet: any, index: number) => {
+        const { data, error } = await supabase.storage
+          .from("character-sprites")
+          .download("characters/" + spriteSheet.name);
+
+        if (data) {
+          console.log("DOWNLOADED CHARACTER SPRITE SHEET: ", data);
+          const url = URL.createObjectURL(data);
+
+          // Don't add the first sprite sheet to the array, as it's an "emptyFolderPlaceholder" used by Supabase
+          if (index === 0) {
+            selectedCharacterSpriteSheet.value = url;
+            return;
+          }
+          characterSpriteSheets.value.push({ name: spriteSheet.name, img: url });
+
+          // Set the first sprite sheet as the selected one
+          if (characterSpriteSheets.value.length > 0) {
+            selectedCharacterSpriteSheet.value = characterSpriteSheets.value[1].img;
+          }
+        }
+        if (error) throw error;
+      });
+    }
+  } catch (error: any) {
+    console.log("DOWNLOAD CHARACTER SPRITE SHEET CATCH ERROR: ", error.message);
+  }
+};
+
 /****************************************
  * UI EVENTS
  ****************************************/
@@ -70,6 +115,30 @@ const handleClickOnConfirm = async () => {
   buttonsActive.value = false;
   showButtonLoading.value = true;
   await handleChangeUserName();
+};
+
+// Canvas stuff to display character sprite sheets
+const canvas: Ref<HTMLCanvasElement | null> = ref(null);
+
+watch(selectedCharacterSpriteSheet, (newVal) => {
+  if (canvas.value) {
+    const ctx = canvas.value.getContext("2d");
+    if (ctx && newVal) {
+      drawSprite(ctx, newVal);
+    }
+  }
+});
+
+const drawSprite = (ctx: CanvasRenderingContext2D, spriteSheet: string) => {
+  ctx.clearRect(0, 0, 128, 128);
+  ctx.imageSmoothingEnabled = false;
+
+  const img = new Image();
+  img.src = spriteSheet;
+  img.onload = () => {
+    // drawing first [0x16] sprite, assuming a sprite sheet 32px per sprite
+    ctx.drawImage(img, 0, 0, 16, 16, 0, 0, 128, 128);
+  };
 };
 </script>
 <template>
@@ -96,6 +165,21 @@ const handleClickOnConfirm = async () => {
             class="form__text-input"
           />
         </div>
+
+        <!-- Character sprite selection -->
+        <section>
+          <select v-model="selectedCharacterSpriteSheet">
+            <option
+              v-for="(spriteSheet, index) in characterSpriteSheets"
+              :key="index"
+              :value="spriteSheet.img"
+            >
+              {{ spriteSheet.name }}
+            </option>
+          </select>
+
+          <canvas ref="canvas" width="128" height="128"></canvas>
+        </section>
 
         <!-- Buttons -->
         <div class="form__bottom mt-xxl">
