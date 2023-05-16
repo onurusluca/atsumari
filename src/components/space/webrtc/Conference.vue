@@ -12,21 +12,41 @@ const webrtcLocalStorage = useStorage("atsumari_webrtc", {
   userAuthTokenExpiry: "",
 });
 
+// Another room for the users that are close to each other
+const myClosePerimeterRoomName = "my-close-perimeter-room";
+
+let roomName = ref<string>("general-hall-room");
+let isUserInARoom = ref<boolean>(false);
+let userToken = ref<string>("");
+let isCurrentlyConnected = ref<boolean>(false);
+
 const wssUrl = ref("wss://atsumari.livekit.cloud");
-const roomName = ref<string>("general-hall-room");
-const isUserInARoom = ref<boolean>(false);
-const userToken = ref<string>("");
 const remoteVideoContainer = ref();
+onMounted(() => {});
 
-onMounted(() => {
-  emitter.on("playerInRoom", handlePlayerInRoom);
-});
+let isJoined = ref<boolean>(false);
+emitter.on(
+  "playerInRoom",
+  async (data: { isPlayerInARoom: boolean; roomName: string }) => {
+    if (data.isPlayerInARoom === true && !isJoined.value) {
+      isJoined.value = true;
+      isUserInARoom.value = true;
+      roomName.value = data.roomName;
 
-const handlePlayerInRoom = (data: any) => {
-  const status = data ? "joining room" : "leaving room";
-  console.log(status);
-  isUserInARoom.value = data;
-};
+      await joinRoom();
+
+      console.log("in room", data);
+    } else if (data.isPlayerInARoom === false && isJoined.value) {
+      isJoined.value = false;
+      isUserInARoom.value = false;
+      roomName.value = "";
+
+      leaveRoom();
+
+      console.log("outside of room", data);
+    }
+  }
+);
 
 const room = new Room();
 
@@ -39,24 +59,14 @@ const createToken = async (): Promise<string> => {
 
     if (createdToken.includes("error")) {
       console.log("Failed to create token.", createdToken);
+      throw new Error("Failed to create token: " + createdToken);
     } else {
-      const expiryTime = new Date(
-        new Date().getTime() + 23 * 60 * 60 * 1000
-      ).toISOString();
-
       console.log("CREATED TOKEN", createdToken);
-
-      // Save token to local storage
-      // Set the expiry of the auth token to 23 hours from now
-      webrtcLocalStorage.value = {
-        userAuthToken: createdToken,
-        userAuthTokenExpiry: expiryTime,
-      };
-
-      return createdToken;
+      return createdToken as string;
     }
   } catch (error) {
     console.log("Catch. Failed to create token.", error);
+    throw error;
   }
 };
 
@@ -70,7 +80,8 @@ const prepareForConnection = async () => {
   // Subscribe remote video and display it
   room.on(RoomEvent.TrackSubscribed, function (remoteTrack) {
     const track = remoteTrack.attach();
-    // style the video
+    // Style the video
+    // TODO: For some reason, I have to style the video here. I can't style it in the template.
     track.style.width = "90vw";
     track.style.height = "70vh";
     track.style.objectFit = "cover";
@@ -85,6 +96,7 @@ const prepareForConnection = async () => {
   // Connect to room
   try {
     await room.connect(wssUrl.value, userToken.value);
+    isCurrentlyConnected.value = true;
     console.log("Connected to room.");
   } catch (error) {
     console.log("Failed to connect to room.", error);
@@ -102,16 +114,10 @@ const prepareForConnection = async () => {
 };
 
 const joinRoom = async () => {
-  if (isLocalStorageTokenInvalid()) {
-    console.log("Either no token or token expired. Creating new token.");
-    userToken.value = await createToken();
-    console.log(
-      userToken.value ? "Token created successfully" : "Failed to create token."
-    );
-  } else {
-    console.log("Token exists and is valid. Joining room.");
-    userToken.value = webrtcLocalStorage.value.userAuthToken;
-  }
+  userToken.value = await createToken();
+  console.log(
+    userToken.value ? "Token created successfully" : "Failed to create token."
+  );
 
   if (userToken.value) {
     console.log(userToken.value);
@@ -120,16 +126,9 @@ const joinRoom = async () => {
   }
 };
 
-const isLocalStorageTokenInvalid = (): boolean => {
-  return (
-    !webrtcLocalStorage.value.userAuthToken ||
-    webrtcLocalStorage.value.userAuthToken === "" ||
-    new Date(webrtcLocalStorage.value.userAuthTokenExpiry) < new Date()
-  );
-};
-
 const leaveRoom = () => {
   room.disconnect();
+  isCurrentlyConnected.value = false;
 };
 
 // WATCHERS
@@ -144,9 +143,13 @@ watch(
     isMicEnabled.value = newValue;
 
     if (isMicEnabled.value) {
-      room.localParticipant.setMicrophoneEnabled(true);
+      if (isCurrentlyConnected.value) {
+        room.localParticipant.setMicrophoneEnabled(true);
+      }
     } else {
-      room.localParticipant.setMicrophoneEnabled(false);
+      if (!isCurrentlyConnected.value) {
+        room.localParticipant.setMicrophoneEnabled(false);
+      }
     }
   },
   { immediate: true }

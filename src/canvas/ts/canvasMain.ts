@@ -1,6 +1,10 @@
 import { emitter } from "@/composables/useEmit";
 import type { User } from "@/types/general";
-import type { CanvasAppOptions, Camera } from "@/types/canvasTypes";
+import type {
+  CanvasAppOptions,
+  Camera,
+  RoomsObjectLayerData,
+} from "@/types/canvasTypes";
 
 import {
   loadImage,
@@ -8,13 +12,14 @@ import {
   matchUserFacingToAnimationState,
   parseCollisionLayer,
 } from "./utilities";
+import { parseRoomsObjectLayerData } from "./roomDetection";
 import { drawTileMap, drawPlayerBanner, drawPlayer } from "./draw";
 import { updateAnimationFrame } from "./animations";
 import { keyDownEventListener, keyUpEventListener } from "./keyboardEvents";
 import { rightClickEventListener, wheelEventListener } from "./mouseEvents";
 
 import WorldMapJson from "../images/test-map.json";
-import WorldMapTileset from "../images/tileset.png";
+import WorldMapTileSet from "../images/tileset.png";
 
 async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
   const {
@@ -24,17 +29,12 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
     canvas,
     canvasFrameRate,
     spaceMap,
-    myCharacterSprite,
     initialSetupCompleted,
   } = options;
 
   const ctx = canvas.getContext("2d")!;
 
-  const [characterImg, characterImgMyPlayer, worldMap] = await Promise.all([
-    loadImage(myCharacterSprite),
-    loadImage(myCharacterSprite),
-    loadImage(WorldMapTileset),
-  ]);
+  const [worldMap] = await Promise.all([loadImage(WorldMapTileSet)]);
 
   let camera: Camera = {
     cameraX: 200,
@@ -48,14 +48,16 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
     x: 0,
     y: 0,
     characterSprite: "",
+    characterSpriteName: "",
     facingTo: "",
     userStatus: "",
   };
   const playerWidth = ((18 * camera.zoomFactor) / 3) as number;
   const playerHeight = ((22 * camera.zoomFactor) / 3) as number;
-  let isPlayerInARoom = false;
   let tempPlayerX = 0 as number;
   let tempPlayerY = 0 as number;
+
+  let roomThePlayerIsIn = "";
 
   // Tracks the order of movement keys (W, A, S, D) being pressed. It helps determine the character's movement direction when multiple keys are pressed, prioritizing the last valid key pressed.
   let keyPressOrder: string[] = [];
@@ -83,7 +85,7 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
   let mouseY = 0;
 
   const collisionData = parseCollisionLayer(WorldMapJson);
-
+  const roomsData = parseRoomsObjectLayerData(WorldMapJson);
   // Track mouse position (used for checking if mouse is hovering over a player)
   canvas.addEventListener("mousemove", (e: MouseEvent) => {
     mouseX = e.clientX;
@@ -122,15 +124,23 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
         drawFPS();
 
         // Check if my player is in a room at startup
-        const collisionWithMap = checkCollisionWithMap(
-          myPlayer.x,
-          myPlayer.y,
+        const isPlayerInARoom = checkPlayerInRoom(
+          tempPlayerX,
+          tempPlayerY,
           playerWidth,
           playerHeight
         );
-        if (isPlayerInARoom || collisionWithMap) {
-          handleInRoomState();
-          emitter.emit("playerInRoom", true);
+
+        if (isPlayerInARoom) {
+          emitter.emit("playerInRoom", {
+            isPlayerInARoom: true,
+            roomName: roomThePlayerIsIn,
+          });
+        } else {
+          emitter.emit("playerInRoom", {
+            isPlayerInARoom: false,
+            roomName: "",
+          });
         }
       }
       lastUpdateTime = timestamp;
@@ -214,11 +224,26 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
 
       if (collisionWithMap) {
         console.log("map collision");
-        emitter.emit("playerInRoom", true);
-        isPlayerInARoom = true;
       } else {
-        emitter.emit("playerInRoom", false);
-        isPlayerInARoom = false;
+      }
+
+      const isPlayerInARoom = checkPlayerInRoom(
+        tempPlayerX,
+        tempPlayerY,
+        playerWidth,
+        playerHeight
+      );
+
+      if (isPlayerInARoom) {
+        emitter.emit("playerInRoom", {
+          isPlayerInARoom: true,
+          roomName: roomThePlayerIsIn,
+        });
+      } else {
+        emitter.emit("playerInRoom", {
+          isPlayerInARoom: false,
+          roomName: "",
+        });
       }
 
       // console.log(`x: ${myPlayer.x}, y: ${myPlayer.y}`);
@@ -243,7 +268,7 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
 
         drawPlayer(
           ctx,
-          characterImg,
+          user.characterSprite,
           matchUserFacingToAnimationState(user.facingTo),
           1,
           user,
@@ -271,7 +296,7 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
 
     drawPlayer(
       ctx,
-      characterImgMyPlayer,
+      myPlayer?.characterSprite,
       animationState,
       animationFrame,
       myPlayer,
@@ -391,6 +416,48 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
       }
     }
     return false; // No collision detected
+  }
+
+  function checkPlayerInRoom(
+    tempPlayerX: number,
+    tempPlayerY: number,
+    playerWidth: number,
+    playerHeight: number
+  ) {
+    const tileWidth = WorldMapJson.tilewidth;
+    const tileHeight = WorldMapJson.tileheight;
+
+    const offsetYCorrection = 4; // Add an offset to the player's Y position
+
+    const offsetX =
+      (-camera.cameraX - (WorldMapJson.width * tileWidth) / 2) * camera.zoomFactor;
+    const offsetY =
+      (-camera.cameraY - (WorldMapJson.height * tileHeight) / 2) * camera.zoomFactor;
+
+    const playerRect = {
+      x: (tempPlayerX - camera.cameraX) * camera.zoomFactor,
+      y: (tempPlayerY - camera.cameraY + offsetYCorrection) * camera.zoomFactor,
+      width: playerWidth * camera.zoomFactor,
+      height: playerHeight * camera.zoomFactor,
+    };
+
+    for (let i = 0; i < roomsData.length; i++) {
+      const room = roomsData[i];
+      const roomRect = {
+        x: room.x * camera.zoomFactor + offsetX,
+        y: room.y * camera.zoomFactor + offsetY,
+        width: room.width * camera.zoomFactor,
+        height: room.height * camera.zoomFactor,
+      };
+
+      if (isColliding(playerRect, roomRect)) {
+        roomThePlayerIsIn = room.name;
+        return true;
+      }
+    }
+
+    roomThePlayerIsIn = "";
+    return false;
   }
 
   // What to do when the player is in the room

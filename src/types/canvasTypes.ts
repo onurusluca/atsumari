@@ -15,7 +15,6 @@ export type CanvasAppOptions = {
   canvas: HTMLCanvasElement;
   canvasFrameRate: number;
   spaceMap: string;
-  myCharacterSprite: string;
   initialSetupCompleted: boolean;
 };
 
@@ -29,6 +28,15 @@ export type CollisionData = {
   width: number;
   height: number;
   data: number[][];
+};
+
+export type RoomsObjectLayerData = {
+  id: number;
+  name: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
 };
 
 export type Layer = {

@@ -58,7 +58,7 @@ window.addEventListener("resize", () => {
   windowHeight.value = window.innerHeight;
 });
 
-let initialSetupCompleted = ref<boolean>(false);
+let initialSetupCompleted = ref<boolean>(true);
 
 /****************************************
  * INITIALIZATION
@@ -66,12 +66,16 @@ let initialSetupCompleted = ref<boolean>(false);
 onMounted(async () => {
   await handleReadProfile();
 
-  watchEffect(async () => {
-    if (initialSetupCompleted.value) {
-      await initialPreparations();
-      await doRealtimeStuff();
-    }
-  });
+  watch(
+    () => initialSetupCompleted,
+    async () => {
+      if (initialSetupCompleted.value) {
+        await doRealtimeStuff();
+        await initialPreparations();
+      }
+    },
+    { immediate: true }
+  );
 });
 
 const initialPreparations = async () => {
@@ -84,7 +88,6 @@ const initialPreparations = async () => {
   generalStore.users = users;
 
   await downloadSpaceMap();
-  await downloadCharacterSpriteSheets();
 
   const canvas = document.getElementById("main-canvas") as HTMLCanvasElement;
 
@@ -124,7 +127,6 @@ const initialPreparations = async () => {
     canvas: canvas,
     canvasFrameRate: canvasFrameRate.value,
     spaceMap: spaceMap.value,
-    myCharacterSprite: myCharacterSprite.value,
     initialSetupCompleted: initialSetupCompleted.value,
   });
 
@@ -262,9 +264,8 @@ const moveUserToRightClickedPosition = async () => {
 
 // Initial setups
 let userName = ref<string>("");
-let userProfile = reactive<any>({});
+let characterSpriteName = ref<string>("");
 const handleReadProfile = async () => {
-  // TODO: Fix after implementing user name
   try {
     let { data: profiles, error } = await supabase
       .from("profiles")
@@ -272,21 +273,17 @@ const handleReadProfile = async () => {
       .eq("id", authStore?.session?.user?.id);
 
     let fetchedUserProfile: ProfilesType = profiles[0];
-    userProfile = fetchedUserProfile;
 
     // Check if user has a user name and sprite selected for this space
     if (fetchedUserProfile) {
-      console.log("READ PROFILES: ", profiles);
-
       // Find user name for this space
       let userNameForThisSpace = Object(
         fetchedUserProfile.user_name_for_each_space
       ).find((space: any) => {
         return Object.keys(space)[0] === spaceId;
       });
-      console.log("USER NAME FOR THIS SPACE: ", userNameForThisSpace);
       if (
-        userNameForThisSpace(fetchedUserProfile.character_sprite != undefined) ||
+        (userNameForThisSpace && fetchedUserProfile.character_sprite != undefined) ||
         !fetchedUserProfile.character_sprite != null
       ) {
         initialSetupCompleted.value = true;
@@ -295,6 +292,7 @@ const handleReadProfile = async () => {
       }
 
       userName.value = userNameForThisSpace[spaceId];
+      characterSpriteName.value = fetchedUserProfile.character_sprite as string;
     } else {
       // If no user name for this space, show initial setup
       initialSetupCompleted.value = false;
@@ -319,7 +317,6 @@ const downloadSpaceMap = async () => {
       .download("newworld.png");
 
     if (data) {
-      console.log("DOWNLOAD SPACE MAP: ", data);
       // Get the URL of the image
       const url = URL.createObjectURL(data);
       spaceMap.value = url;
@@ -330,27 +327,31 @@ const downloadSpaceMap = async () => {
   }
 };
 
-// Get characters
-let myCharacterSprite = ref<string>("");
+// Download user character sprite sheet
 const downloadCharacterSpriteSheets = async () => {
-  // Download my character sprite sheet
-  try {
-    console.log(userProfile);
+  users.forEach(async (user) => {
+    console.log("WOWWWWWWWWWWW");
+    console.log(user);
 
-    const { data, error } = await supabase.storage
-      .from("character-sprites")
-      .download(`characters/${userProfile.character_sprite}`);
+    try {
+      const { data, error } = await supabase.storage
+        .from("character-sprites")
+        .download(`characters/${user.characterSpriteName}`);
 
-    if (data) {
-      console.log("DOWNLOAD CHARACTER SPRITE SHEET: ", data);
-      // Get the URL of the image
-      const url = URL.createObjectURL(data);
-      myCharacterSprite.value = url;
+      if (data) {
+        console.log("DOWNLOAD OTHER CHARACTERS SPRITE SHEET: ", data);
+        // Get the URL of the image
+        const url = URL.createObjectURL(data);
+        const img = new Image();
+        img.src = url;
+
+        user.characterSprite = img;
+      }
+      if (error) throw error;
+    } catch (error: any) {
+      console.log("DOWNLOAD OTHER CHARACTERS SPRITE SHEET CATCH ERROR: ", error);
     }
-    if (error) throw error;
-  } catch (error: any) {
-    console.log("DOWNLOADED CHARACTER SPRITE SHEET CATCH ERROR: ", error.message);
-  }
+  });
 };
 
 /****************************************
@@ -386,16 +387,17 @@ const doRealtimeStuff = async () => {
       );
 
       // Add user to users array
-      //if (newPresences[0].id !== userId) {
       users.push({
         userName: newPresences[0].userName,
         id: newPresences[0].id,
         x: newPresences[0].lastPosition.x,
         y: newPresences[0].lastPosition.y,
-        characterSprite: myCharacterSprite.value,
+        characterSprite: newPresences[0].characterSprite,
+        characterSpriteName: newPresences[0].characterSpriteName,
         facingTo: "down",
         userStatus: "online",
       });
+      await downloadCharacterSpriteSheets();
     })
     .on("presence", { event: "leave" }, ({ key, leftPresences }) => {
       // Listen to leave event
@@ -414,6 +416,7 @@ const doRealtimeStuff = async () => {
           id: authStore.user?.id,
           userName: userName.value,
           online_at: new Date().toISOString(),
+          characterSpriteName: characterSpriteName.value,
           lastPosition: {
             x: canvasLocalStorage.value.lastUserPosition
               ? canvasLocalStorage.value.lastUserPosition.x

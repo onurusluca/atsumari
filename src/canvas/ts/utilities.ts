@@ -35,7 +35,7 @@ export function matchUserFacingToAnimationState(facingTo: string): string {
 
 export function parseCollisionLayer(mapJson: any): CollisionData {
   const collisionLayer = mapJson.layers.find(
-    (layer: any) => layer.name === "Collision"
+    (layer: any) => layer.name === "CollisionObjectLayer"
   );
   if (!collisionLayer) {
     throw new Error("Collision layer not found");

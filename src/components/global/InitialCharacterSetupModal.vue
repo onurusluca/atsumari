@@ -22,11 +22,14 @@ let nameChanged = ref<boolean>(false);
 
 let userName = ref<string>("");
 let allUserNames = reactive<Array<Object>>([]);
-const handleChangeUserName = async () => {
+const handleUpdateProfile = async () => {
   try {
     const { error } = await supabase
       .from("profiles")
-      .update({ user_name_for_each_space: allUserNames })
+      .update({
+        user_name_for_each_space: allUserNames,
+        character_sprite: selectedCharacterSpriteSheetName.value,
+      })
       .eq("id", authStore?.session?.user?.id);
     if (error) {
       throw error;
@@ -56,12 +59,24 @@ const handleReadProfile = async () => {
   }
 };
 
-let characterSpriteSheets = ref<Array<Object>>([]);
+type AllSpriteSheets = {
+  data: Array<Object>;
+  error: Object;
+};
+
+type SpriteSheet = {
+  name: string;
+  img: string;
+};
+
+let allSpriteSheets = reactive<AllSpriteSheets>({ data: [], error: {} });
+let characterSpriteSheets = reactive<Array<SpriteSheet>>([]);
 let selectedCharacterSpriteSheet = ref<string>("");
+let selectedCharacterSpriteSheetName = ref<string>("");
 const downloadCharacterSpriteSheets = async () => {
   try {
     // List all sprite sheets
-    const allSpriteSheets = await supabase.storage
+    allSpriteSheets = await supabase.storage
       .from("character-sprites")
       .list("characters", {
         limit: 100,
@@ -85,11 +100,11 @@ const downloadCharacterSpriteSheets = async () => {
             selectedCharacterSpriteSheet.value = url;
             return;
           }
-          characterSpriteSheets.value.push({ name: spriteSheet.name, img: url });
+          characterSpriteSheets.push({ name: spriteSheet.name, img: url });
 
           // Set the first sprite sheet as the selected one
-          if (characterSpriteSheets.value.length > 0) {
-            selectedCharacterSpriteSheet.value = characterSpriteSheets.value[1].img;
+          if (characterSpriteSheets.length > 0) {
+            selectedCharacterSpriteSheet.value = characterSpriteSheets[1]?.img;
           }
         }
         if (error) throw error;
@@ -114,7 +129,7 @@ const handleClickOnConfirm = async () => {
 
   buttonsActive.value = false;
   showButtonLoading.value = true;
-  await handleChangeUserName();
+  await handleUpdateProfile();
 };
 
 // Canvas stuff to display character sprite sheets
@@ -126,6 +141,14 @@ watch(selectedCharacterSpriteSheet, (newVal) => {
     if (ctx && newVal) {
       drawSprite(ctx, newVal);
     }
+  }
+
+  // Set the selected sprite sheet name
+  const selectedSprite = characterSpriteSheets.find(
+    (spriteSheet) => spriteSheet.img === newVal
+  );
+  if (selectedSprite) {
+    selectedCharacterSpriteSheetName.value = selectedSprite.name;
   }
 });
 
