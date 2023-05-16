@@ -22,6 +22,11 @@ let showEmailVerification = ref<boolean>(false);
 
 let rememberMeChecked = ref<boolean>(false);
 
+const authLocalStorage = useStorage("atsumari_auth", {
+  rememberMeCheckedLocal: null,
+  tokenExpiry: 0,
+});
+
 onMounted(() => {});
 
 /****************************************
@@ -39,12 +44,8 @@ const handleLogin = async () => {
       expires_in: sessionDuration,
     });
 
-    // TODO: Set longer session if remember me is checked
-    if (rememberMeChecked.value) {
-      const authLocalStorage = useStorage("atsumari_auth", {
-        rememberMeCheckedLocal: true,
-      });
-    }
+    authLocalStorage.value.tokenExpiry = sessionDuration;
+
     if (error) {
       errorUi.value = t("auth.login.invalidCredentials");
       errorUiSecond.value = t("auth.login.tryAgain");

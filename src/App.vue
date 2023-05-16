@@ -7,9 +7,36 @@ const router = useRouter();
 const route = useRouter();
 const authStore = useAuthStore();
 
-let session = ref();
+const authLocalStorage = useStorage("atsumari_auth", {
+  rememberMeCheckedLocal: null,
+  tokenExpiry: 0,
+});
 
+let session = ref();
 onMounted(async () => {
+  // if token is expired, refresh it
+  if (authLocalStorage.value.tokenExpiry) {
+    const tokenExpiry = authLocalStorage.value.tokenExpiry;
+    const now = new Date();
+    const expiryDate = new Date(tokenExpiry);
+    if (now > expiryDate) {
+      console.log("token expired");
+
+      try {
+        const { data, error } = await supabase.auth.refreshSession();
+
+        console.log("token refreshed");
+
+        if (error) {
+          console.log(error);
+          throw error;
+        } else {
+          authLocalStorage.value.tokenExpiry = data.expires_at;
+        }
+      } catch (error) {}
+    }
+  }
+
   // listen for auth events (e.g. sign in, sign out, refresh)
   // set session based on the auth event
   supabase.auth.getSession().then(({ data }) => {
