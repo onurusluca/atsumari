@@ -5,7 +5,8 @@ export interface User {
   x: number;
   y: number;
   characterSprite: string;
-  characterSpriteName: string;
+  characterSpriteName?: string;
   facingTo: string;
   userStatus: string;
+  userPersonalMessage: string;
 }

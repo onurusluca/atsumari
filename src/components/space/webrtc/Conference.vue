@@ -34,7 +34,9 @@ emitter.on(
       roomName.value = data.roomName;
 
       await joinRoom();
-
+      if (webRtcStore.devices.isMicrophoneEnabled) {
+        room.localParticipant.setMicrophoneEnabled(true);
+      }
       console.log("in room", data);
     } else if (data.isPlayerInARoom === false && isJoined.value) {
       isJoined.value = false;
@@ -42,6 +44,10 @@ emitter.on(
       roomName.value = "";
 
       leaveRoom();
+
+      if (!webRtcStore.devices.isMicrophoneEnabled) {
+        room.localParticipant.setMicrophoneEnabled(false);
+      }
 
       console.log("outside of room", data);
     }
@@ -115,9 +121,6 @@ const prepareForConnection = async () => {
 
 const joinRoom = async () => {
   userToken.value = await createToken();
-  console.log(
-    userToken.value ? "Token created successfully" : "Failed to create token."
-  );
 
   if (userToken.value) {
     console.log(userToken.value);
@@ -143,13 +146,9 @@ watch(
     isMicEnabled.value = newValue;
 
     if (isMicEnabled.value) {
-      if (isCurrentlyConnected.value) {
-        room.localParticipant.setMicrophoneEnabled(true);
-      }
+      room.localParticipant.setMicrophoneEnabled(true);
     } else {
-      if (!isCurrentlyConnected.value) {
-        room.localParticipant.setMicrophoneEnabled(false);
-      }
+      room.localParticipant.setMicrophoneEnabled(false);
     }
   },
   { immediate: true }

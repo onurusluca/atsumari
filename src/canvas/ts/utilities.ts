@@ -1,4 +1,4 @@
-import type { Rect, CollisionData } from "@/types/canvasTypes";
+import type { Rect, RoomsObjectLayerData } from "@/types/canvasTypes";
 
 export function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
@@ -33,26 +33,35 @@ export function matchUserFacingToAnimationState(facingTo: string): string {
   }
 }
 
-export function parseCollisionLayer(mapJson: any): CollisionData {
-  const collisionLayer = mapJson.layers.find(
-    (layer: any) => layer.name === "CollisionObjectLayer"
+// What to do when the player is in the room
+export function handleInRoomState(
+  ctx: CanvasRenderingContext2D,
+  canvas: HTMLCanvasElement
+) {
+  // Draw a transparent black rectangle over the canvas except for the room
+  ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
+
+// Parse the layers of the tile map from the .json file
+export function parseRoomsObjectLayerData(
+  mapJson: any,
+  objectLayerName: string
+): RoomsObjectLayerData[] {
+  const roomsObjectLayer = mapJson.layers.find(
+    (layer: any) => layer.name === objectLayerName
   );
-  if (!collisionLayer) {
-    throw new Error("Collision layer not found");
+  if (!roomsObjectLayer) {
+    throw new Error("Rooms object layer not found");
   }
 
-  const data = [];
-  for (let y = 0; y < collisionLayer.height; y++) {
-    const row = [];
-    for (let x = 0; x < collisionLayer.width; x++) {
-      row.push(collisionLayer.data[y * collisionLayer.width + x]);
-    }
-    data.push(row);
-  }
-
-  return {
-    width: collisionLayer.width,
-    height: collisionLayer.height,
-    data: data,
-  };
+  return roomsObjectLayer.objects.map((room: any) => ({
+    id: room.id,
+    name: room.name,
+    x: room.x,
+    y: room.y,
+    width: room.width,
+    height: room.height,
+    polygon: room.polygon,
+  }));
 }

@@ -24,12 +24,6 @@ export type Camera = {
   zoomFactor: number;
 };
 
-export type CollisionData = {
-  width: number;
-  height: number;
-  data: number[][];
-};
-
 export type RoomsObjectLayerData = {
   id: number;
   name: string;
@@ -37,6 +31,7 @@ export type RoomsObjectLayerData = {
   y: number;
   width: number;
   height: number;
+  polygon: Array<{ x: number; y: number }>;
 };
 
 export type Layer = {

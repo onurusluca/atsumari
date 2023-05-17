@@ -342,10 +342,8 @@ const downloadCharacterSpriteSheets = async () => {
         console.log("DOWNLOAD OTHER CHARACTERS SPRITE SHEET: ", data);
         // Get the URL of the image
         const url = URL.createObjectURL(data);
-        const img = new Image();
-        img.src = url;
 
-        user.characterSprite = img;
+        user.characterSprite = url;
       }
       if (error) throw error;
     } catch (error: any) {
