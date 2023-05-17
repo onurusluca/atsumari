@@ -4,9 +4,9 @@ export interface User {
   userName: string;
   x: number;
   y: number;
+  facingTo: string;
   characterSprite: string;
   characterSpriteName?: string;
-  facingTo: string;
   userStatus: string;
-  userPersonalMessage: string;
+  userPersonalMessage?: string;
 }

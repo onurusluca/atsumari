@@ -390,10 +390,11 @@ const doRealtimeStuff = async () => {
         id: newPresences[0].id,
         x: newPresences[0].lastPosition.x,
         y: newPresences[0].lastPosition.y,
+        facingTo: "down",
         characterSprite: newPresences[0].characterSprite,
         characterSpriteName: newPresences[0].characterSpriteName,
-        facingTo: "down",
-        userStatus: "online",
+        userStatus: generalStore.userStatus,
+        userPersonalMessage: generalStore.userPersonalMessage,
       });
       await downloadCharacterSpriteSheets();
     })
@@ -702,7 +703,7 @@ const handleChatMenuOpen = () => {
 
   .space__webrtc {
     position: fixed;
-    top: 0;
+    bottom: 0;
     border: 5px solid red;
   }
 }

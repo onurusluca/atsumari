@@ -45,15 +45,16 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
     userName: "",
     x: 0,
     y: 0,
+    facingTo: "",
     characterSprite: "",
     characterSpriteName: "",
-    facingTo: "",
     userStatus: "",
+    userPersonalMessage: "",
   };
-  const playerWidth = 16 as number;
-  const playerHeight = 16 as number;
-  let tempPlayerX = 0 as number;
-  let tempPlayerY = 0 as number;
+
+  const playerSize = 16;
+
+  let tempPlayerPosition: { x: number; y: number } = { x: 0, y: 0 };
 
   let roomThePlayerIsIn = "";
   let checkedIfPlayerIsInRoom = false;
@@ -144,28 +145,28 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
     if (keyPressOrder.length > 0) {
       const lastValidKey = keyPressOrder[keyPressOrder.length - 1];
 
-      tempPlayerX = myPlayer.x;
-      tempPlayerY = myPlayer.y;
+      tempPlayerPosition.x = myPlayer.x;
+      tempPlayerPosition.y = myPlayer.y;
 
       if (pressedKeys.w || pressedKeys.a || pressedKeys.s || pressedKeys.d) {
         switch (lastValidKey) {
           case "w":
-            tempPlayerY -= speed;
+            tempPlayerPosition.y -= speed;
             animationState = "walk-up";
             myPlayer.facingTo = "up";
             break;
           case "a":
-            tempPlayerX -= speed;
+            tempPlayerPosition.x -= speed;
             animationState = "walk-left";
             myPlayer.facingTo = "left";
             break;
           case "s":
-            tempPlayerY += speed;
+            tempPlayerPosition.y += speed;
             animationState = "walk-down";
             myPlayer.facingTo = "down";
             break;
           case "d":
-            tempPlayerX += speed;
+            tempPlayerPosition.x += speed;
             animationState = "walk-right";
             myPlayer.facingTo = "right";
             break;
@@ -179,12 +180,12 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
           user.id !== myPlayerId &&
           isColliding(
             {
-              x: tempPlayerX,
-              y: tempPlayerY,
-              width: playerWidth,
-              height: playerHeight,
+              x: tempPlayerPosition.x,
+              y: tempPlayerPosition.y,
+              width: playerSize,
+              height: playerSize,
             },
-            { x: user.x, y: user.y, width: playerWidth, height: playerHeight }
+            { x: user.x, y: user.y, width: playerSize, height: playerSize }
           )
         ) {
           collisionWithOtherUsers = true;
@@ -192,8 +193,8 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
         }
       }
       if (!collisionWithOtherUsers) {
-        myPlayer.x = tempPlayerX;
-        myPlayer.y = tempPlayerY;
+        myPlayer.x = tempPlayerPosition.x;
+        myPlayer.y = tempPlayerPosition.y;
       }
 
       // Check for collision with map
@@ -203,8 +204,8 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
         camera,
         myPlayer.x,
         myPlayer.y,
-        playerWidth,
-        playerHeight
+        playerSize,
+        playerSize
       );
 
       if (collisionWithMap) {
@@ -257,7 +258,6 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
           camera.cameraX,
           camera.cameraY,
           camera.zoomFactor,
-          user.userStatus,
           isMouseOver
         );
       }
@@ -285,7 +285,6 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
       camera.cameraX,
       camera.cameraY,
       camera.zoomFactor,
-      myPlayer.userStatus,
       isMouseOver
     );
   }
@@ -332,8 +331,8 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
       roomThePlayerIsIn,
       myPlayer.x,
       myPlayer.y,
-      playerWidth,
-      playerHeight
+      playerSize,
+      playerSize
     );
 
     if (isPlayerInARoom) {
