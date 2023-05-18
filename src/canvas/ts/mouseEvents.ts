@@ -82,11 +82,13 @@ function handleWheelEvent(
   if (e.ctrlKey) {
     e.preventDefault();
     const zoomSpeed = 0.1;
-    const zoomIncrement = e.deltaY < 0 ? zoomSpeed : -zoomSpeed;
-    // Limit zoom to 0.5 - 1.5
-    camera.zoomFactor = clampZoom(camera.zoomFactor + zoomIncrement, 0.5, 1.5);
+    const zoomIncrement = e.deltaY < 0 ? +zoomSpeed : -zoomSpeed;
+    // Limit zoom to 2 - 5
+    camera.zoomFactor = clampZoom(camera.zoomFactor + zoomIncrement, 2, 5);
 
     console.log(camera.zoomFactor);
+    // Save zoom factor to localStorage
+    localStorage.setItem("zoomFactor", camera.zoomFactor.toString());
   }
 }
 

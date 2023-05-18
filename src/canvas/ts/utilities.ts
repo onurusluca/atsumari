@@ -62,6 +62,6 @@ export function parseRoomsObjectLayerData(
     y: room.y,
     width: room.width,
     height: room.height,
-    polygon: room.polygon,
+    polyline: room.polyline,
   }));
 }

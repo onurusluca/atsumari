@@ -30,10 +30,10 @@ let users = reactive<Array<User>>([]);
 
 // FIXME: this is broken
 // Request animation frame every ..ms
-let canvasFrameRate = ref<number>(60);
+let canvasFrameRate = ref<number>(100);
 let canvasLoaded = ref<boolean>(false);
-// Need to change user speed based on canvasFrameRate
-let speed = canvasFrameRate.value === 30 ? 2 : canvasFrameRate.value === 60 ? 3 : 3;
+// TODO: Need to change user speed based on canvasFrameRate
+let speed = 3.5;
 
 let initialUserPosition = {
   x: 100,
@@ -330,9 +330,6 @@ const downloadSpaceMap = async () => {
 // Download user character sprite sheet
 const downloadCharacterSpriteSheets = async () => {
   users.forEach(async (user) => {
-    console.log("WOWWWWWWWWWWW");
-    console.log(user);
-
     try {
       const { data, error } = await supabase.storage
         .from("character-sprites")
@@ -492,9 +489,9 @@ const handleChatMenuOpen = () => {
 
 <template>
   <!-- Loading animation to show until app mount -->
-  <section v-if="!canvasLoaded" class="route-loading-overlay">
+  <!--   <section v-if="!canvasLoaded" class="route-loading-overlay">
     <span class="loader"></span>
-  </section>
+  </section> -->
 
   <div class="space">
     <div class="canvas-container">
@@ -703,7 +700,7 @@ const handleChatMenuOpen = () => {
 
   .space__webrtc {
     position: fixed;
-    bottom: 0;
+    bottom: 5rem;
     border: 5px solid red;
   }
 }

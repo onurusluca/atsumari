@@ -31,7 +31,7 @@ export type RoomsObjectLayerData = {
   y: number;
   width: number;
   height: number;
-  polygon: Array<{ x: number; y: number }>;
+  polyline: Array<{ x: number; y: number }>;
 };
 
 export type Layer = {

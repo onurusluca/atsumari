@@ -130,6 +130,8 @@ const joinRoom = async () => {
 };
 
 const leaveRoom = () => {
+  // Empty the remote video container
+  remoteVideoContainer.value.innerHTML = "";
   room.disconnect();
   isCurrentlyConnected.value = false;
 };

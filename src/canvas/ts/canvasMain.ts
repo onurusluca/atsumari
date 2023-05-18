@@ -1,4 +1,5 @@
 import { emitter } from "@/composables/useEmit";
+import { getOS } from "@/utils/getOS";
 import type { User } from "@/types/general";
 import type { CanvasAppOptions, Camera, TileMap } from "@/types/canvasTypes";
 
@@ -28,17 +29,22 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
 
   const [worldMap] = await Promise.all([loadImage(WorldMapTileSet)]);
 
-  function loadAnImage(src: string) {
+  /*   function loadAnImage(src: string) {
     const img = new Image();
     img.src = src;
     return img as HTMLImageElement;
-  }
+  } */
 
   let camera: Camera = {
     cameraX: 200,
     cameraY: 200,
     zoomFactor: 3,
   };
+
+  // If zoomFactor local storage exists, use it, otherwise use the default zoomFactor
+  if (localStorage.getItem("zoomFactor")) {
+    camera.zoomFactor = Number(localStorage.getItem("zoomFactor"));
+  }
 
   let myPlayer: User = {
     id: "",
@@ -52,12 +58,11 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
     userPersonalMessage: "",
   };
 
-  const playerSize = 16;
+  const PLAYER_SIZE = 16;
 
   let tempPlayerPosition: { x: number; y: number } = { x: 0, y: 0 };
 
   let roomThePlayerIsIn = "";
-  let checkedIfPlayerIsInRoom = false;
 
   // Tracks the order of movement keys (W, A, S, D) being pressed. It helps determine the character's movement direction when multiple keys are pressed, prioritizing the last valid key pressed.
   let keyPressOrder: string[] = [];
@@ -76,10 +81,9 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
   // FPS counter
   let lastTime = performance.now();
   let fps = 0;
+  const refreshInterval = 1000 / canvasFrameRate;
 
-  // FPS limiting
-  let lastUpdateTime = 0;
-  const frameDuration = 1000 / canvasFrameRate;
+  let userOs = getOS();
 
   let mouseX = 0;
   let mouseY = 0;
@@ -90,48 +94,43 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
     mouseY = e.clientY;
   });
 
-  function gameLoop(timestamp: number) {
-    // Calculate the elapsed time since the last update
-    let elapsedTime = timestamp - lastUpdateTime;
+  function gameLoop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    if (elapsedTime >= frameDuration) {
-      // Clear the canvas before drawing to prevent ghosting effect
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Anti-aliasing in browsers smooths images, which can blur pixel art or low-res graphics
+    ctx.imageSmoothingEnabled = false;
 
-      // Anti-aliasing in browsers smooths images, which can blur pixel art or low-res graphics
-      ctx.imageSmoothingEnabled = false;
+    myPlayer = users.find((user) => user.id === myPlayerId)!;
+    if (myPlayer) {
+      // Center camera on my player
+      camera.cameraX = myPlayer.x - canvas.width / (2.2 * camera.zoomFactor);
+      camera.cameraY = myPlayer.y - canvas.height / (2.2 * camera.zoomFactor);
 
-      myPlayer = users.find((user) => user.id === myPlayerId)!;
-      if (myPlayer) {
-        // Center camera on my player
-        camera.cameraX = myPlayer.x - canvas.width / (2.2 * camera.zoomFactor);
-        camera.cameraY = myPlayer.y - canvas.height / (2.2 * camera.zoomFactor);
+      drawMap();
 
-        drawMap();
+      handlePlayerMovement();
 
-        handlePlayerMovement();
+      drawOtherPlayers();
 
-        drawOtherPlayers();
+      drawMyPlayer();
 
-        drawMyPlayer();
+      drawAllPlayerBanners();
 
-        drawAllPlayerBanners();
+      updateAnimation();
 
-        updateAnimation();
+      drawFPS();
 
-        drawFPS();
-
-        // Initial room detection
-        if (!checkedIfPlayerIsInRoom) {
-          checkIfPlayerIsInRoom();
-          checkedIfPlayerIsInRoom = true;
-        }
-      }
-      lastUpdateTime = timestamp;
+      checkIfPlayerIsInRoom();
     }
 
-    requestAnimationFrame(gameLoop);
+    // On MacOS use requestAnimationFrame, on other OS use setInterval
+    if (userOs === "MacOS") {
+      requestAnimationFrame(gameLoop);
+    } else {
+      setTimeout(gameLoop, refreshInterval);
+    }
   }
+  // end of gameLoop
 
   // HELPER FUNCTIONS
 
@@ -182,10 +181,10 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
             {
               x: tempPlayerPosition.x,
               y: tempPlayerPosition.y,
-              width: playerSize,
-              height: playerSize,
+              width: PLAYER_SIZE,
+              height: PLAYER_SIZE,
             },
-            { x: user.x, y: user.y, width: playerSize, height: playerSize }
+            { x: user.x, y: user.y, width: PLAYER_SIZE, height: PLAYER_SIZE }
           )
         ) {
           collisionWithOtherUsers = true;
@@ -204,12 +203,11 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
         camera,
         myPlayer.x,
         myPlayer.y,
-        playerSize,
-        playerSize
+        PLAYER_SIZE,
+        PLAYER_SIZE
       );
 
       if (collisionWithMap) {
-        console.log("map collision");
         // Stop player movement
 
         switch (lastValidKey) {
@@ -228,8 +226,6 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
         }
       } else {
       }
-
-      checkIfPlayerIsInRoom();
     }
   }
 
@@ -239,8 +235,8 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
         const playerRect = {
           x: (user.x - camera.cameraX) * camera.zoomFactor,
           y: (user.y - camera.cameraY) * camera.zoomFactor,
-          width: 18 * camera.zoomFactor,
-          height: 18 * camera.zoomFactor,
+          width: PLAYER_SIZE * camera.zoomFactor,
+          height: PLAYER_SIZE * camera.zoomFactor,
         };
 
         // Check if mouse is over the player
@@ -268,8 +264,8 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
     const playerRect = {
       x: (myPlayer.x - camera.cameraX) * camera.zoomFactor,
       y: (myPlayer.y - camera.cameraY) * camera.zoomFactor,
-      width: 18 * camera.zoomFactor,
-      height: 18 * camera.zoomFactor,
+      width: PLAYER_SIZE * camera.zoomFactor,
+      height: PLAYER_SIZE * camera.zoomFactor,
     };
     const isMouseOver = isColliding(
       { x: mouseX, y: mouseY, width: 1, height: 1 },
@@ -326,13 +322,14 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
 
   function checkIfPlayerIsInRoom() {
     const isPlayerInARoom = checkPlayerInRoom(
+      ctx,
       WorldMapJson,
       camera,
       roomThePlayerIsIn,
       myPlayer.x,
       myPlayer.y,
-      playerSize,
-      playerSize
+      PLAYER_SIZE,
+      PLAYER_SIZE
     );
 
     if (isPlayerInARoom) {
@@ -356,7 +353,9 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
       spaceMap !== "" &&
       initialSetupCompleted
     ) {
-      requestAnimationFrame(gameLoop);
+      gameLoop();
+
+      //requestAnimationFrame(gameLoop);
     } else {
       const checkConditionsBeforeLoop = setInterval(() => {
         if (
@@ -365,7 +364,9 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
           spaceMap !== "" &&
           initialSetupCompleted
         ) {
-          requestAnimationFrame(gameLoop);
+          gameLoop();
+
+          //requestAnimationFrame(gameLoop);
 
           clearInterval(checkConditionsBeforeLoop);
 
@@ -375,14 +376,6 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
       }, 0);
     }
   }
-
-  /*   function getCamera(): Camera {
-    return {
-      cameraX: myPlayer?.x - canvas.width / (2.2 * camera.zoomFactor),
-      cameraY: myPlayer.y - canvas.height / (2.2 * camera.zoomFactor),
-      zoomFactor: camera.zoomFactor,
-    };
-  } */
 
   keyDownEventListener(canvas, pressedKeys, keyPressOrder, () => myPlayer);
   keyUpEventListener(canvas, pressedKeys, keyPressOrder, () => myPlayer);

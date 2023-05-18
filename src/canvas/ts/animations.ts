@@ -29,7 +29,7 @@ export const characterAnimations: CharacterAnimation = {
   ],
 };
 
-let animationSpeed = 7;
+let animationSpeed = 6.5;
 
 function updateAnimationFrameIfMoving(
   animationState: string,
@@ -60,6 +60,7 @@ export function updateAnimationFrame(
   if (isMoving) {
     return updateAnimationFrameIfMoving(animationState, animationFrame, animationTick);
   } else {
+    // When the player is not moving, show the first frame of the animation(idle)
     return [1, animationTick];
   }
 }

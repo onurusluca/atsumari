@@ -1,6 +1,66 @@
 import type { Camera } from "@/types/canvasTypes";
 import { parseRoomsObjectLayerData } from "./utilities";
 
+interface Point {
+  x: number;
+  y: number;
+}
+
+interface Rectangle {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+function lineIntersectsRect(p1: Point, p2: Point, rect: Rectangle) {
+  return (
+    lineIntersectsLine(
+      p1,
+      p2,
+      { x: rect.x, y: rect.y },
+      { x: rect.x + rect.width, y: rect.y }
+    ) ||
+    lineIntersectsLine(
+      p1,
+      p2,
+      { x: rect.x + rect.width, y: rect.y },
+      { x: rect.x + rect.width, y: rect.y + rect.height }
+    ) ||
+    lineIntersectsLine(
+      p1,
+      p2,
+      { x: rect.x + rect.width, y: rect.y + rect.height },
+      { x: rect.x, y: rect.y + rect.height }
+    ) ||
+    lineIntersectsLine(
+      p1,
+      p2,
+      { x: rect.x, y: rect.y + rect.height },
+      { x: rect.x, y: rect.y }
+    )
+  );
+}
+
+function lineIntersectsLine(l1p1: Point, l1p2: Point, l2p1: Point, l2p2: Point) {
+  const q =
+    (l1p1.y - l2p1.y) * (l2p2.x - l2p1.x) - (l1p1.x - l2p1.x) * (l2p2.y - l2p1.y);
+  const d =
+    (l1p2.x - l1p1.x) * (l2p2.y - l2p1.y) - (l1p2.y - l1p1.y) * (l2p2.x - l2p1.x);
+
+  if (d === 0) {
+    return false;
+  }
+
+  const r = q / d;
+
+  const q2 =
+    (l1p1.y - l2p1.y) * (l1p2.x - l1p1.x) - (l1p1.x - l2p1.x) * (l1p2.y - l1p1.y);
+  const s = q2 / d;
+
+  return !(r < 0 || r > 1 || s < 0 || s > 1);
+}
+
 export function checkPlayerCollisionWithWalls(
   ctx: CanvasRenderingContext2D,
   WorldMapJson: any,
@@ -10,8 +70,6 @@ export function checkPlayerCollisionWithWalls(
   playerWidth: number,
   playerHeight: number
 ) {
-  console.log("checkPlayerCollisionWithWalls");
-
   const wallsData = parseRoomsObjectLayerData(WorldMapJson, "CollisionObjectLayer");
 
   const tileWidth = WorldMapJson.tilewidth;
@@ -37,14 +95,14 @@ export function checkPlayerCollisionWithWalls(
   for (let i = 0; i < wallsData.length; i++) {
     const wall = wallsData[i];
 
-    // Converting polygon coordinates to camera's view
-    const polygon = wall.polygon.map((point: any) => ({
+    // Converting polyline coordinates to camera's view
+    const polyline = wall.polyline.map((point: any) => ({
       x: (wall.x + point.x) * camera.zoomFactor + offsetX,
       y: (wall.y + point.y) * camera.zoomFactor + offsetY,
     }));
 
     // Debugging: Draw a border around each collision spot
-    polygon.forEach((point: any) => {
+    polyline.forEach((point: Point) => {
       ctx.beginPath();
       ctx.arc(point.x, point.y, 5, 0, 2 * Math.PI, false);
       ctx.fillStyle = "red";
@@ -54,66 +112,21 @@ export function checkPlayerCollisionWithWalls(
       ctx.stroke();
     });
 
-    if (
-      rectInPolygon(
-        {
-          x: playerRect.x,
-          y: playerRect.y,
-          width: playerWidth,
-          height: playerHeight,
-        },
-        polygon
-      ) ||
-      rectInPolygon(
-        {
-          x: playerRect.x + playerWidth,
-          y: playerRect.y + playerHeight,
-          width: playerWidth,
-          height: playerHeight,
-        },
-        polygon
-      )
-    ) {
-      console.log("Player collided with wall: " + wall.name);
+    for (let j = 0; j < polyline.length - 1; j++) {
+      if (lineIntersectsRect(polyline[j], polyline[j + 1], playerRect)) {
+        console.log("Player collided with wall: " + wall.name);
 
-      // Debugging: Draw a border around the player
-      ctx.beginPath();
-      ctx.rect(playerRect.x, playerRect.y, playerRect.width, playerRect.height);
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = "red";
-      ctx.stroke();
+        // Debugging: Draw a border around the player
+        ctx.beginPath();
+        ctx.rect(playerRect.x, playerRect.y, playerRect.width, playerRect.height);
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = "red";
+        ctx.stroke();
 
-      return true;
+        return true;
+      }
     }
   }
 
   return false;
-}
-
-function pointInPolygon(point: any, vs: any) {
-  var inside = false;
-  for (var i = 0, j = vs.length - 1; i < vs.length; j = i++) {
-    var xi = vs[i].x,
-      yi = vs[i].y;
-    var xj = vs[j].x,
-      yj = vs[j].y;
-
-    var intersect =
-      yi > point.y !== yj > point.y &&
-      point.x < ((xj - xi) * (point.y - yi)) / (yj - yi) + xi;
-    if (intersect) inside = !inside;
-  }
-
-  return inside;
-}
-
-function rectInPolygon(rect: any, vs: any) {
-  const points = [
-    { x: rect.x, y: rect.y }, // top-left
-    { x: rect.x + rect.width, y: rect.y }, // top-right
-    { x: rect.x, y: rect.y + rect.height }, // bottom-left
-    { x: rect.x + rect.width, y: rect.y + rect.height }, // bottom-right
-  ];
-
-  return points.some((point) => pointInPolygon(point, vs));
 }

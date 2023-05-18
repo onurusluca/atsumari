@@ -9,7 +9,7 @@ export const useGeneralStore = defineStore("generalStore", {
       userId: "" as string,
       userName: "" as string,
       users: [] as User[],
-      userStatus: "" as string,
+      userStatus: "online" as string,
       userPersonalMessage: "" as string,
     };
   },
