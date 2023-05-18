@@ -37,6 +37,7 @@ const handleUpdateProfile = async () => {
       nameChanged.value = true;
       showButtonLoading.value = false;
       emit("initialSetupCompleted");
+      console.log("1. EMITTED INITIAL SETUP COMPLETED");
     }
   } catch (error: any) {
     console.log("CHANGE username CATCH ERROR: ", error.message);
@@ -92,7 +93,6 @@ const downloadCharacterSpriteSheets = async () => {
           .download("characters/" + spriteSheet.name);
 
         if (data) {
-          console.log("DOWNLOADED CHARACTER SPRITE SHEET: ", data);
           const url = URL.createObjectURL(data);
 
           // Don't add the first sprite sheet to the array, as it's an "emptyFolderPlaceholder" used by Supabase
@@ -123,11 +123,12 @@ let showButtonLoading = ref<boolean>(false);
 let buttonsActive = ref<boolean>(true);
 
 const handleClickOnConfirm = async () => {
+  buttonsActive.value = false;
+
   allUserNames.push({
     [props.spaceId]: userName.value,
   });
 
-  buttonsActive.value = false;
   showButtonLoading.value = true;
   await handleUpdateProfile();
 };
@@ -165,15 +166,15 @@ const drawSprite = (ctx: CanvasRenderingContext2D, spriteSheet: string) => {
 };
 </script>
 <template>
-  <div class="change-username-modal">
-    <div class="change-username-modal__content">
+  <div class="initial-character-setup-modal">
+    <div class="initial-character-setup-modal__content">
       <form
         v-if="!nameChanged"
         @submit.prevent="handleClickOnConfirm"
         class="content__form"
       >
         <h5 class="mb-xl">{{ t("user.setUserName.setAUserNameForThisSpace") }}</h5>
-        <div class="form__input-single">
+        <div class="form__input-single form__name-input">
           <label for="userName" class="form__label">{{
             t("user.setUserName.userName")
           }}</label>
@@ -190,8 +191,17 @@ const drawSprite = (ctx: CanvasRenderingContext2D, spriteSheet: string) => {
         </div>
 
         <!-- Character sprite selection -->
-        <section>
-          <select v-model="selectedCharacterSpriteSheet">
+        <section class="form__sprites-container">
+          <canvas
+            ref="canvas"
+            width="128"
+            height="128"
+            class="sprites-container__sprites"
+          ></canvas>
+          <select
+            v-model="selectedCharacterSpriteSheet"
+            class="sprites-container__select form__text-input"
+          >
             <option
               v-for="(spriteSheet, index) in characterSpriteSheets"
               :key="index"
@@ -200,8 +210,6 @@ const drawSprite = (ctx: CanvasRenderingContext2D, spriteSheet: string) => {
               {{ spriteSheet.name }}
             </option>
           </select>
-
-          <canvas ref="canvas" width="128" height="128"></canvas>
         </section>
 
         <!-- Buttons -->
@@ -231,7 +239,7 @@ const drawSprite = (ctx: CanvasRenderingContext2D, spriteSheet: string) => {
   </div>
 </template>
 <style scoped lang="scss">
-.change-username-modal {
+.initial-character-setup-modal {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -249,7 +257,7 @@ const drawSprite = (ctx: CanvasRenderingContext2D, spriteSheet: string) => {
 
   z-index: $modal-z-index;
 
-  .change-username-modal__content {
+  .initial-character-setup-modal__content {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -271,6 +279,21 @@ const drawSprite = (ctx: CanvasRenderingContext2D, spriteSheet: string) => {
       justify-content: center;
       align-items: center;
       width: 100%;
+      .form__name-input {
+        margin-bottom: 3rem;
+      }
+
+      .form__sprites-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+
+        .sprites-container__sprites {
+          background-color: rgb(132, 0, 255);
+          padding: 1rem;
+          border-radius: 1rem;
+        }
+      }
 
       .form__bottom {
         display: flex;

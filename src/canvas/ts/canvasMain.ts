@@ -29,11 +29,11 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
 
   const [worldMap] = await Promise.all([loadImage(WorldMapTileSet)]);
 
-  /*   function loadAnImage(src: string) {
+  function loadAnImage(src: string) {
     const img = new Image();
     img.src = src;
     return img as HTMLImageElement;
-  } */
+  }
 
   let camera: Camera = {
     cameraX: 200,
@@ -61,8 +61,6 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
   const PLAYER_SIZE = 16;
 
   let tempPlayerPosition: { x: number; y: number } = { x: 0, y: 0 };
-
-  let roomThePlayerIsIn = "";
 
   // Tracks the order of movement keys (W, A, S, D) being pressed. It helps determine the character's movement direction when multiple keys are pressed, prioritizing the last valid key pressed.
   let keyPressOrder: string[] = [];
@@ -321,21 +319,20 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
   }
 
   function checkIfPlayerIsInRoom() {
-    const isPlayerInARoom = checkPlayerInRoom(
+    const { isPlayerInRoom, roomName } = checkPlayerInRoom(
       ctx,
       WorldMapJson,
       camera,
-      roomThePlayerIsIn,
       myPlayer.x,
       myPlayer.y,
       PLAYER_SIZE,
       PLAYER_SIZE
     );
 
-    if (isPlayerInARoom) {
+    if (isPlayerInRoom) {
       emitter.emit("playerInRoom", {
         isPlayerInARoom: true,
-        roomName: roomThePlayerIsIn,
+        roomName,
       });
     } else {
       emitter.emit("playerInRoom", {

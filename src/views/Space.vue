@@ -64,18 +64,12 @@ let initialSetupCompleted = ref<boolean>(true);
  * INITIALIZATION
  ****************************************/
 onMounted(async () => {
-  await handleReadProfile();
-
-  watch(
-    () => initialSetupCompleted,
-    async () => {
-      if (initialSetupCompleted.value) {
-        await doRealtimeStuff();
-        await initialPreparations();
-      }
-    },
-    { immediate: true }
-  );
+  await handleReadProfile().then(async () => {
+    if (initialSetupCompleted.value) {
+      await initialPreparations();
+      await doRealtimeStuff();
+    }
+  });
 });
 
 const initialPreparations = async () => {
@@ -88,6 +82,7 @@ const initialPreparations = async () => {
   generalStore.users = users;
 
   await downloadSpaceMap();
+  await downloadCharacterSpriteSheets();
 
   const canvas = document.getElementById("main-canvas") as HTMLCanvasElement;
 
@@ -266,6 +261,8 @@ const moveUserToRightClickedPosition = async () => {
 let userName = ref<string>("");
 let characterSpriteName = ref<string>("");
 const handleReadProfile = async () => {
+  console.log("3. READ PROFILES");
+
   try {
     let { data: profiles, error } = await supabase
       .from("profiles")
@@ -275,24 +272,23 @@ const handleReadProfile = async () => {
     let fetchedUserProfile: ProfilesType = profiles[0];
 
     // Check if user has a user name and sprite selected for this space
-    if (fetchedUserProfile) {
+    if (
+      fetchedUserProfile &&
+      Object(fetchedUserProfile.user_name_for_each_space).length > 0
+    ) {
       // Find user name for this space
       let userNameForThisSpace = Object(
         fetchedUserProfile.user_name_for_each_space
       ).find((space: any) => {
         return Object.keys(space)[0] === spaceId;
       });
-      if (
-        (userNameForThisSpace && fetchedUserProfile.character_sprite != undefined) ||
-        !fetchedUserProfile.character_sprite != null
-      ) {
+      if (userNameForThisSpace && fetchedUserProfile.character_sprite) {
+        userName.value = userNameForThisSpace[spaceId];
+        characterSpriteName.value = fetchedUserProfile.character_sprite as string;
         initialSetupCompleted.value = true;
       } else {
         initialSetupCompleted.value = false;
       }
-
-      userName.value = userNameForThisSpace[spaceId];
-      characterSpriteName.value = fetchedUserProfile.character_sprite as string;
     } else {
       // If no user name for this space, show initial setup
       initialSetupCompleted.value = false;
@@ -304,8 +300,13 @@ const handleReadProfile = async () => {
 };
 
 const handleInitialSetupCompleted = async () => {
+  console.log("2. HANDLED INITIAL SETUP COMPLETED");
+
   initialSetupCompleted.value = true;
-  await handleReadProfile();
+  await handleReadProfile().then(async () => {
+    await initialPreparations();
+    await doRealtimeStuff();
+  });
 };
 
 // Get space map
@@ -336,7 +337,6 @@ const downloadCharacterSpriteSheets = async () => {
         .download(`characters/${user.characterSpriteName}`);
 
       if (data) {
-        console.log("DOWNLOAD OTHER CHARACTERS SPRITE SHEET: ", data);
         // Get the URL of the image
         const url = URL.createObjectURL(data);
 
@@ -347,6 +347,11 @@ const downloadCharacterSpriteSheets = async () => {
       console.log("DOWNLOAD OTHER CHARACTERS SPRITE SHEET CATCH ERROR: ", error);
     }
   });
+};
+
+const handleInitiateDownloadsAfterUsersLoaded = async () => {
+  await downloadCharacterSpriteSheets();
+  await downloadSpaceMap();
 };
 
 /****************************************
@@ -393,7 +398,7 @@ const doRealtimeStuff = async () => {
         userStatus: generalStore.userStatus,
         userPersonalMessage: generalStore.userPersonalMessage,
       });
-      await downloadCharacterSpriteSheets();
+      await handleInitiateDownloadsAfterUsersLoaded();
     })
     .on("presence", { event: "leave" }, ({ key, leftPresences }) => {
       // Listen to leave event

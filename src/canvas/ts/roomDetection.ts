@@ -5,7 +5,6 @@ export function checkPlayerInRoom(
   ctx: CanvasRenderingContext2D,
   WorldMapJson: any,
   camera: Camera,
-  roomThePlayerIsIn: string,
   tempPlayerX: number,
   tempPlayerY: number,
   playerWidth: number,
@@ -45,14 +44,12 @@ export function checkPlayerInRoom(
       playerRect.x + playerRect.width <= roomRect.x + roomRect.width &&
       playerRect.y + playerRect.height <= roomRect.y + roomRect.height
     ) {
-      roomThePlayerIsIn = room.name;
       drawRoomBorder(ctx, roomRect);
-      return true;
+      return { isPlayerInRoom: true, roomName: room.name };
     }
   }
 
-  roomThePlayerIsIn = "";
-  return false;
+  return { isPlayerInRoom: false, roomName: "" };
 }
 
 // draw a border around the room

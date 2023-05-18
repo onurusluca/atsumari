@@ -21,11 +21,13 @@ function drawShadow(
   zoomFactor: number,
   isMouseOver: boolean
 ): void {
-  const shadowSize = 48 / mapZoomFactor;
+  const shadowSize = 64 / mapZoomFactor;
+  const shadowOffsetX = 0;
+  const shadowOffsetY = 4;
   ctx.drawImage(
     shadowSprite,
-    shadowX + 3 * zoomFactor,
-    shadowY + 8 * zoomFactor,
+    shadowX + shadowOffsetX * zoomFactor,
+    shadowY + shadowOffsetY * zoomFactor,
     shadowSize * zoomFactor,
     shadowSize * zoomFactor
   );
