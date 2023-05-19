@@ -6,7 +6,7 @@
 
   width: max-content;
   height: max-content;
-  padding: 0.5rem .8rem;
+  padding: 0.4rem .5rem;
 
   border: none;
   border-radius: 0.5rem;
@@ -24,6 +24,14 @@
   /*   &:focus {
     outline: max(1px, 0.15em) solid var(--input-focus-border);
   } */
+
+
+  @include s-576 {
+    // Smaller buttons for mobile
+    padding: 0.3rem .4rem;
+    font-size: 0.9rem;
+
+  }
 }
 
 button:disabled {

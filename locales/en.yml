@@ -123,6 +123,9 @@ user:
 
 ##### SPACES #####
 spaces:
+  title: Spaces
+  mySpaces: My Spaces
+  visitedSpaces: Visited Spaces
   createSpace:
     title: Create Space
     passwordProtect: Password Protect
@@ -168,6 +171,8 @@ spaces:
 home:
   spaces:
     noSpacesMessage: You don't have any spaces yet. Create one now!
+    noVisitedSpacesMessage: You haven't visited any spaces yet.
+    noVisitedSpacesMessage2: Visit someone's space and it will appear here.
 
 ##### SPACE SETTINGS #####
 spaceSettings:

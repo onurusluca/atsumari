@@ -1,5 +1,4 @@
 import { emitter } from "@/composables/useEmit";
-import { getOS } from "@/utils/getOS";
 import type { User } from "@/types/general";
 import type { CanvasAppOptions, Camera, TileMap } from "@/types/canvasTypes";
 
@@ -29,12 +28,6 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
 
   const [worldMap] = await Promise.all([loadImage(WorldMapTileSet)]);
 
-  function loadAnImage(src: string) {
-    const img = new Image();
-    img.src = src;
-    return img as HTMLImageElement;
-  }
-
   let camera: Camera = {
     cameraX: 200,
     cameraY: 200,
@@ -52,7 +45,7 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
     x: 0,
     y: 0,
     facingTo: "",
-    characterSprite: "",
+    characterSprite: new Image(),
     characterSpriteName: "",
     userStatus: "",
     userPersonalMessage: "",
@@ -76,12 +69,14 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
   let animationFrame = 0;
   let animationTick = 0;
 
-  // FPS counter
-  let lastTime = performance.now();
-  let fps = 0;
+  // FPS
+  let lastFrameTime = performance.now();
   const refreshInterval = 1000 / canvasFrameRate;
 
-  let userOs = getOS();
+  // FPS counter
+  let lastFpsUpdate = 0; // Time of last FPS update
+  let framesThisSecond = 0; // Frames during this second
+  let averageFps = 0; // The average FPS
 
   let mouseX = 0;
   let mouseY = 0;
@@ -93,51 +88,60 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
   });
 
   function gameLoop() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const now = Date.now();
+    const delta = now - lastFrameTime;
 
-    // Anti-aliasing in browsers smooths images, which can blur pixel art or low-res graphics
-    ctx.imageSmoothingEnabled = false;
+    // If enough time has passed since the last frame, render the next frame
+    if (delta >= refreshInterval) {
+      lastFrameTime = now - (delta % refreshInterval); // Track the updated frame time
 
-    myPlayer = users.find((user) => user.id === myPlayerId)!;
-    if (myPlayer) {
-      // Center camera on my player
-      camera.cameraX = myPlayer.x - canvas.width / (2.2 * camera.zoomFactor);
-      camera.cameraY = myPlayer.y - canvas.height / (2.2 * camera.zoomFactor);
+      // Track FPS: this is to preserve consistency across different OS and browsers
+      if (now > lastFpsUpdate + 1000) {
+        // After one second, calculate average
+        averageFps = framesThisSecond;
+        framesThisSecond = 0;
+        lastFpsUpdate = now;
+      }
+      framesThisSecond++;
 
-      drawMap();
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      handlePlayerMovement();
+      // Anti-aliasing in browsers smooths images, which can blur pixel art or low-res graphics
+      ctx.imageSmoothingEnabled = false;
 
-      drawOtherPlayers();
+      myPlayer = users.find((user) => user.id === myPlayerId)!;
+      if (myPlayer) {
+        // Center camera on my player
+        camera.cameraX = myPlayer.x - canvas.width / (2.2 * camera.zoomFactor);
+        camera.cameraY = myPlayer.y - canvas.height / (2.2 * camera.zoomFactor);
 
-      drawMyPlayer();
+        drawMap();
 
-      drawAllPlayerBanners();
+        handlePlayerMovement();
 
-      updateAnimation();
+        drawOtherPlayers();
 
-      drawFPS();
+        drawMyPlayer();
 
-      checkIfPlayerIsInRoom();
+        drawAllPlayerBanners();
+
+        updateAnimation();
+
+        drawFPS();
+
+        checkIfPlayerIsInRoom();
+      }
     }
-
-    // On MacOS use requestAnimationFrame, on other OS use setInterval
-    if (userOs === "MacOS") {
-      requestAnimationFrame(gameLoop);
-    } else {
-      setTimeout(gameLoop, refreshInterval);
-    }
+    requestAnimationFrame(gameLoop);
   }
   // end of gameLoop
 
   // HELPER FUNCTIONS
-
   async function drawMap() {
     drawTileMap(ctx, camera, WorldMapJson as TileMap, worldMap);
   }
 
   // Move my player but only if no other key is pressed(prevent diagonal movement). Also, if the user releases the second pressed key, the character should continue moving in the direction of the first pressed key
-
   function handlePlayerMovement() {
     if (keyPressOrder.length > 0) {
       const lastValidKey = keyPressOrder[keyPressOrder.length - 1];
@@ -243,17 +247,20 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
           playerRect
         );
 
-        drawPlayer(
-          ctx,
-          loadAnImage(user.characterSprite),
-          matchUserFacingToAnimationState(user.facingTo),
-          1,
-          user,
-          camera.cameraX,
-          camera.cameraY,
-          camera.zoomFactor,
-          isMouseOver
-        );
+        // Only draw the player if the sprite has loaded
+        if (user?.characterSprite?.complete) {
+          drawPlayer(
+            ctx,
+            user.characterSprite,
+            matchUserFacingToAnimationState(user.facingTo),
+            1,
+            user,
+            camera.cameraX,
+            camera.cameraY,
+            camera.zoomFactor,
+            isMouseOver
+          );
+        }
       }
     });
   }
@@ -269,18 +276,19 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
       { x: mouseX, y: mouseY, width: 1, height: 1 },
       playerRect
     );
-
-    drawPlayer(
-      ctx,
-      loadAnImage(myPlayer?.characterSprite),
-      animationState,
-      animationFrame,
-      myPlayer,
-      camera.cameraX,
-      camera.cameraY,
-      camera.zoomFactor,
-      isMouseOver
-    );
+    if (myPlayer?.characterSprite?.complete) {
+      drawPlayer(
+        ctx,
+        myPlayer?.characterSprite,
+        animationState,
+        animationFrame,
+        myPlayer,
+        camera.cameraX,
+        camera.cameraY,
+        camera.zoomFactor,
+        isMouseOver
+      );
+    }
   }
 
   // We need to draw the names separately because we want them to be drawn on top of everything else
@@ -306,16 +314,9 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
   }
 
   function drawFPS() {
-    // Calculate FPS
-    const currentTime = performance.now();
-    const deltaTime = currentTime - lastTime;
-    lastTime = currentTime;
-
-    // Draw FPS
-    fps = Math.round(1000 / deltaTime);
-    ctx.fillStyle = "black";
     ctx.font = "bold 16px Poppins";
-    ctx.fillText(`FPS: ${fps}`, 10, 20);
+    ctx.fillStyle = "black";
+    ctx.fillText(`FPS: ${averageFps}`, 10, 20);
   }
 
   function checkIfPlayerIsInRoom() {
@@ -350,8 +351,7 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
       spaceMap !== "" &&
       initialSetupCompleted
     ) {
-      gameLoop();
-
+      requestAnimationFrame(gameLoop);
       //requestAnimationFrame(gameLoop);
     } else {
       const checkConditionsBeforeLoop = setInterval(() => {
@@ -361,8 +361,7 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
           spaceMap !== "" &&
           initialSetupCompleted
         ) {
-          gameLoop();
-
+          requestAnimationFrame(gameLoop);
           //requestAnimationFrame(gameLoop);
 
           clearInterval(checkConditionsBeforeLoop);

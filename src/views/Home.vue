@@ -1,31 +1,29 @@
 <script setup lang="ts">
-import type { SpacesType, SpaceType } from "@/api/types";
+import type { SpacesType } from "@/api/types";
 import type { OnClickOutsideHandler } from "@vueuse/core";
 import { vOnClickOutside } from "@vueuse/components";
-import { EnvVariables } from "@/envVariables";
 import { getCurrentUrlOrigin } from "@/utils/general";
-
 import { slugify } from "@/utils/slugify";
 
 const { t } = useI18n();
 const authStore = useAuthStore();
-const generalLocalStorage = useStorage("atsumari_general", {
-  visitedSpaces: [],
-});
 
-let userSpaces = ref<SpacesType[]>([]);
+let userSpaces = reactive<SpacesType[]>([]);
+let visitedSpaces = reactive<SpacesType[]>([]);
 let showContentLoadingPlaceholder = ref<boolean>(true);
-let showNoSpacesMessage = ref<boolean>(false);
+let showNoUserSpacesMessage = ref<boolean>(false);
+let showNoVisitedSpacesMessage = ref<boolean>(false);
 
 onMounted(async () => {
-  await handleReadSpace();
+  await handleReadUserSpaces();
+  await handleReadVisitedSpaces();
 });
 
 /****************************************
  * API CALLS
  ****************************************/
 
-const handleReadSpace = async () => {
+const handleReadUserSpaces = async () => {
   try {
     let { data: spaces, error } = await supabase
       .from("spaces")
@@ -35,13 +33,38 @@ const handleReadSpace = async () => {
       // Hide loading placeholder
       showContentLoadingPlaceholder.value = false;
 
-      userSpaces.value = spaces;
+      userSpaces = spaces;
 
       // Show no spaces message if user has no spaces
-      if (userSpaces.value.length <= 0) {
-        showNoSpacesMessage.value = true;
+      if (userSpaces.length <= 0) {
+        showNoUserSpacesMessage.value = true;
       } else {
-        showNoSpacesMessage.value = false;
+        showNoUserSpacesMessage.value = false;
+      }
+    }
+    if (error) throw error;
+  } catch (error: any) {
+    console.log("READ SPACE CATCH ERROR: ", error.message);
+  }
+};
+
+const handleReadVisitedSpaces = async () => {
+  try {
+    let { data: spaces, error } = await supabase
+      .from("visited_spaces")
+      .select("*")
+      .eq("visited_user_id", authStore?.session?.user?.id);
+    if (spaces) {
+      // Hide loading placeholder
+      showContentLoadingPlaceholder.value = false;
+
+      visitedSpaces = spaces;
+
+      // Show no spaces message if user has no spaces
+      if (visitedSpaces.length <= 0) {
+        showNoVisitedSpacesMessage.value = true;
+      } else {
+        showNoVisitedSpacesMessage.value = false;
       }
     }
     if (error) throw error;
@@ -51,37 +74,21 @@ const handleReadSpace = async () => {
 };
 
 // Realtime
-supabase
+/* supabase
   .channel("custom-all-channel")
   .on(
     "postgres_changes",
     { event: "*", schema: "public", table: "spaces" },
     async () => {
       console.log("Spaces changed!");
-      await handleReadSpace();
+      await handleReadUserSpaces();
     }
   )
-  .subscribe();
+  .subscribe(); */
 
 /****************************************
  * UI
  ****************************************/
-
-const handleClickOnEnterSpace = (space: SpaceType ) => {
-  // Add space to visited spaces if not already in there and it is not a user space(add all of the values of object)
-  if (
-    !generalLocalStorage.value.visitedSpaces.some(
-      (item) => item.id === space.id
-    ) &&
-    space.user_id !== authStore?.session?.user?.id
-  ) {
-    generalLocalStorage.value.visitedSpaces.push(space);
-  }
-  
-
-  
-  
-};
 
 // Settings menu dropdown
 const settingsMenuDropDownOpen = ref<Boolean>(false);
@@ -106,6 +113,9 @@ const onCopyToClipboard = (spaceUrl: string) => {
   showToast("copiedNotification");
 };
 
+// Tabs
+let activeTab = ref<string>("userSpaces");
+
 // Toast
 let toastOpen = ref<boolean>(false);
 let toastType = ref<string>("");
@@ -123,8 +133,26 @@ function showToast(toastTypeProp: string) {
 
 <template>
   <div class="home">
-    <ul class="home__spaces" v-if="userSpaces.length > 0"
-      ><li v-for="(item, index) in userSpaces" :key="index" class="spaces__space">
+    <section class="home__tabs">
+      <button
+        @click="activeTab = 'userSpaces'"
+        class="tabs__tab btn-no-style"
+        :class="{ 'tabs__tab--active': activeTab === 'userSpaces' }"
+      >
+        {{ t("spaces.mySpaces") }}
+      </button>
+      <button
+        @click="activeTab = 'visitedSpaces'"
+        class="tabs__tab btn-no-style"
+        :class="{ 'tabs__tab--active': activeTab === 'visitedSpaces' }"
+      >
+        {{ t("spaces.visitedSpaces") }}
+      </button>
+    </section>
+
+    <!-- User spaces -->
+    <ul class="home__spaces" v-if="userSpaces.length > 0 && activeTab === 'userSpaces'">
+      <li v-for="(item, index) in userSpaces" :key="index" class="spaces__space">
         <!-- Top -->
         <div class="space__top">
           <p class="top__title">{{ item.name }}</p>
@@ -199,7 +227,6 @@ function showToast(toastTypeProp: string) {
           <!-- :to="`/space/${item.id}`" -->
           <router-link
             class="btn btn-save image-container__enter-btn"
-            @click="handleClickOnEnterSpace(item)"
             :to="{
               name: 'Space',
               params: {
@@ -227,8 +254,102 @@ function showToast(toastTypeProp: string) {
             <p>30 {{ t("spaces.onlineCount") }}</p>
           </div> -->
           <div class="bottom__right"> </div>
-        </div> </li
-    ></ul>
+        </div>
+      </li>
+    </ul>
+
+    <!-- Visited spaces -->
+    <ul
+      class="home__spaces"
+      v-if="visitedSpaces.length > 0 && activeTab === 'visitedSpaces'"
+    >
+      <li v-for="(item, index) in visitedSpaces" :key="index" class="spaces__space">
+        <!-- Top -->
+        <div class="space__top">
+          <p class="top__title">{{ item.name }}</p>
+          <div class="top__space-settings">
+            <button @click.stop="openSettingsMenu(index)" class="btn btn-icon">
+              <ph:dots-three-outline-fill
+                style="color: var(--text-100); font-size: 1.2rem"
+              />
+            </button>
+
+            <!-- Settings menu -->
+            <!-- Language menu dropdown -->
+            <Transition name="fade">
+              <div
+                v-if="settingsMenuDropDownOpen && settingsMenuDropDownIndex === index"
+                v-on-click-outside.bubble="clickOutsideHandlersettingsMenuDrowpdown"
+                class="space-settings__menu-dropdown dropdown-menu"
+              >
+                <!-- Copy space URL -->
+                <!-- TODO: change to real root route -->
+                <button
+                  @click="
+                    onCopyToClipboard(
+                      `${getCurrentUrlOrigin()}/space/${item.id}/${slugify(item.name)}`
+                    )
+                  "
+                  class="btn btn-icon"
+                >
+                  <carbon:copy class="menu-list-icon" />
+                  {{ t("spaces.copySpaceUrl") }}
+                </button>
+
+                <!--     <router-link
+                  :to="`/space-edit/${item.id}`"
+                  tag="li"
+                >
+                  {{ t("spaces.menu.editMap") }}
+                </router-link> -->
+              </div>
+            </Transition>
+          </div>
+        </div>
+
+        <!-- Image -->
+        <div class="space__image-container">
+          <img
+            src="@/assets/images/mockup/temporary-space-background.jpg"
+            :alt="t('spaces.spaceImageAlt')"
+            class="image-container__image"
+          />
+
+          <!-- Go to space -->
+          <!-- :to="`/space/${item.id}`" -->
+          <router-link
+            class="btn btn-save image-container__enter-btn"
+            :to="{
+              name: 'Space',
+              params: {
+                id: item.id,
+                name: slugify(item.name),
+              },
+            }"
+          >
+            {{ t("spaces.enterSpace") }}
+            <radix-icons:enter class="ml-s" />
+          </router-link>
+        </div>
+
+        <!-- Bottom -->
+        <div class="space__bottom">
+          <!--     <div class="bottom__left">
+        // Online count
+            <carbon:dot-mark
+              style="
+                font-size: 1.2rem;
+                color: var(--online-count-green);
+                margin-right: 0.2rem;
+              "
+            />
+            <p>30 {{ t("spaces.onlineCount") }}</p>
+          </div> -->
+          <div class="bottom__right"> </div>
+        </div>
+      </li>
+    </ul>
+
     <!-- clp -->
     <!-- TODO: Enable if it takes too much time to load spaces -->
     <!--     <div v-if="showContentLoadingPlaceholder" class="clp-container">
@@ -238,11 +359,27 @@ function showToast(toastTypeProp: string) {
       <div class="clp"></div>
     </div> -->
 
-    <!-- No spaces -->
-    <div v-if="showNoSpacesMessage" class="home__no-spaces">
+    <!-- No user spaces -->
+    <div
+      v-if="showNoUserSpacesMessage && activeTab === 'userSpaces'"
+      class="home__no-spaces"
+    >
       <fluent-emoji:sad-but-relieved-face style="font-size: 5rem" />
       <p class="no-spaces__message">
         {{ t("home.spaces.noSpacesMessage") }}
+      </p>
+    </div>
+
+    <div
+      v-if="showNoVisitedSpacesMessage && activeTab === 'visitedSpaces'"
+      class="home__no-spaces"
+    >
+      <fluent-emoji:sad-but-relieved-face style="font-size: 5rem" />
+
+      <p class="no-spaces__message">
+        {{ t("home.spaces.noVisitedSpacesMessage") }}
+        <br />
+        {{ t("home.spaces.noVisitedSpacesMessage2") }}
       </p>
     </div>
   </div>
@@ -256,6 +393,26 @@ function showToast(toastTypeProp: string) {
 <style scoped lang="scss">
 .home {
   padding: 1rem;
+
+  .home__tabs {
+    display: flex;
+    margin-bottom: 2rem;
+    color: var(--pale);
+    border-bottom: 2px solid var(--border-color);
+
+    .tabs__tab {
+      margin-right: 1rem;
+
+      font-weight: bold;
+      cursor: pointer;
+
+      transition: background-color 0.1s ease-in-out;
+    }
+    .tabs__tab--active {
+      border-bottom: 2px solid var(--success);
+    }
+  }
+
   .home__spaces {
     display: flex;
     flex-wrap: wrap;
@@ -301,7 +458,7 @@ function showToast(toastTypeProp: string) {
           .image-container__image {
             transition: filter 100ms ease;
 
-            filter: brightness(0.6);
+            filter: brightness(0.3);
           }
           .image-container__enter-btn {
             transition: visibility 100ms ease;
@@ -319,10 +476,6 @@ function showToast(toastTypeProp: string) {
           top: 50%;
           left: 50%;
           transform: translate(-50%, -50%);
-          box-shadow: rgba(6, 24, 44, 0.4) 0px 0px 0px 2px,
-            rgba(6, 24, 44, 0.65) 0px 4px 6px -1px,
-            rgba(255, 255, 255, 0.08) 0px 1px 0px inset;
-
           visibility: hidden;
         }
       }

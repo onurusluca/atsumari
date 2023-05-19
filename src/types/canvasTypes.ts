@@ -3,7 +3,7 @@ export type User = {
   userName: string;
   x: number;
   y: number;
-  characterSprite: string;
+  characterSprite: HTMLImageElement;
   facingTo: string;
   userStatus: string;
 };

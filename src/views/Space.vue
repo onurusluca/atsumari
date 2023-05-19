@@ -6,8 +6,7 @@ import InitialCharacterSetupModal from "@/components/global/InitialCharacterSetu
 import { emitter } from "@/composables/useEmit";
 
 import type { User } from "@/types/general";
-import type { ProfilesType } from "@/api/types/index";
-// import type { ProfilesType } from "@/api/types/index";
+import type { SpacesType, ProfilesType } from "@/api/types";
 import Joystick from "@/components/space/Joystick.vue";
 
 /****************************************
@@ -28,9 +27,8 @@ const canvasLocalStorage = useStorage("atsumari_canvas", {
 
 let users = reactive<Array<User>>([]);
 
-// FIXME: this is broken
 // Request animation frame every ..ms
-let canvasFrameRate = ref<number>(100);
+let canvasFrameRate = ref<number>(60);
 let canvasLoaded = ref<boolean>(false);
 // TODO: Need to change user speed based on canvasFrameRate
 let speed = 3.5;
@@ -68,6 +66,7 @@ onMounted(async () => {
     if (initialSetupCompleted.value) {
       await initialPreparations();
       await doRealtimeStuff();
+      await handleAddSpaceToVisitedSpaces();
     }
   });
 });
@@ -88,7 +87,6 @@ const initialPreparations = async () => {
 
   // Listen to canvasLoaded event
   emitter.on("canvasLoaded", () => {
-    console.log("Canvas loaded");
     canvasLoaded.value = true;
   });
 
@@ -144,14 +142,12 @@ const initialPreparations = async () => {
         canvasLocalStorage.value = {
           lastUserPosition: { x: user.x, y: user.y },
         };
-        // console.log("User move received,saved and updated");
       }
     });
   });
 
   // Listen to double click emit event sent from canvas
   /*   emitter.on("doubleClick", async (clickedPosition) => {
-    console.log("Double click received", clickedPosition);
 
     // Update user position with the clicked position
     users.forEach(async (user) => {
@@ -169,15 +165,12 @@ const initialPreparations = async () => {
         canvasLocalStorage.value = {
           lastUserPosition: { x: user.x, y: user.y },
         };
-        console.log("User move received,saved and updated");
       }
     });
   }); */
 
   // Listen to right click emit event sent from canvas
   emitter.on("rightClick", async (positions) => {
-    console.log("Right click received", positions);
-
     // Update right click menu position
     rightClickMenuPosition.value = {
       x: positions.mousePos.mouseX,
@@ -206,8 +199,6 @@ const initialPreparations = async () => {
   let canvasScale = 1;
 
   emitter.on("zoomIn", () => {
-    console.log("Zoom in received");
-
     // Update canvas scale
     let canvas = document.querySelector(
       ".canvas-container__canvas"
@@ -218,8 +209,6 @@ const initialPreparations = async () => {
   });
 
   emitter.on("zoomOut", () => {
-    console.log("Zoom out received");
-
     // Update canvas scale
     let canvas = document.querySelector(
       ".canvas-container__canvas"
@@ -250,7 +239,6 @@ const moveUserToRightClickedPosition = async () => {
       canvasLocalStorage.value = {
         lastUserPosition: { x: user.x, y: user.y },
       };
-      console.log("User move received,saved and updated");
     }
   });
 
@@ -261,8 +249,6 @@ const moveUserToRightClickedPosition = async () => {
 let userName = ref<string>("");
 let characterSpriteName = ref<string>("");
 const handleReadProfile = async () => {
-  console.log("3. READ PROFILES");
-
   try {
     let { data: profiles, error } = await supabase
       .from("profiles")
@@ -300,8 +286,6 @@ const handleReadProfile = async () => {
 };
 
 const handleInitialSetupCompleted = async () => {
-  console.log("2. HANDLED INITIAL SETUP COMPLETED");
-
   initialSetupCompleted.value = true;
   await handleReadProfile().then(async () => {
     await initialPreparations();
@@ -340,13 +324,71 @@ const downloadCharacterSpriteSheets = async () => {
         // Get the URL of the image
         const url = URL.createObjectURL(data);
 
-        user.characterSprite = url;
+        // Create an image as the canvas drawImage() method requires an image
+        const img = new Image();
+        img.onload = () => {
+          user.characterSprite = img as HTMLImageElement;
+        };
+        img.src = url;
       }
       if (error) throw error;
     } catch (error: any) {
       console.log("DOWNLOAD OTHER CHARACTERS SPRITE SHEET CATCH ERROR: ", error);
     }
   });
+};
+
+const handleAddSpaceToVisitedSpaces = async () => {
+  try {
+    const visitedSpaces = await getVisitedSpaces();
+    if (!isSpaceVisited(visitedSpaces)) {
+      const userSpaces = await getUserSpaces();
+      if (isSpaceNotOwned(userSpaces) || userSpaces.length === 0) {
+        await addSpaceToVisitedSpaces();
+      }
+    }
+  } catch (error) {
+    console.error("Error in handleAddSpaceToVisitedSpaces: ", error);
+  }
+};
+
+const getVisitedSpaces = async () => {
+  const { data: spaces, error } = await supabase
+    .from("visited_spaces")
+    .select("*")
+    .eq("visited_user_id", authStore?.session?.user?.id);
+
+  if (error) throw error;
+  return spaces || [];
+};
+
+const isSpaceVisited = (visitedSpaces: SpacesType[]) => {
+  return visitedSpaces.some((space) => space.id === spaceId);
+};
+
+const getUserSpaces = async () => {
+  const { data: spaces, error } = await supabase
+    .from("spaces")
+    .select("*")
+    .eq("user_id", authStore?.session?.user?.id)
+    .eq("name", spaceName);
+
+  if (error) throw error;
+  return spaces || [];
+};
+
+const isSpaceNotOwned = (userSpaces: SpacesType[]) => {
+  return userSpaces.some((space) => space.user_id !== authStore?.session?.user?.id);
+};
+
+const addSpaceToVisitedSpaces = async () => {
+  const { error } = await supabase.from("visited_spaces").insert({
+    name: spaceName,
+    id: spaceId,
+    visited_user_id: authStore?.session?.user?.id,
+  });
+
+  if (error) throw error;
 };
 
 const handleInitiateDownloadsAfterUsersLoaded = async () => {
@@ -370,11 +412,10 @@ const doRealtimeStuff = async () => {
   broadCastChannel
     /*   .on('presence', { event: 'sync' }, () => {
     const state = broadCastChannel.presenceState()
-    console.log('Channel synced: ', state)
   }) */
     .on("presence", { event: "join" }, async ({ key, newPresences }) => {
       // Listen to join event
-      console.log("Someone joined the channel: ", newPresences[0].id);
+
       // Send start position for new user
       await sendUserAction(
         canvasLocalStorage.value.lastUserPosition
@@ -401,9 +442,6 @@ const doRealtimeStuff = async () => {
       await handleInitiateDownloadsAfterUsersLoaded();
     })
     .on("presence", { event: "leave" }, ({ key, leftPresences }) => {
-      // Listen to leave event
-      console.log("Someone left the channel: ", leftPresences);
-
       // Remove user from users array
       const userIndex = users.findIndex((user) => user.id === leftPresences[0].id);
       if (userIndex !== -1) {
@@ -427,13 +465,9 @@ const doRealtimeStuff = async () => {
               : initialUserPosition.y,
           },
         });
-        console.log("Sent join event: ", presenceTrackStatus);
       }
     })
     .on("broadcast", { event: "sendUserPositionEvent" }, (payload: any) => {
-      // Listen for broadcast events
-      console.log("Received broadcast event", payload);
-
       // Update user position
       const user = users.find((user) => user.id === payload.payload.id);
       if (user) {
@@ -458,7 +492,6 @@ const sendUserAction = async (x: number, y: number, facingTo: string) => {
       facingTo: facingTo,
     },
   });
-  /*   console.log("Sent broadcast event", { x, y, userName, facingTo }); */
 };
 
 // Unsubscribe from channel when component is unmounted

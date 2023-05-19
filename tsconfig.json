@@ -35,5 +35,8 @@
     {
       "path": "./tsconfig.config.json"
     }
+  ],
+  "types": [
+    "unplugin-icons/types/vue"
   ]
 }
