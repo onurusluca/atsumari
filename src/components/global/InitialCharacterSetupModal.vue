@@ -181,7 +181,7 @@ const drawSprite = (ctx: CanvasRenderingContext2D, spriteSheet: string) => {
           <!-- @input is for mobile(v-model won't update until input loses focus): https://github.com/vuejs/vue/issues/8231 -->
           <input
             v-model="userName"
-            @input="(e: Event ) => (userName = e.target?.value)"
+            @input="(e: Event) => (userName = (e.target as HTMLInputElement)?.value)"
             type="text"
             required
             maxlength="30"

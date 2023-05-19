@@ -74,7 +74,7 @@ const handleReadVisitedSpaces = async () => {
 };
 
 // Realtime
-/* supabase
+supabase
   .channel("custom-all-channel")
   .on(
     "postgres_changes",
@@ -84,7 +84,7 @@ const handleReadVisitedSpaces = async () => {
       await handleReadUserSpaces();
     }
   )
-  .subscribe(); */
+  .subscribe();
 
 /****************************************
  * UI

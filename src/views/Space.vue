@@ -39,13 +39,13 @@ let initialUserPosition = {
 };
 
 let rightClickMenuIsEnabled = ref<boolean>(false);
-let rightClickMenuPosition = ref<{ x: number; y: number }>({
-  x: 0,
-  y: 0,
+let rightClickMenuPosition = ref<{ mouseX: number; mouseY: number }>({
+  mouseX: 0,
+  mouseY: 0,
 });
-let rightClickWorldPosition = ref<{ x: number; y: number }>({
-  x: 0,
-  y: 0,
+let rightClickWorldPosition = ref<{ worldX: number; worldY: number }>({
+  worldX: 0,
+  worldY: 0,
 });
 
 // Windows size to canvas size
@@ -58,14 +58,11 @@ window.addEventListener("resize", () => {
 
 let initialSetupCompleted = ref<boolean>(true);
 
-/****************************************
- * INITIALIZATION
- ****************************************/
 onMounted(async () => {
   await handleReadProfile().then(async () => {
     if (initialSetupCompleted.value) {
       await initialPreparations();
-      await doRealtimeStuff();
+      doRealtimeStuff();
       await handleAddSpaceToVisitedSpaces();
     }
   });
@@ -125,172 +122,80 @@ const initialPreparations = async () => {
 
   // Focus canvas on click
   canvas.addEventListener("click", function () {
+    // Close right click menu on click
+    rightClickMenuIsEnabled.value = false;
     canvas.focus();
   });
 
-  // Listen to emit move events sent from canvas
-  emitter.on("playerMove", async (myPlayer) => {
-    users.forEach(async (user) => {
-      if (user.id === userId) {
-        user.x = myPlayer.x;
-        user.y = myPlayer.y;
-        user.facingTo = myPlayer.facingTo;
+  // Define helper function to update and broadcast user position
+  const updateUserPositionAndBroadcast = async (
+    user: User,
+    position: { x: number; y: number; facingTo: string }
+  ) => {
+    Object.assign(user, position);
+    sendUserAction(user.x, user.y, user.facingTo);
+    canvasLocalStorage.value = { lastUserPosition: { x: user.x, y: user.y } };
+  };
 
-        // TODO: Use bitmap to send data
-        await sendUserAction(user.x, user.y, user.facingTo);
-        // Save user position in localstorage
-        canvasLocalStorage.value = {
-          lastUserPosition: { x: user.x, y: user.y },
-        };
-      }
-    });
+  // Find user by ID
+  const findUserById = (userId: string) => users.find((user) => user.id === userId);
+
+  // Listener to handle player move event
+  emitter.on("playerMove", (myPlayer) => {
+    const user = findUserById(userId);
+    if (!user) return;
+    updateUserPositionAndBroadcast(user, myPlayer);
   });
 
-  // Listen to double click emit event sent from canvas
-  /*   emitter.on("doubleClick", async (clickedPosition) => {
+  // Listener to handle right click event
+  emitter.on("rightClick", (positions) => {
+    console.log("rightClick", positions);
 
-    // Update user position with the clicked position
-    users.forEach(async (user) => {
-      if (user.id === userId) {
-        setTimeout(() => {
-          user.x = clickedPosition.x;
-          user.y = clickedPosition.y;
-          user.facingTo = clickedPosition.facingTo;
-        }, 200);
+    rightClickMenuPosition.value = positions.mousePos;
+    rightClickWorldPosition.value = positions.worldPos;
 
-        // Send user position in realtime
-        await sendUserAction(user.x, user.y, user.facingTo);
-
-        // Save user position in localstorage
-        canvasLocalStorage.value = {
-          lastUserPosition: { x: user.x, y: user.y },
-        };
-      }
-    });
-  }); */
-
-  // Listen to right click emit event sent from canvas
-  emitter.on("rightClick", async (positions) => {
-    // Update right click menu position
-    rightClickMenuPosition.value = {
-      x: positions.mousePos.mouseX,
-      y: positions.mousePos.mouseY,
-    };
-
-    rightClickWorldPosition.value = {
-      x: positions.worldPos.worldX,
-      y: positions.worldPos.worldY,
-    };
-
-    // Enable right click menu
     rightClickMenuIsEnabled.value = true;
   });
 
+  // Sent from canvas, when user presses a key, close right click menu
   emitter.on("closeRightClickMenu", () => {
     rightClickMenuIsEnabled.value = false;
   });
-
-  // Close right click menu on click
-  canvas.addEventListener("click", () => {
-    rightClickMenuIsEnabled.value = false;
-  });
-
-  // Listen to zoom in/out events
-  let canvasScale = 1;
-
-  emitter.on("zoomIn", () => {
-    // Update canvas scale
-    let canvas = document.querySelector(
-      ".canvas-container__canvas"
-    ) as HTMLCanvasElement;
-    // Increase scale by 0.1
-    canvasScale += 0.1;
-    canvas.style.transform = `scale(${canvasScale})`;
-  });
-
-  emitter.on("zoomOut", () => {
-    // Update canvas scale
-    let canvas = document.querySelector(
-      ".canvas-container__canvas"
-    ) as HTMLCanvasElement;
-    // Increase scale by 0.1
-    canvasScale -= 0.1;
-    canvas.style.transform = `scale(${canvasScale})`;
-  });
 };
 
-// Update user position with the clicked position
-const moveUserToRightClickedPosition = async () => {
-  users.forEach(async (user) => {
-    if (user.id === userId) {
-      // Update user position
-      user.x = rightClickWorldPosition.value.x;
-      user.y = rightClickWorldPosition.value.y;
-      // Set to default
-      user.facingTo = "down";
-
-      // Emit event to update canvas
-      emitter.emit("rightClickPlayerMoveConfirmed", user);
-
-      // Send user position in realtime
-      await sendUserAction(user.x, user.y, user.facingTo);
-
-      // Save user position in localstorage
-      canvasLocalStorage.value = {
-        lastUserPosition: { x: user.x, y: user.y },
-      };
-    }
-  });
-
-  rightClickMenuIsEnabled.value = false;
-};
-
-// Initial setups
+/****************************************
+ * INITIAL SETUPS
+ ****************************************/
 let userName = ref<string>("");
 let characterSpriteName = ref<string>("");
 const handleReadProfile = async () => {
   try {
-    let { data: profiles, error } = await supabase
-      .from("profiles")
+    if (!userId) throw new Error("No user ID found in authStore session");
+
+    const { data: profiles, error } = await supabase
+      .from<ProfilesType>("profiles")
       .select("*")
-      .eq("id", authStore?.session?.user?.id);
+      .eq("id", userId);
 
-    let fetchedUserProfile: ProfilesType = profiles[0];
+    if (error) throw error;
+    if (!profiles || profiles.length === 0)
+      throw new Error("No user profile found for the user");
 
-    // Check if user has a user name and sprite selected for this space
-    if (
-      fetchedUserProfile &&
-      Object(fetchedUserProfile.user_name_for_each_space).length > 0
-    ) {
-      // Find user name for this space
-      let userNameForThisSpace = Object(
-        fetchedUserProfile.user_name_for_each_space
-      ).find((space: any) => {
-        return Object.keys(space)[0] === spaceId;
-      });
-      if (userNameForThisSpace && fetchedUserProfile.character_sprite) {
-        userName.value = userNameForThisSpace[spaceId];
-        characterSpriteName.value = fetchedUserProfile.character_sprite as string;
-        initialSetupCompleted.value = true;
-      } else {
-        initialSetupCompleted.value = false;
-      }
+    const fetchedUserProfile = profiles[0];
+    const userNameForThisSpace = Object(
+      fetchedUserProfile.user_name_for_each_space
+    ).find((space: { [key: string]: string }) => space[spaceId]);
+
+    if (userNameForThisSpace && fetchedUserProfile.character_sprite) {
+      userName.value = userNameForThisSpace[spaceId];
+      characterSpriteName.value = fetchedUserProfile.character_sprite;
+      initialSetupCompleted.value = true;
     } else {
-      // If no user name for this space, show initial setup
       initialSetupCompleted.value = false;
     }
-    if (error) throw error;
   } catch (error: any) {
     console.log("READ PROFILES CATCH ERROR: ", error.message);
   }
-};
-
-const handleInitialSetupCompleted = async () => {
-  initialSetupCompleted.value = true;
-  await handleReadProfile().then(async () => {
-    await initialPreparations();
-    await doRealtimeStuff();
-  });
 };
 
 // Get space map
@@ -341,9 +246,16 @@ const downloadCharacterSpriteSheets = async () => {
 const handleAddSpaceToVisitedSpaces = async () => {
   try {
     const visitedSpaces = await getVisitedSpaces();
-    if (!isSpaceVisited(visitedSpaces)) {
+
+    // If space is not in visited spaces
+    if (visitedSpaces.some((space: SpacesType) => space.id === spaceId)) {
       const userSpaces = await getUserSpaces();
-      if (isSpaceNotOwned(userSpaces) || userSpaces.length === 0) {
+
+      // If user is not the owner of the space
+      if (
+        userSpaces.some((space: SpacesType) => space.user_id !== userId) ||
+        userSpaces.length === 0
+      ) {
         await addSpaceToVisitedSpaces();
       }
     }
@@ -356,151 +268,164 @@ const getVisitedSpaces = async () => {
   const { data: spaces, error } = await supabase
     .from("visited_spaces")
     .select("*")
-    .eq("visited_user_id", authStore?.session?.user?.id);
+    .eq("visited_user_id", userId);
 
   if (error) throw error;
   return spaces || [];
-};
-
-const isSpaceVisited = (visitedSpaces: SpacesType[]) => {
-  return visitedSpaces.some((space) => space.id === spaceId);
 };
 
 const getUserSpaces = async () => {
   const { data: spaces, error } = await supabase
     .from("spaces")
     .select("*")
-    .eq("user_id", authStore?.session?.user?.id)
+    .eq("user_id", userId)
     .eq("name", spaceName);
 
   if (error) throw error;
   return spaces || [];
 };
 
-const isSpaceNotOwned = (userSpaces: SpacesType[]) => {
-  return userSpaces.some((space) => space.user_id !== authStore?.session?.user?.id);
-};
-
 const addSpaceToVisitedSpaces = async () => {
   const { error } = await supabase.from("visited_spaces").insert({
     name: spaceName,
     id: spaceId,
-    visited_user_id: authStore?.session?.user?.id,
+    visited_user_id: userId,
   });
 
   if (error) throw error;
 };
 
+// After all the users are loaded, do the preparations
 const handleInitiateDownloadsAfterUsersLoaded = async () => {
   await downloadCharacterSpriteSheets();
   await downloadSpaceMap();
 };
 
+// After all the initial setups are done in the modal, do the preparations
+const handleInitialSetupCompleted = async () => {
+  initialSetupCompleted.value = true;
+  await handleReadProfile().then(async () => {
+    await initialPreparations();
+    doRealtimeStuff();
+  });
+};
+
+// Update user position with the clicked position
+const moveUserToRightClickedPosition = async () => {
+  users.forEach(async (user) => {
+    if (user.id === userId) {
+      // Update user position
+      user.x = rightClickWorldPosition.value.worldX;
+      user.y = rightClickWorldPosition.value.worldY;
+      // Set to default
+      user.facingTo = "down";
+
+      // Emit event to update canvas
+      emitter.emit("rightClickPlayerMoveConfirmed", user);
+
+      // Send user position in realtime
+      sendUserAction(user.x, user.y, user.facingTo);
+
+      // Save user position in localstorage
+      canvasLocalStorage.value = {
+        lastUserPosition: { x: user.x, y: user.y },
+      };
+    }
+  });
+
+  rightClickMenuIsEnabled.value = false;
+};
+
 /****************************************
  * REALTIME
  ****************************************/
-const broadCastChannel = supabase.channel(spaceId, {
+const BROADCAST_CONFIG = {
   config: {
     broadcast: {
-      self: false, // Listen to your own broadcast events: https://supabase.com/docs/guides/realtime/broadcast#self-send-messages
-      ack: false, // Acknowledge the event: https://supabase.com/docs/guides/realtime/broadcast#acknowledge-messages
+      self: false,
+      ack: false,
     },
   },
-});
-
-const doRealtimeStuff = async () => {
-  broadCastChannel
-    /*   .on('presence', { event: 'sync' }, () => {
-    const state = broadCastChannel.presenceState()
-  }) */
-    .on("presence", { event: "join" }, async ({ key, newPresences }) => {
-      // Listen to join event
-
-      // Send start position for new user
-      await sendUserAction(
-        canvasLocalStorage.value.lastUserPosition
-          ? canvasLocalStorage.value.lastUserPosition.x
-          : initialUserPosition.x,
-        canvasLocalStorage.value.lastUserPosition
-          ? canvasLocalStorage.value.lastUserPosition.y
-          : initialUserPosition.y,
-        "down"
-      );
-
-      // Add user to users array
-      users.push({
-        userName: newPresences[0].userName,
-        id: newPresences[0].id,
-        x: newPresences[0].lastPosition.x,
-        y: newPresences[0].lastPosition.y,
-        facingTo: "down",
-        characterSprite: newPresences[0].characterSprite,
-        characterSpriteName: newPresences[0].characterSpriteName,
-        userStatus: generalStore.userStatus,
-        userPersonalMessage: generalStore.userPersonalMessage,
-      });
-      await handleInitiateDownloadsAfterUsersLoaded();
-    })
-    .on("presence", { event: "leave" }, ({ key, leftPresences }) => {
-      // Remove user from users array
-      const userIndex = users.findIndex((user) => user.id === leftPresences[0].id);
-      if (userIndex !== -1) {
-        users.splice(userIndex, 1);
-      }
-    })
-    .subscribe(async (status: string) => {
-      // Send join event
-      if (status === "SUBSCRIBED") {
-        const presenceTrackStatus = await broadCastChannel.track({
-          id: authStore.user?.id,
-          userName: userName.value,
-          online_at: new Date().toISOString(),
-          characterSpriteName: characterSpriteName.value,
-          lastPosition: {
-            x: canvasLocalStorage.value.lastUserPosition
-              ? canvasLocalStorage.value.lastUserPosition.x
-              : initialUserPosition.x,
-            y: canvasLocalStorage.value.lastUserPosition
-              ? canvasLocalStorage.value.lastUserPosition.y
-              : initialUserPosition.y,
-          },
-        });
-      }
-    })
-    .on("broadcast", { event: "sendUserPositionEvent" }, (payload: any) => {
-      // Update user position
-      const user = users.find((user) => user.id === payload.payload.id);
-      if (user) {
-        user.x = payload.payload.x;
-        user.y = payload.payload.y;
-        user.facingTo = payload.payload.facingTo;
-      }
-    });
 };
 
-// Send user position
-// TODO: add a tick rate so it doesn't send too many events
-const sendUserAction = async (x: number, y: number, facingTo: string) => {
+const EVENT_JOIN = "join";
+const EVENT_LEAVE = "leave";
+const EVENT_SEND_USER_POSITION = "sendUserPositionEvent";
+const BROADCAST_SUBSCRIBED_STATUS = "SUBSCRIBED";
+
+const broadCastChannel = supabase.channel(spaceId, BROADCAST_CONFIG);
+
+const getUserPayload = (x: number, y: number, facingTo: string) => ({
+  id: userId,
+  userName: userName.value,
+  x,
+  y,
+  facingTo,
+});
+
+const sendUserAction = (x: number, y: number, facingTo: string) => {
   broadCastChannel.send({
     type: "broadcast",
-    event: "sendUserPositionEvent",
-    payload: {
-      id: authStore.user?.id,
-      userName: userName.value,
-      x: x,
-      y: y,
-      facingTo: facingTo,
-    },
+    event: EVENT_SEND_USER_POSITION,
+    payload: getUserPayload(x, y, facingTo),
   });
+};
+
+const handleJoinEvent = ({ newPresences }: { newPresences: User[] }) => {
+  const { lastUserPosition = initialUserPosition } = canvasLocalStorage.value;
+  sendUserAction(lastUserPosition.x, lastUserPosition.y, "down");
+
+  const [newUser] = newPresences as User[];
+  users.push({
+    ...newUser,
+    facingTo: "down",
+    userStatus: generalStore.userStatus,
+    userPersonalMessage: generalStore.userPersonalMessage,
+  });
+
+  handleInitiateDownloadsAfterUsersLoaded();
+};
+
+const handleLeaveEvent = ({ leftPresences }: { leftPresences: User[] }) => {
+  const userIndex = users.findIndex(({ id }) => id === leftPresences[0].id);
+  if (userIndex !== -1) users.splice(userIndex, 1);
+};
+
+const handleUserPositionBroadcast = ({ payload: userPayload }: { payload: User }) => {
+  if (!userPayload) {
+    console.error("Invalid payload received");
+    return;
+  }
+
+  const user = users.find(({ id }) => id === userPayload.id);
+  if (user) {
+    Object.assign(user, userPayload);
+  }
+};
+
+const doRealtimeStuff = () => {
+  broadCastChannel
+    .on("presence", { event: EVENT_JOIN }, handleJoinEvent)
+    .on("presence", { event: EVENT_LEAVE }, handleLeaveEvent)
+    .on("broadcast", { event: EVENT_SEND_USER_POSITION }, handleUserPositionBroadcast)
+    .subscribe((status: string) => {
+      if (status === BROADCAST_SUBSCRIBED_STATUS) {
+        const lastPosition =
+          canvasLocalStorage.value.lastUserPosition || initialUserPosition;
+        broadCastChannel.track({
+          ...getUserPayload(lastPosition.x, lastPosition.y, "down"),
+          online_at: new Date().toISOString(),
+          characterSpriteName: characterSpriteName.value,
+          lastPosition,
+        });
+      }
+    });
 };
 
 // Unsubscribe from channel when component is unmounted
 onUnmounted(() => {
   broadCastChannel.unsubscribe();
 });
-/****************************************
- * end REALTIME
- ****************************************/
 
 /****************************************
  * UI
@@ -542,8 +467,8 @@ const handleChatMenuOpen = () => {
         v-show="rightClickMenuIsEnabled"
         class="btn canvas-container__right-click-menu"
         :style="{
-          left: rightClickMenuPosition.x + 'px',
-          top: rightClickMenuPosition.y + 'px',
+          left: rightClickMenuPosition.mouseX + 'px',
+          top: rightClickMenuPosition.mouseY + 'px',
         }"
         >{{ t("space.userActions.moveHere") }}</button
       >

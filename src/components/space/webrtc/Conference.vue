@@ -189,11 +189,7 @@ watch(
 
 <template>
   <div class="conference">
-    <div class="conference__video" ref="remoteVideoContainer">remote</div>
-
-    <button @click="createToken" class="btn btn-outline">CREATE TOKEN</button>
-    <button @click="joinRoom" class="btn btn-save">JOIN ROOM</button>
-    <button @click="leaveRoom" class="btn btn-danger">LEAVE ROOM</button>
+    <div class="conference__video" ref="remoteVideoContainer"></div>
   </div>
 </template>
 
@@ -207,7 +203,6 @@ watch(
   &__video {
     width: 20rem;
     height: 20rem;
-    background-color: black;
     border: 4px solid blueviolet;
   }
 }

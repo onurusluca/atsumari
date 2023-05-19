@@ -35,12 +35,10 @@ const handleCreateSpace = async () => {
       throw error;
     } else {
       await handleReadSpace();
-      if (userSpaces.value.length > 0) {
-        spaceCreated.value = true;
-        showButtonLoading.value = false;
+      spaceCreated.value = true;
+      showButtonLoading.value = false;
 
-        activeStep.value = 2;
-      }
+      activeStep.value = 2;
     }
   } catch (error: any) {
     console.log("CREATE SPACE CATCH ERROR: ", error.message);
@@ -245,7 +243,8 @@ const handleClickGoToSpace = (spaceId: string, spaceName: string) => {
                   <!-- @input is for mobile(v-model won't update until input loses focus): https://github.com/vuejs/vue/issues/8231 -->
                   <input
                     v-model="spaceName"
-                    @input="(e: Event ) => (spaceName = e.target?.value)"
+                    @input="(e: Event ) => (spaceName = (e.target as HTMLInputElement
+                    )?.value)"
                     type="text"
                     name="spaceName"
                     id="spaceName"
@@ -504,15 +503,6 @@ const handleClickGoToSpace = (spaceId: string, spaceName: string) => {
                   {{ t("spaces.createSpace.showMe") }}
                 </button>
 
-                <!-- Confetti -->
-                <component
-                  :is="ConfettiExplosion"
-                  :particleCount="200"
-                  :particleSize="8"
-                  :duration="4000"
-                  :force="1"
-                  :colors="['#FF4755', '#98DB7C', '#000000']"
-                />
                 <!-- Next -->
                 <button
                   @click.prevent="
@@ -520,6 +510,15 @@ const handleClickGoToSpace = (spaceId: string, spaceName: string) => {
                   "
                   class="btn btn-create"
                 >
+                  <!-- Confetti -->
+                  <component
+                    :is="ConfettiExplosion"
+                    :particleCount="200"
+                    :particleSize="8"
+                    :duration="4000"
+                    :force="1"
+                    :colors="['#FF4755', '#98DB7C', '#000000']"
+                  />
                   <div v-if="!showButtonLoading">{{ t("buttons.goToSpace") }}</div>
                   <carbon:chevron-right v-if="!showButtonLoading" class="ml-s" />
                 </button>
