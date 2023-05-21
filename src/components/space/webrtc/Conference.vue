@@ -24,12 +24,14 @@ const wssUrl = ref("wss://atsumari.livekit.cloud");
 const remoteVideoContainer = ref();
 onMounted(() => {});
 
-let isJoined = ref<boolean>(false);
+let isJoinedToARoom = ref<boolean>(false);
 emitter.on(
   "playerInRoom",
   async (data: { isPlayerInARoom: boolean; roomName: string }) => {
-    if (data.isPlayerInARoom === true && !isJoined.value) {
-      isJoined.value = true;
+    if (data.isPlayerInARoom === true && !isJoinedToARoom.value) {
+      console.log("in room", data);
+
+      isJoinedToARoom.value = true;
       isUserInARoom.value = true;
       roomName.value = data.roomName;
 
@@ -37,9 +39,8 @@ emitter.on(
       if (webRtcStore.devices.isMicrophoneEnabled) {
         room.localParticipant.setMicrophoneEnabled(true);
       }
-      console.log("in room", data);
-    } else if (data.isPlayerInARoom === false && isJoined.value) {
-      isJoined.value = false;
+    } else if (data.isPlayerInARoom === false && isJoinedToARoom.value) {
+      isJoinedToARoom.value = false;
       isUserInARoom.value = false;
       roomName.value = "";
 
@@ -54,7 +55,54 @@ emitter.on(
   }
 );
 
-const room = new Room();
+const room = new Room({
+  audioCaptureDefaults: {
+    autoGainControl: true,
+    deviceId: "",
+    echoCancellation: true,
+    noiseSuppression: true,
+  },
+  videoCaptureDefaults: {
+    deviceId: "",
+    facingMode: "user",
+    resolution: {
+      width: 1280,
+      height: 720,
+      frameRate: 30,
+    },
+  },
+  publishDefaults: {
+    videoEncoding: {
+      maxBitrate: 1_500_000,
+      maxFramerate: 30,
+    },
+    screenShareEncoding: {
+      maxBitrate: 1_500_000,
+      maxFramerate: 30,
+    },
+    audioBitrate: 20_000,
+    dtx: true,
+    // only needed if overriding defaults
+    videoSimulcastLayers: [
+      {
+        width: 640,
+        height: 360,
+        encoding: {
+          maxBitrate: 500_000,
+          maxFramerate: 20,
+        },
+      },
+      {
+        width: 320,
+        height: 180,
+        encoding: {
+          maxBitrate: 150_000,
+          maxFramerate: 15,
+        },
+      },
+    ],
+  },
+});
 
 const createToken = async (): Promise<string> => {
   try {
@@ -88,8 +136,8 @@ const prepareForConnection = async () => {
     const track = remoteTrack.attach();
     // Style the video
     // TODO: For some reason, I have to style the video here. I can't style it in the template.
-    track.style.width = "90vw";
-    track.style.height = "70vh";
+    track.style.width = "30vw";
+    track.style.height = "20vh";
     track.style.objectFit = "cover";
     track.style.borderRadius = "1rem";
     track.style.border = "2px solid #fff";
@@ -97,6 +145,12 @@ const prepareForConnection = async () => {
 
     remoteVideoContainer.value.appendChild(track);
     console.log("TRACK: ", track);
+  });
+
+  // Unsubscribe remote video and remove it
+  room.on(RoomEvent.TrackUnsubscribed, function (remoteTrack) {
+    const track = remoteTrack.detach();
+    remoteVideoContainer.value.removeChild(track);
   });
 
   // Connect to room
@@ -130,8 +184,6 @@ const joinRoom = async () => {
 };
 
 const leaveRoom = () => {
-  // Empty the remote video container
-  remoteVideoContainer.value.innerHTML = "";
   room.disconnect();
   isCurrentlyConnected.value = false;
 };
@@ -201,8 +253,11 @@ watch(
   justify-content: center;
 
   &__video {
-    width: 20rem;
-    height: 20rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+
     border: 4px solid blueviolet;
   }
 }

@@ -248,7 +248,7 @@ const handleAddSpaceToVisitedSpaces = async () => {
     const visitedSpaces = await getVisitedSpaces();
 
     // If space is not in visited spaces
-    if (visitedSpaces.some((space: SpacesType) => space.id === spaceId)) {
+    if (visitedSpaces.some((space: SpacesType) => space.id !== spaceId)) {
       const userSpaces = await getUserSpaces();
 
       // If user is not the owner of the space

@@ -53,7 +53,7 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
 
   const PLAYER_SIZE = 16;
 
-  let tempPlayerPosition: { x: number; y: number } = { x: 0, y: 0 };
+  let tempPlayerPosition = { x: 0, y: 0 };
 
   // Tracks the order of movement keys (W, A, S, D) being pressed. It helps determine the character's movement direction when multiple keys are pressed, prioritizing the last valid key pressed.
   let keyPressOrder: string[] = [];
@@ -109,7 +109,6 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
       // Anti-aliasing in browsers smooths images, which can blur pixel art or low-res graphics
       ctx.imageSmoothingEnabled = false;
 
-      myPlayer = users.find((user) => user.id === myPlayerId)!;
       if (myPlayer) {
         // Center camera on my player
         camera.cameraX = myPlayer.x - canvas.width / (2.2 * camera.zoomFactor);
@@ -345,32 +344,20 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
 
   // Start the game loop
   function initGameLoop() {
-    if (
-      users.length > 0 &&
-      myPlayerId !== "" &&
-      spaceMap !== "" &&
-      initialSetupCompleted
-    ) {
-      requestAnimationFrame(gameLoop);
-      //requestAnimationFrame(gameLoop);
-    } else {
-      const checkConditionsBeforeLoop = setInterval(() => {
-        if (
-          users.length > 0 &&
-          myPlayerId !== "" &&
-          spaceMap !== "" &&
-          initialSetupCompleted
-        ) {
-          requestAnimationFrame(gameLoop);
-          //requestAnimationFrame(gameLoop);
+    const checkConditionsBeforeLoop = setInterval(() => {
+      if (users.length > 0 && spaceMap !== "" && initialSetupCompleted) {
+        myPlayer = users.find((user) => user.id === myPlayerId)!;
 
+        // Check that myPlayer is not undefined
+        if (myPlayer) {
+          requestAnimationFrame(gameLoop);
           clearInterval(checkConditionsBeforeLoop);
 
           // Emit event to notify Space.vue that the canvas is loaded
           emitter.emit("canvasLoaded");
         }
-      }, 0);
-    }
+      }
+    }, 10);
   }
 
   keyDownEventListener(canvas, pressedKeys, keyPressOrder, () => myPlayer);
