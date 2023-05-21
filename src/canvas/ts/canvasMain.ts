@@ -312,12 +312,12 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
     );
   }
 
-  function drawFPS() {
+  /*   function drawFPS() {
     ctx.font = "bold 16px Poppins";
     ctx.fillStyle = "black";
     ctx.fillText(`FPS: ${averageFps}`, 10, 20);
   }
-
+ */
   // Collision detection
   function checkCollision(
     WorldMapJson: any,

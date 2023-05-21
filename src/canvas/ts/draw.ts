@@ -175,11 +175,11 @@ export function drawPlayerBanner(
 
   // Draw player name
   ctx.fillStyle = "white";
-  ctx.fillText(
+  /*   ctx.fillText(
     player.userName,
     backgroundX + padding * 2,
     backgroundY + padding + statusRadius
-  );
+  ); */
 }
 
 // Draw the map
@@ -220,25 +220,3 @@ export async function drawTileMap(
     }
   }
 }
-
-/* export function drawFPS(
-  ctx: CanvasRenderingContext2D,
-  lastTime: number,
-  fpsObj: { value: number }
-) {
-  // Calculate FPS
-  const currentTime = performance.now();
-  const deltaTime = currentTime - lastTime;
-
-  // Update FPS value
-  fpsObj.value = Math.round(1000 / deltaTime);
-
-  // Draw FPS
-  ctx.fillStyle = "black";
-  ctx.font = "bold 16px Poppins";
-  ctx.fillText(`FPS: ${fpsObj.value}`, 10, 20);
-
-  // Return updated lastTime value
-  return currentTime;
-}
- */
