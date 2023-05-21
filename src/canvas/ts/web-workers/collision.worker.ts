@@ -1,5 +1,5 @@
 import type { Camera } from "@/types/canvasTypes";
-import { parseRoomsObjectLayerData } from "./utilities";
+import { parseRoomsObjectLayerData } from "../utilities";
 
 interface Point {
   x: number;
@@ -61,8 +61,7 @@ function lineIntersectsLine(l1p1: Point, l1p2: Point, l2p1: Point, l2p2: Point) 
   return !(r < 0 || r > 1 || s < 0 || s > 1);
 }
 
-export function checkPlayerCollisionWithWalls(
-  ctx: CanvasRenderingContext2D,
+function checkPlayerCollisionWithWalls(
   WorldMapJson: any,
   camera: Camera,
   tempPlayerX: number,
@@ -102,7 +101,7 @@ export function checkPlayerCollisionWithWalls(
     }));
 
     // Debugging: Draw a border around each collision spot
-    polyline.forEach((point: Point) => {
+    /*    polyline.forEach((point: Point) => {
       ctx.beginPath();
       ctx.arc(point.x, point.y, 5, 0, 2 * Math.PI, false);
       ctx.fillStyle = "red";
@@ -111,18 +110,16 @@ export function checkPlayerCollisionWithWalls(
       ctx.strokeStyle = "#003300";
       ctx.stroke();
     });
-
+ */
     for (let j = 0; j < polyline.length - 1; j++) {
       if (lineIntersectsRect(polyline[j], polyline[j + 1], playerRect)) {
-        console.log("Player collided with wall: " + wall.name);
-
         // Debugging: Draw a border around the player
-        ctx.beginPath();
+        /*       ctx.beginPath();
         ctx.rect(playerRect.x, playerRect.y, playerRect.width, playerRect.height);
         ctx.lineWidth = 2;
         ctx.strokeStyle = "red";
         ctx.stroke();
-
+ */
         return true;
       }
     }
@@ -130,3 +127,17 @@ export function checkPlayerCollisionWithWalls(
 
   return false;
 }
+
+self.onmessage = (event) => {
+  const { WorldMapJson, camera, tempPlayerX, tempPlayerY, playerWidth, playerHeight } =
+    event.data;
+  const collisionDetected = checkPlayerCollisionWithWalls(
+    WorldMapJson,
+    camera,
+    tempPlayerX,
+    tempPlayerY,
+    playerWidth,
+    playerHeight
+  );
+  self.postMessage(collisionDetected);
+};

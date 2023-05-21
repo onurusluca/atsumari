@@ -1,8 +1,7 @@
 import type { Camera } from "@/types/canvasTypes";
-import { parseRoomsObjectLayerData } from "./utilities";
+import { parseRoomsObjectLayerData } from "../utilities";
 
-export function checkPlayerInRoom(
-  ctx: CanvasRenderingContext2D,
+function checkPlayerInRoom(
   WorldMapJson: any,
   camera: Camera,
   tempPlayerX: number,
@@ -44,7 +43,7 @@ export function checkPlayerInRoom(
       playerRect.x + playerRect.width <= roomRect.x + roomRect.width &&
       playerRect.y + playerRect.height <= roomRect.y + roomRect.height
     ) {
-      drawRoomBorder(ctx, roomRect);
+      // drawRoomBorder(ctx, roomRect);
       return { isPlayerInRoom: true, roomName: room.name };
     }
   }
@@ -53,8 +52,25 @@ export function checkPlayerInRoom(
 }
 
 // draw a border around the room
-function drawRoomBorder(ctx: CanvasRenderingContext2D, roomRect: any) {
+/* function drawRoomBorder(ctx: CanvasRenderingContext2D, roomRect: any) {
   ctx.strokeStyle = "#d846ef6e";
   ctx.lineWidth = 10;
   ctx.strokeRect(roomRect.x, roomRect.y, roomRect.width, roomRect.height);
-}
+} */
+
+self.onmessage = (event) => {
+  const { WorldMapJson, camera, tempPlayerX, tempPlayerY, playerWidth, playerHeight } =
+    event.data;
+  const { isPlayerInRoom, roomName } = checkPlayerInRoom(
+    WorldMapJson,
+    camera,
+    tempPlayerX,
+    tempPlayerY,
+    playerWidth,
+    playerHeight
+  );
+  self.postMessage({
+    isPlayerInRoom: Boolean(isPlayerInRoom),
+    roomName: String(roomName),
+  });
+};

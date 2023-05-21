@@ -3,8 +3,6 @@ import type { User } from "@/types/general";
 import type { CanvasAppOptions, Camera, TileMap } from "@/types/canvasTypes";
 
 import { loadImage, isColliding, matchUserFacingToAnimationState } from "./utilities";
-import { checkPlayerCollisionWithWalls } from "./collisionDetection";
-import { checkPlayerInRoom } from "./roomDetection";
 import { drawTileMap, drawPlayerBanner, drawPlayer } from "./draw";
 import { updateAnimationFrame } from "./animations";
 import { keyDownEventListener, keyUpEventListener } from "./keyboardEvents";
@@ -87,6 +85,21 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
     mouseY = e.clientY;
   });
 
+  // Web Workers
+  const collisionWorker = new Worker(
+    new URL("./web-workers/collision.worker.ts", import.meta.url),
+    {
+      type: "module",
+    }
+  );
+
+  const roomDetectionWorker = new Worker(
+    new URL("./web-workers/room-detection.worker.ts", import.meta.url),
+    {
+      type: "module",
+    }
+  );
+
   function gameLoop() {
     const now = Date.now();
     const delta = now - lastFrameTime;
@@ -128,7 +141,14 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
 
         drawFPS();
 
-        checkIfPlayerIsInRoom();
+        checkIfPlayerIsInRoom(
+          WorldMapJson,
+          camera,
+          myPlayer.x,
+          myPlayer.y,
+          PLAYER_SIZE,
+          PLAYER_SIZE
+        );
       }
     }
     requestAnimationFrame(gameLoop);
@@ -141,7 +161,7 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
   }
 
   // Move my player but only if no other key is pressed(prevent diagonal movement). Also, if the user releases the second pressed key, the character should continue moving in the direction of the first pressed key
-  function handlePlayerMovement() {
+  async function handlePlayerMovement() {
     if (keyPressOrder.length > 0) {
       const lastValidKey = keyPressOrder[keyPressOrder.length - 1];
 
@@ -198,12 +218,11 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
       }
 
       // Check for collision with map
-      const collisionWithMap = checkPlayerCollisionWithWalls(
-        ctx,
+      let collisionWithMap = await checkCollision(
         WorldMapJson,
         camera,
-        myPlayer.x,
-        myPlayer.y,
+        tempPlayerPosition.x,
+        tempPlayerPosition.y,
         PLAYER_SIZE,
         PLAYER_SIZE
       );
@@ -318,28 +337,67 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
     ctx.fillText(`FPS: ${averageFps}`, 10, 20);
   }
 
-  function checkIfPlayerIsInRoom() {
-    const { isPlayerInRoom, roomName } = checkPlayerInRoom(
-      ctx,
+  // Collision detection
+  async function checkCollision(
+    WorldMapJson: any,
+    camera: Camera,
+    tempPlayerX: number,
+    tempPlayerY: number,
+    playerWidth: number,
+    playerHeight: number
+  ): Promise<boolean> {
+    return new Promise((resolve) => {
+      collisionWorker.postMessage({
+        WorldMapJson,
+        camera,
+        tempPlayerX,
+        tempPlayerY,
+        playerWidth,
+        playerHeight,
+      });
+
+      collisionWorker.onmessage = (event) => {
+        if (event.data) {
+          console.log("Collision detected.");
+          resolve(true);
+        } else {
+          resolve(false);
+        }
+      };
+    });
+  }
+
+  // Room detection
+  function checkIfPlayerIsInRoom(
+    WorldMapJson: any,
+    camera: Camera,
+    tempPlayerX: number,
+    tempPlayerY: number,
+    playerWidth: number,
+    playerHeight: number
+  ) {
+    roomDetectionWorker.postMessage({
       WorldMapJson,
       camera,
-      myPlayer.x,
-      myPlayer.y,
-      PLAYER_SIZE,
-      PLAYER_SIZE
-    );
+      tempPlayerX,
+      tempPlayerY,
+      playerWidth,
+      playerHeight,
+    });
 
-    if (isPlayerInRoom) {
-      emitter.emit("playerInRoom", {
-        isPlayerInARoom: true,
-        roomName,
-      });
-    } else {
-      emitter.emit("playerInRoom", {
-        isPlayerInARoom: false,
-        roomName: "",
-      });
-    }
+    roomDetectionWorker.onmessage = (event) => {
+      if (event.data.isPlayerInRoom) {
+        emitter.emit("playerInRoom", {
+          isPlayerInARoom: true,
+          roomName: event.data.roomName,
+        });
+      } else {
+        emitter.emit("playerInRoom", {
+          isPlayerInARoom: false,
+          roomName: "",
+        });
+      }
+    };
   }
 
   // Start the game loop
