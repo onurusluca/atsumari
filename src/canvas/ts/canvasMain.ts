@@ -218,34 +218,15 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
       }
 
       // Check for collision with map
-      let collisionWithMap = await checkCollision(
+      checkCollision(
         WorldMapJson,
         camera,
         tempPlayerPosition.x,
         tempPlayerPosition.y,
         PLAYER_SIZE,
-        PLAYER_SIZE
+        PLAYER_SIZE,
+        lastValidKey
       );
-
-      if (collisionWithMap) {
-        // Stop player movement
-
-        switch (lastValidKey) {
-          case "w":
-            myPlayer.y += speed;
-            break;
-          case "a":
-            myPlayer.x += speed;
-            break;
-          case "s":
-            myPlayer.y -= speed;
-            break;
-          case "d":
-            myPlayer.x -= speed;
-            break;
-        }
-      } else {
-      }
     }
   }
 
@@ -338,33 +319,47 @@ async function createCanvasApp(options: CanvasAppOptions): Promise<void> {
   }
 
   // Collision detection
-  async function checkCollision(
+  function checkCollision(
     WorldMapJson: any,
     camera: Camera,
     tempPlayerX: number,
     tempPlayerY: number,
     playerWidth: number,
-    playerHeight: number
-  ): Promise<boolean> {
-    return new Promise((resolve) => {
-      collisionWorker.postMessage({
-        WorldMapJson,
-        camera,
-        tempPlayerX,
-        tempPlayerY,
-        playerWidth,
-        playerHeight,
-      });
-
-      collisionWorker.onmessage = (event) => {
-        if (event.data) {
-          console.log("Collision detected.");
-          resolve(true);
-        } else {
-          resolve(false);
-        }
-      };
+    playerHeight: number,
+    lastValidKey: string
+  ) {
+    collisionWorker.postMessage({
+      WorldMapJson,
+      camera,
+      tempPlayerX,
+      tempPlayerY,
+      playerWidth,
+      playerHeight,
     });
+
+    collisionWorker.onmessage = (event) => {
+      if (event.data) {
+        console.log("Collision detected.");
+
+        // Stop player movement
+
+        switch (lastValidKey) {
+          case "w":
+            myPlayer.y += speed;
+            break;
+          case "a":
+            myPlayer.x += speed;
+            break;
+          case "s":
+            myPlayer.y -= speed;
+            break;
+          case "d":
+            myPlayer.x -= speed;
+            break;
+        }
+      } else {
+      }
+    };
   }
 
   // Room detection

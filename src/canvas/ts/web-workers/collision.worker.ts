@@ -1,5 +1,5 @@
-import type { Camera } from "@/types/canvasTypes";
 import { parseRoomsObjectLayerData } from "../utilities";
+import type { Camera } from "@/types/canvasTypes";
 
 interface Point {
   x: number;
