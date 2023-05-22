@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import type { OnClickOutsideHandler } from "@vueuse/core";
 import { vOnClickOutside } from "@vueuse/components";
-import { createCanvasApp } from "@/canvas/ts/canvasMain";
+// import { createCanvasApp } from "@/canvas/ts/canvasMain";
 import InitialCharacterSetupModal from "@/components/global/InitialCharacterSetupModal.vue";
 import { emitter } from "@/composables/useEmit";
 
 import type { User } from "@/types/general";
 import type { SpacesType, ProfilesType } from "@/api/types";
 import Joystick from "@/components/space/Joystick.vue";
+import { createCanvasApp } from "@/canvas/pixijs/pixi";
 
 /****************************************
  * DECLARATIONS
@@ -59,13 +60,22 @@ window.addEventListener("resize", () => {
 let initialSetupCompleted = ref<boolean>(true);
 
 onMounted(async () => {
-  await handleReadProfile().then(async () => {
+  // Create canvas
+  const canvas = document.getElementById("main-canvas") as HTMLCanvasElement;
+  createCanvasApp(canvas);
+  /*  canvas.addEventListener("click", function () {
+    // Close right click menu on click
+    rightClickMenuIsEnabled.value = false;
+    canvas.focus();
+  }); */
+
+  /*   await handleReadProfile().then(async () => {
     if (initialSetupCompleted.value) {
       await initialPreparations();
       doRealtimeStuff();
       await handleAddSpaceToVisitedSpaces();
     }
-  });
+  }); */
 });
 
 const initialPreparations = async () => {
@@ -109,8 +119,7 @@ const initialPreparations = async () => {
     { immediate: true }
   );
 
-  // Create canvas
-  createCanvasApp({
+  /*   createCanvasApp({
     users: users,
     myPlayerId: userId,
     speed: speed,
@@ -118,7 +127,7 @@ const initialPreparations = async () => {
     canvasFrameRate: canvasFrameRate.value,
     spaceMap: spaceMap.value,
     initialSetupCompleted: initialSetupCompleted.value,
-  });
+  }); */
 
   // Focus canvas on click
   canvas.addEventListener("click", function () {
@@ -565,8 +574,8 @@ const handleChatMenuOpen = () => {
 .space {
   background-color: #222;
   .canvas-container {
-    width: 100%;
-    height: 100vh;
+    /*   width: 100%;
+    height: 100vh; */
 
     .canvas-container__canvas {
       image-rendering: pixelated;
