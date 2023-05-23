@@ -77,8 +77,8 @@ const onClickShowModal = () => {
       </div>
     </div>
     <div class="navbar__right">
-      <button @click.stop="onClickShowModal" class="btn btn-create mr-xxl">
-        <ri:add-circle-line class="mr-s" style="font-size: 1.3rem" />
+      <button @click.stop="onClickShowModal" class="btn btn-create">
+        <ri:add-circle-line class="mr-s" />
         {{ t("spaces.createSpace.title") }}
       </button>
 
@@ -214,6 +214,7 @@ const onClickShowModal = () => {
     display: flex;
     align-items: center;
     padding-right: 1rem;
+    gap: 2rem;
 
     .right__avatar {
       background-color: var(--brand-green);

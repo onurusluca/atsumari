@@ -1,205 +1,113 @@
 import * as PIXI from "pixi.js";
-import { addStats, Stats } from "pixi-stats";
-import bunny_image_url from "./bunny.png";
-import shadow_image_url from "@/canvas/images/shadow.png";
 import dog_image_url from "@/canvas/images/dog.png";
+import world_image_url from "@/canvas/images/newworld.png";
+import Stats from "stats.js";
+
+type KeyType = "w" | "a" | "s" | "d" | "";
 async function createCanvasApp(canvas: HTMLCanvasElement) {
-  // Empty canvas
-  // Create a Pixi Application
+  // Setup Pixi Application
   const app = new PIXI.Application({
-    width: 1000,
-    height: 500,
+    width: window.innerWidth,
+    height: window.innerHeight,
     backgroundColor: 0x0000ff,
     antialias: true,
     view: canvas,
   });
 
-  // Add Bunny
-  const texture = PIXI.Texture.from(bunny_image_url);
-  const bunny = new PIXI.Sprite(texture);
-  bunny.x = app.view.width / 2;
-  bunny.y = app.view.height / 2;
+  // Load map texture and create sprite
+  const worldMap = PIXI.Texture.from(world_image_url);
+  const worldMapSprite = new PIXI.Sprite(worldMap);
+  worldMapSprite.scale.set(3, 3);
 
-  // When click is on on canvas, add 10 bunnies at random positions
-  app.stage.eventMode = "dynamic";
-  app.stage.on("click", (event) => {
-    for (let i = 0; i < 1510; i++) {
-      const bunny = new PIXI.Sprite(texture);
-      bunny.x = Math.random() * app.view.width;
-      bunny.y = Math.random() * app.view.height;
-      bunny.anchor.x = Math.random() * 4;
-      bunny.anchor.y = Math.random() * 4;
-      bunny.scale.x = Math.random() * 4;
-      bunny.scale.y = Math.random() * 4;
-      bunny.rotation = Math.random() * 4;
-      // Rotate around center constantly
-      bunny.pivot.x = bunny.width / 2;
-      bunny.pivot.y = bunny.height / 2;
+  // Create frames for each direction of character movement
+  const dogSheet = PIXI.BaseTexture.from(dog_image_url);
+  const walkDirections: Record<string, [number, number][]> = {
+    "walk-down": [
+      [0, 0],
+      [0, 16],
+      [0, 32],
+      [0, 48],
+    ],
+    "walk-up": [
+      [16, 0],
+      [16, 16],
+      [16, 32],
+      [16, 48],
+    ],
+    "walk-left": [
+      [32, 0],
+      [32, 16],
+      [32, 32],
+      [32, 48],
+    ],
+    "walk-right": [
+      [48, 0],
+      [48, 16],
+      [48, 32],
+      [48, 48],
+    ],
+  };
 
-      app.stage.addChild(bunny);
+  const walkFrames: Record<string, PIXI.Texture[]> = {};
+  for (const direction in walkDirections) {
+    walkFrames[direction] = walkDirections[direction].map(
+      ([x, y]) => new PIXI.Texture(dogSheet, new PIXI.Rectangle(x, y, 16, 16))
+    );
+  }
+
+  // Create character sprite
+  const dogSheetAnim = new PIXI.AnimatedSprite(walkFrames["walk-down"]);
+  dogSheetAnim.position.set(app.view.width / 2, app.view.height / 2);
+  dogSheetAnim.scale.set(4, 4);
+  dogSheetAnim.animationSpeed = 0.1;
+
+  // Create container for map and character sprite
+  const worldContainer = new PIXI.Container();
+  worldContainer.addChild(worldMapSprite);
+  worldContainer.addChild(dogSheetAnim);
+  app.stage.addChild(worldContainer);
+
+  // Lower movement speed
+  const speed = 3;
+
+  // Keyboard controls
+  let lastKey: KeyType = "";
+  window.addEventListener("keydown", (event) => {
+    lastKey = event.key as KeyType;
+  });
+  window.addEventListener("keyup", () => {
+    lastKey = "";
+  });
+
+  // Ticker for handling map movement and character animation
+  app.ticker.add(() => {
+    const directions: Record<KeyType, [string, () => void]> = {
+      w: ["walk-up", () => (worldMapSprite.y += speed)],
+      a: ["walk-left", () => (worldMapSprite.x += speed)],
+      s: ["walk-down", () => (worldMapSprite.y -= speed)],
+      d: ["walk-right", () => (worldMapSprite.x -= speed)],
+      "": ["walk-down", () => {}], // No movement
+    };
+
+    const [direction, movement] = directions[lastKey];
+    dogSheetAnim.textures = walkFrames[direction];
+    dogSheetAnim.gotoAndPlay(0);
+    movement();
+
+    if (lastKey === "") {
+      dogSheetAnim.gotoAndStop(0);
     }
   });
 
-  // Add Keyboard
-  const keys: {
-    [key: string]: boolean;
-  } = {
-    w: false,
-    a: false,
-    s: false,
-    d: false,
-  };
-  window.addEventListener("keydown", (event) => (keys[event.key] = true));
-  window.addEventListener("keyup", (event) => (keys[event.key] = false));
-
-  // Add Rectangle
-  const Graphics = PIXI.Graphics;
-  const rectangle = new Graphics();
-  rectangle.beginFill("red").lineStyle(4).drawRect(111, 111, 64, 64).endFill();
-  app.stage.addChild(rectangle);
-
-  // Add Polygon
-  const poly = new Graphics();
-  poly
-    .beginFill(0x00ff00)
-    .lineStyle(4)
-    .drawPolygon([0, 0, 32, 64, 64, 0, 22, 51])
-    .endFill();
-  poly.x = 64;
-  poly.y = 130;
-  app.stage.addChild(poly);
-
-  // Add Circle
-  const circle = new Graphics();
-  circle.beginFill(0xff0000).drawCircle(0, 0, 32).endFill();
-  circle.x = 64;
-  circle.y = 64;
-  app.stage.addChild(circle);
-
-  // Add Text
-  const textStyles = new PIXI.TextStyle({
-    fontFamily: "Arial",
-    fontSize: 36,
-    fontStyle: "italic",
-    fontWeight: "bold",
-    fill: ["#ffffff", "#00ff99"], // gradient
-    stroke: "#4a1850",
-    strokeThickness: 5,
-    dropShadow: true,
-    dropShadowColor: "#000000",
-    dropShadowBlur: 4,
-    dropShadowAngle: Math.PI / 6,
-    dropShadowDistance: 6,
-    wordWrap: true,
-    wordWrapWidth: 440,
-  });
-  const myText = new PIXI.Text("Hello Pixi!", textStyles);
-  myText.x = 100;
-  myText.y = 100;
-  myText.text = "Text changed!";
-
-  // Loop
-  /*   app.ticker.add((delta) => loop(delta));
-  function loop(delta: number) {
-    // Add Rectangle that is created at random position every frame
-    const rect = new Graphics();
-    rect
-      .beginFill(0x66ccff)
-      .drawRect(
-        Math.random() * app.screen.width,
-        Math.random() * app.screen.height,
-        Math.random() * 10,
-        Math.random() * 10
-      )
-      .endFill();
-
-    app.stage.addChild(rect);
-  } */
-
-  // Add Image
-  const image = PIXI.Texture.from("https://picsum.photos/200/300");
-  const imageSprite = new PIXI.Sprite(image);
-  imageSprite.x = 100;
-  imageSprite.y = 100;
-  imageSprite.width = 200;
-  imageSprite.height = 300;
-  imageSprite.scale.set(0.5, 0.5);
-  app.stage.addChild(imageSprite);
-
-  // Loop
-  app.ticker.add((delta) => loop(delta));
-  function loop(delta: number) {
-    // Bounce the image on canvas edges
-
-    // center the sprite's anchor point
-    bunny.anchor.set(0.5);
-    imageSprite.x += 0.1;
-    imageSprite.y += 0.1;
-    imageSprite.scale.set(+1, +1);
-  }
-
-  // CONTAINERS
-  // Containers in pixi are like divs in html. They are used to group elements together. They can be nested.
-  const container = new PIXI.Container();
-
-  const bunnyImg = PIXI.Texture.from(bunny_image_url);
-  const bunnySprite = new PIXI.Sprite(bunnyImg);
-  container.addChild(bunnySprite);
-
-  const shadowImg = PIXI.Texture.from(shadow_image_url);
-  const shadowSprite = new PIXI.Sprite(shadowImg);
-  container.addChild(shadowSprite);
-
-  app.stage.addChild(container);
-  shadowSprite.scale.set(10, 10);
-
-  container.x = app.screen.width / 2;
-  container.y = app.screen.height / 2;
-
-  /*   console.log(container.width, container.height);
-  console.log(container.getBounds());
-  console.log(bunnySprite.getBounds());
- */
-  // Add keyboard movement logic to app
-  app.ticker.add(() => {
-    if (keys.w) bunny.y -= 1;
-    if (keys.a) bunny.x -= 1;
-    if (keys.s) bunny.y += 1;
-    if (keys.d) bunny.x += 1;
-  });
-
-  // Particle Container
-  const particleContainer = new PIXI.ParticleContainer(1000, {
-    position: true,
-    rotation: true,
-    vertices: true,
-    tint: true,
-    uvs: true,
-  });
-
-  /*  for (let i = 0; i < 100; ++i) {
-    let sprite = PIXI.Sprite.from(dog_image_url);
-    particleContainer.addChild(sprite);
-  } */
-  app.stage.addChild(particleContainer);
-
   // Add Stats for FPS, MS, MB...
-  const stats: Stats = addStats(document, app);
-  app.ticker.add(stats.update, stats, PIXI.UPDATE_PRIORITY.UTILITY);
-
-  // Change stats position
-
-  // Tile Sets
-  const tileset = PIXI.Texture.from(dog_image_url);
-  console.log(tileset);
-  tileset.baseTexture.width = 64;
-  tileset.baseTexture.height = 64;
-
-  const rect = new PIXI.Rectangle(0, 0, 16, 16);
-  tileset.frame = rect;
-  const tile = new PIXI.Sprite(tileset);
-  tile.scale.set(2, 2);
-  app.stage.addChild(tile);
+  const stats = new Stats();
+  stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
+  stats.dom.style.position = "absolute";
+  stats.dom.style.left = "1.4rem";
+  stats.dom.style.top = ".8rem";
+  stats.dom.style.transform = "scale(1.5)";
+  document.body.appendChild(stats.dom);
+  app.ticker.add(() => stats.update());
 }
 
 export { createCanvasApp };

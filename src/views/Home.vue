@@ -10,13 +10,13 @@ const authStore = useAuthStore();
 
 let userSpaces = reactive<SpacesType[]>([]);
 let visitedSpaces = reactive<SpacesType[]>([]);
-let showContentLoadingPlaceholder = ref<boolean>(true);
+let isUserSpacesLoaded = ref<boolean>(false);
+let isVisitedSpacesLoaded = ref<boolean>(false);
 let showNoUserSpacesMessage = ref<boolean>(false);
 let showNoVisitedSpacesMessage = ref<boolean>(false);
 
 onMounted(async () => {
   await handleReadUserSpaces();
-  await handleReadVisitedSpaces();
 });
 
 /****************************************
@@ -30,9 +30,6 @@ const handleReadUserSpaces = async () => {
       .select("*")
       .eq("user_id", authStore?.session?.user?.id);
     if (spaces) {
-      // Hide loading placeholder
-      showContentLoadingPlaceholder.value = false;
-
       userSpaces = spaces;
 
       // Show no spaces message if user has no spaces
@@ -42,7 +39,11 @@ const handleReadUserSpaces = async () => {
         showNoUserSpacesMessage.value = false;
       }
     }
-    if (error) throw error;
+    if (error) {
+      throw error;
+    } else {
+      isUserSpacesLoaded.value = true;
+    }
   } catch (error: any) {
     console.log("READ SPACE CATCH ERROR: ", error.message);
   }
@@ -55,9 +56,6 @@ const handleReadVisitedSpaces = async () => {
       .select("*")
       .eq("visited_user_id", authStore?.session?.user?.id);
     if (spaces) {
-      // Hide loading placeholder
-      showContentLoadingPlaceholder.value = false;
-
       visitedSpaces = spaces;
 
       // Show no spaces message if user has no spaces
@@ -67,7 +65,13 @@ const handleReadVisitedSpaces = async () => {
         showNoVisitedSpacesMessage.value = false;
       }
     }
-    if (error) throw error;
+    if (error) {
+      throw error;
+    } else {
+      console.log("fsdfsdf");
+
+      isVisitedSpacesLoaded.value = true;
+    }
   } catch (error: any) {
     console.log("READ SPACE CATCH ERROR: ", error.message);
   }
@@ -115,6 +119,12 @@ const onCopyToClipboard = (spaceUrl: string) => {
 
 // Tabs
 let activeTab = ref<string>("userSpaces");
+const changeTab = async (tab: string) => {
+  activeTab.value = tab;
+  if (activeTab.value === "visitedSpaces" && !isVisitedSpacesLoaded.value) {
+    await handleReadVisitedSpaces();
+  }
+};
 
 // Toast
 let toastOpen = ref<boolean>(false);
@@ -135,14 +145,14 @@ function showToast(toastTypeProp: string) {
   <div class="home">
     <section class="home__tabs">
       <button
-        @click="activeTab = 'userSpaces'"
+        @click="changeTab('userSpaces')"
         class="tabs__tab btn-no-style"
         :class="{ 'tabs__tab--active': activeTab === 'userSpaces' }"
       >
         {{ t("spaces.mySpaces") }}
       </button>
       <button
-        @click="activeTab = 'visitedSpaces'"
+        @click="changeTab('visitedSpaces')"
         class="tabs__tab btn-no-style"
         :class="{ 'tabs__tab--active': activeTab === 'visitedSpaces' }"
       >
@@ -151,7 +161,7 @@ function showToast(toastTypeProp: string) {
     </section>
 
     <!-- User spaces -->
-    <ul class="home__spaces" v-if="userSpaces.length > 0 && activeTab === 'userSpaces'">
+    <ul class="home__spaces" v-if="isUserSpacesLoaded && activeTab === 'userSpaces'">
       <li v-for="(item, index) in userSpaces" :key="index" class="spaces__space">
         <!-- Top -->
         <div class="space__top">
@@ -261,7 +271,7 @@ function showToast(toastTypeProp: string) {
     <!-- Visited spaces -->
     <ul
       class="home__spaces"
-      v-if="visitedSpaces.length > 0 && activeTab === 'visitedSpaces'"
+      v-if="isVisitedSpacesLoaded && activeTab === 'visitedSpaces'"
     >
       <li v-for="(item, index) in visitedSpaces" :key="index" class="spaces__space">
         <!-- Top -->
@@ -352,12 +362,20 @@ function showToast(toastTypeProp: string) {
 
     <!-- clp -->
     <!-- TODO: Enable if it takes too much time to load spaces -->
-    <!--     <div v-if="showContentLoadingPlaceholder" class="clp-container">
+    <div
+      v-if="
+        (!isUserSpacesLoaded && activeTab === 'userSpaces' && userSpaces.length <= 0) ||
+        (!isVisitedSpacesLoaded &&
+          activeTab === 'visitedSpaces' &&
+          visitedSpaces.length <= 0)
+      "
+      class="clp-container"
+    >
       <div class="clp"></div>
       <div class="clp"></div>
       <div class="clp"></div>
       <div class="clp"></div>
-    </div> -->
+    </div>
 
     <!-- No user spaces -->
     <div

@@ -62,6 +62,7 @@ let initialSetupCompleted = ref<boolean>(true);
 onMounted(async () => {
   // Create canvas
   const canvas = document.getElementById("main-canvas") as HTMLCanvasElement;
+  const canvasContainer = document.getElementById("canvas-container") as HTMLDivElement;
   createCanvasApp(canvas);
   /*  canvas.addEventListener("click", function () {
     // Close right click menu on click
