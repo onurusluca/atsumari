@@ -1,7 +1,6 @@
 .btn {
   display: flex;
-  justify-content: center;
-  align-items: center;
+  place-items: center;
   text-align: center;
 
   width: max-content;
@@ -169,8 +168,8 @@ button:disabled {
 .btn-bottom-control {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  place-items: center;
+
 
   padding: 0.3rem .8rem;
 

@@ -1,11 +1,20 @@
 import * as PIXI from "pixi.js";
-import dog_image_url from "@/canvas/images/dog.png";
+import character_sprite_url from "@/canvas/images/dog.png";
 import world_image_url from "@/canvas/images/newworld.png";
 import Stats from "stats.js";
 
-type KeyType = "w" | "a" | "s" | "d" | "";
+const keysPressed: Record<string, boolean> = {
+  w: false,
+  a: false,
+  s: false,
+  d: false,
+};
+
 async function createCanvasApp(canvas: HTMLCanvasElement) {
-  // Setup Pixi Application
+  // Crispy pixels!
+  PIXI.BaseTexture.defaultOptions.scaleMode = PIXI.SCALE_MODES.NEAREST;
+
+  // Create PIXI application
   const app = new PIXI.Application({
     width: window.innerWidth,
     height: window.innerHeight,
@@ -19,8 +28,11 @@ async function createCanvasApp(canvas: HTMLCanvasElement) {
   const worldMapSprite = new PIXI.Sprite(worldMap);
   worldMapSprite.scale.set(3, 3);
 
+  // Set initial position of map sprite
+  worldMapSprite.position.set(-2000, -2200);
+
   // Create frames for each direction of character movement
-  const dogSheet = PIXI.BaseTexture.from(dog_image_url);
+  const characterSprite = PIXI.BaseTexture.from(character_sprite_url);
   const walkDirections: Record<string, [number, number][]> = {
     "walk-down": [
       [0, 0],
@@ -48,60 +60,105 @@ async function createCanvasApp(canvas: HTMLCanvasElement) {
     ],
   };
 
+  // Create textures for each frame
   const walkFrames: Record<string, PIXI.Texture[]> = {};
   for (const direction in walkDirections) {
     walkFrames[direction] = walkDirections[direction].map(
-      ([x, y]) => new PIXI.Texture(dogSheet, new PIXI.Rectangle(x, y, 16, 16))
+      ([x, y]) => new PIXI.Texture(characterSprite, new PIXI.Rectangle(x, y, 16, 16))
     );
   }
 
   // Create character sprite
-  const dogSheetAnim = new PIXI.AnimatedSprite(walkFrames["walk-down"]);
-  dogSheetAnim.position.set(app.view.width / 2, app.view.height / 2);
-  dogSheetAnim.scale.set(4, 4);
-  dogSheetAnim.animationSpeed = 0.1;
+  const characterSpriteAnimation = new PIXI.AnimatedSprite(
+    walkFrames["walk-down"],
+    true
+  );
+  characterSpriteAnimation.scale.set(4, 4);
+  characterSpriteAnimation.animationSpeed = 0.2;
 
-  // Create container for map and character sprite
+  // Center character sprite on screen
+  characterSpriteAnimation.position.set(app.view.width / 2.1, app.view.height / 2.3);
+
+  // Add sprites to container and add container to stage
   const worldContainer = new PIXI.Container();
   worldContainer.addChild(worldMapSprite);
-  worldContainer.addChild(dogSheetAnim);
+  worldContainer.addChild(characterSpriteAnimation);
   app.stage.addChild(worldContainer);
 
-  // Lower movement speed
   const speed = 3;
 
-  // Keyboard controls
-  let lastKey: KeyType = "";
+  const directions: Record<string, [string, () => void]> = {
+    w: ["walk-up", () => (worldMapSprite.y += speed)],
+    a: ["walk-left", () => (worldMapSprite.x += speed)],
+    s: ["walk-down", () => (worldMapSprite.y -= speed)],
+    d: ["walk-right", () => (worldMapSprite.x -= speed)],
+  };
+
+  // Handle keypress
+  const keysOrder: string[] = [];
   window.addEventListener("keydown", (event) => {
-    lastKey = event.key as KeyType;
-  });
-  window.addEventListener("keyup", () => {
-    lastKey = "";
-  });
+    if (event.key in keysPressed) {
+      keysPressed[event.key] = true;
 
-  // Ticker for handling map movement and character animation
-  app.ticker.add(() => {
-    const directions: Record<KeyType, [string, () => void]> = {
-      w: ["walk-up", () => (worldMapSprite.y += speed)],
-      a: ["walk-left", () => (worldMapSprite.x += speed)],
-      s: ["walk-down", () => (worldMapSprite.y -= speed)],
-      d: ["walk-right", () => (worldMapSprite.x -= speed)],
-      "": ["walk-down", () => {}], // No movement
-    };
+      // Remove key from array if it already exists, then push it to the end
+      const index = keysOrder.indexOf(event.key);
+      if (index > -1) {
+        keysOrder.splice(index, 1);
+      }
+      keysOrder.push(event.key);
 
-    const [direction, movement] = directions[lastKey];
-    dogSheetAnim.textures = walkFrames[direction];
-    dogSheetAnim.gotoAndPlay(0);
-    movement();
-
-    if (lastKey === "") {
-      dogSheetAnim.gotoAndStop(0);
+      const lastKey = keysOrder[keysOrder.length - 1];
+      const direction = directions[lastKey][0];
+      if (
+        !characterSpriteAnimation.playing ||
+        characterSpriteAnimation.textures !== walkFrames[direction]
+      ) {
+        characterSpriteAnimation.textures = walkFrames[direction];
+        characterSpriteAnimation.gotoAndPlay(0);
+      }
     }
   });
 
-  // Add Stats for FPS, MS, MB...
+  window.addEventListener("keyup", (event) => {
+    if (event.key in keysPressed) {
+      keysPressed[event.key] = false;
+
+      // Remove key from array
+      const index = keysOrder.indexOf(event.key);
+      if (index > -1) {
+        keysOrder.splice(index, 1);
+      }
+
+      // If there are other keys still being pressed, update direction
+      // Otherwise, stop animation
+      if (keysOrder.length > 0) {
+        const lastKey = keysOrder[keysOrder.length - 1];
+        const direction = directions[lastKey][0];
+        if (characterSpriteAnimation.textures !== walkFrames[direction]) {
+          characterSpriteAnimation.textures = walkFrames[direction];
+          characterSpriteAnimation.gotoAndPlay(0);
+        }
+      } else {
+        characterSpriteAnimation.gotoAndStop(0);
+      }
+    }
+  });
+
+  // Game loop
+  app.ticker.add(() => {
+    let movement = () => {};
+
+    if (keysOrder.length > 0) {
+      const lastKey = keysOrder[keysOrder.length - 1];
+      [, movement] = directions[lastKey];
+    }
+
+    movement();
+  });
+
+  // Stats
   const stats = new Stats();
-  stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
+  stats.showPanel(0);
   stats.dom.style.position = "absolute";
   stats.dom.style.left = "1.4rem";
   stats.dom.style.top = ".8rem";
