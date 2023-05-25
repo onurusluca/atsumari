@@ -1,6 +1,7 @@
 .btn {
   display: flex;
-  place-items: center;
+  align-items: center;
+  justify-content: center;
   text-align: center;
 
   width: max-content;
@@ -28,7 +29,6 @@
 
   @include s-576 {
     // Smaller buttons for mobile
-    padding: 0.3rem .4rem;
     font-size: 0.9rem;
 
   }
@@ -168,8 +168,8 @@ button:disabled {
 .btn-bottom-control {
   display: flex;
   flex-direction: column;
-  place-items: center;
-
+  justify-content: center;
+  align-items: center;
 
   padding: 0.3rem .8rem;
 

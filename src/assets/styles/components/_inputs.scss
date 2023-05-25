@@ -75,7 +75,8 @@ or with text:
 
 .toggle-container {
   display: flex;
-  place-items: center;
+  align-items: center;
+  justify-content: center;
   margin: 1rem 0;
 
   .toggle-container__text-right {

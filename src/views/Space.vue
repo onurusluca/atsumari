@@ -8,8 +8,7 @@ import { emitter } from "@/composables/useEmit";
 import type { User } from "@/types/general";
 import type { SpacesType, ProfilesType } from "@/api/types";
 import Joystick from "@/components/space/Joystick.vue";
-import { createCanvasApp } from "@/canvas/pixijs/pixi";
-
+import "@/game";
 /****************************************
  * DECLARATIONS
  ****************************************/
@@ -60,16 +59,11 @@ window.addEventListener("resize", () => {
 let initialSetupCompleted = ref<boolean>(true);
 
 onMounted(async () => {
-  // Create canvas
-  const canvas = document.getElementById("main-canvas") as HTMLCanvasElement;
-  const canvasContainer = document.getElementById("canvas-container") as HTMLDivElement;
-  createCanvasApp(canvas);
   /*  canvas.addEventListener("click", function () {
     // Close right click menu on click
     rightClickMenuIsEnabled.value = false;
     canvas.focus();
   }); */
-
   /*   await handleReadProfile().then(async () => {
     if (initialSetupCompleted.value) {
       await initialPreparations();

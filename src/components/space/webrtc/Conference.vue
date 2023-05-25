@@ -83,13 +83,17 @@ const room = new Room({
     audioBitrate: 20_000,
     dtx: true,
     // only needed if overriding defaults
-    videoSimulcastLayers: [
+    /*     videoSimulcastLayers: [
       {
         width: 640,
         height: 360,
         encoding: {
           maxBitrate: 500_000,
           maxFramerate: 20,
+        },
+        resolution: {
+          width: 640,
+          height: 360,
         },
       },
       {
@@ -99,8 +103,12 @@ const room = new Room({
           maxBitrate: 150_000,
           maxFramerate: 15,
         },
+        resolution: {
+          width: 640,
+          height: 360,
+        },
       },
-    ],
+    ], */
   },
 });
 
@@ -195,8 +203,7 @@ let isScreenShareEnabled = ref<boolean>(false);
 
 watch(
   () => webRtcStore.devices.isMicrophoneEnabled,
-  (newValue, oldValue) => {
-    console.log("isMicrophoneEnabled changed");
+  (newValue) => {
     isMicEnabled.value = newValue;
 
     if (isMicEnabled.value) {
@@ -210,8 +217,7 @@ watch(
 
 watch(
   () => webRtcStore.devices.isCameraEnabled,
-  (newValue, oldValue) => {
-    console.log("isCameraEnabled changed");
+  (newValue) => {
     isCameraEnabled.value = newValue;
 
     if (isCameraEnabled.value) {
@@ -225,8 +231,7 @@ watch(
 
 watch(
   () => webRtcStore.devices.isScreenSharing,
-  (newValue, oldValue) => {
-    console.log("isScreenSharing changed");
+  (newValue) => {
     isScreenShareEnabled.value = newValue;
 
     if (isScreenShareEnabled.value) {

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 const { t } = useI18n();
-const authStore = useAuthStore();
+// const authStore = useAuthStore();
 const route = useRouter();
 const router = useRouter();
 
