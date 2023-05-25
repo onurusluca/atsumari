@@ -30,8 +30,16 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 5174,
     },
-    build: { chunkSizeWarningLimit: 1000 },
-
+    build: {
+      chunkSizeWarningLimit: 1000,
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            phaser: ["phaser"],
+          },
+        },
+      },
+    },
     define: {
       __APP_ENV__: env.APP_ENV,
     },

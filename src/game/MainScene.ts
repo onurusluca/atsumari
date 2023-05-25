@@ -73,7 +73,7 @@ export default class MainScene extends Phaser.Scene {
   }
 
   handleMovement(delta: number) {
-    // Games can run at different speeds on different machines if they don't take into account the time passed between frames, which is known as "delta time".
+    // Games can run at different speeds on different machines if they don't take into account the time passed between frames, which is known as "delta time". So we need to multiply our speed by delta time to ensure that the movement speed is consistent across different machines.
     const upDown = this.cursors.up?.isDown;
     const downDown = this.cursors.down?.isDown;
     const leftDown = this.cursors.left?.isDown;
