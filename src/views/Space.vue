@@ -461,11 +461,7 @@ const handleChatMenuOpen = () => {
   </section> -->
 
   <div class="space">
-    <div class="canvas-container">
-      <!-- tabindex is there to be able to focus the canvas and listen to key events only on canvas-->
-      <canvas id="main-canvas" class="canvas-container__canvas" tabindex="0"></canvas>
-
-      <!-- Right-click   -->
+    <!--     <div class="canvas-container">
       <button
         @click="moveUserToRightClickedPosition"
         v-show="rightClickMenuIsEnabled"
@@ -476,7 +472,7 @@ const handleChatMenuOpen = () => {
         }"
         >{{ t("space.userActions.moveHere") }}</button
       >
-    </div>
+    </div> -->
 
     <!-- Bottom control -->
     <div class="bottom-control">
