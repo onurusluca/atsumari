@@ -1,27 +1,25 @@
-import kaboom from "kaboom";
 import * as Phaser from "phaser";
-import bean_sprite_url from "./sprites/bean.png";
+import MainScene from "./MainScene";
 import tileset_sprite_url from "./images/tileset.png";
-import jsonnnnnnnnnnnn from "./images/test-map.json";
-import { tiledToKaboom } from "./helpers/tileMapParser";
+import map_json from "./images/phaser.json";
 
-const k = kaboom();
+const scene: MainScene = new MainScene(tileset_sprite_url, map_json);
 
-// Load your tileset image
-k.loadSprite("tileset", tileset_sprite_url);
-
-// Define your game objects
-const GAME_OBJECTS = {
-  0: "empty",
-  129: {
-    sprite: "tileset", // the sprite name
-    frame: 0, // the frame number in the sprite
+const config: Phaser.Types.Core.GameConfig = {
+  type: Phaser.AUTO,
+  parent: "app",
+  width: 800,
+  height: 600,
+  audio: {
+    disableWebAudio: true,
   },
-  // Add more objects if needed
+  physics: {
+    default: "arcade",
+    arcade: {
+      gravity: { y: 200 },
+    },
+  },
+  scene: [scene],
 };
 
-const layers = tiledToKaboom(jsonnnnnnnnnnnn);
-
-layers.forEach((layer) => {
-  k.addLevel(layer.grid, GAME_OBJECTS);
-});
+const game = new Phaser.Game(config);

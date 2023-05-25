@@ -22,9 +22,6 @@ dependencies:
   emittery:
     specifier: ^1.0.1
     version: 1.0.1
-  kaboom:
-    specifier: ^2000.2.10
-    version: 2000.2.10
   nanoid:
     specifier: ^4.0.2
     version: 4.0.2
@@ -2400,10 +2397,6 @@ packages:
       jwa: 1.4.1
       safe-buffer: 5.2.1
     dev: true
-
-  /kaboom@2000.2.10:
-    resolution: {integrity: sha512-OHWdRuRMNkTkpO0/1R4ljS4+vpPtf6PvN+S0WTe+PkPB6Z61rmunw4SKTQDkrCt7dDzEIZTnK1G6s7rttd61Bw==}
-    dev: false
 
   /kolorist@1.8.0:
     resolution: {integrity: sha512-Y+60/zizpJ3HRH8DCss+q95yr6145JXZo46OTpFvDZWLfRCE4qChOyk1b26nMaNpfHHgxagk9dXT5OP0Tfe+dQ==}

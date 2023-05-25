@@ -19,7 +19,6 @@
     "@vueuse/core": "^10.1.2",
     "@vueuse/head": "^1.1.26",
     "emittery": "^1.0.1",
-    "kaboom": "^2000.2.10",
     "nanoid": "^4.0.2",
     "phaser": "^3.60.0",
     "picmo": "^5.8.4",
