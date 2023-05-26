@@ -18,12 +18,6 @@ export type CanvasAppOptions = {
   initialSetupCompleted: boolean;
 };
 
-export type Camera = {
-  cameraX: number;
-  cameraY: number;
-  zoomFactor: number;
-};
-
 export type RoomsObjectLayerData = {
   id: number;
   name: string;
@@ -50,7 +44,7 @@ export type TileMap = {
   layers: Layer[];
 };
 
-export type Rect = {
+export type Rectangle = {
   x: number;
   y: number;
   width: number;

@@ -461,7 +461,7 @@ const handleChatMenuOpen = () => {
   </section> -->
 
   <div class="space">
-    <!--     <div class="canvas-container">
+    <div class="canvas-container">
       <button
         @click="moveUserToRightClickedPosition"
         v-show="rightClickMenuIsEnabled"
@@ -472,7 +472,7 @@ const handleChatMenuOpen = () => {
         }"
         >{{ t("space.userActions.moveHere") }}</button
       >
-    </div> -->
+    </div>
 
     <!-- Bottom control -->
     <div class="bottom-control">
@@ -567,15 +567,6 @@ const handleChatMenuOpen = () => {
   .canvas-container {
     /*   width: 100%;
     height: 100vh; */
-
-    .canvas-container__canvas {
-      image-rendering: pixelated;
-      margin-left: 0;
-      margin-top: 0;
-
-      /*Ensure that the canvas and its contents are rendered on the GPU where possible. We can force GPU compositing by adding a 3D transform to the canvas CSS: */
-      transform: translateZ(0);
-    }
 
     .canvas-container__right-click-menu {
       position: absolute;
