@@ -11,7 +11,15 @@ export type User = {
 export type CanvasAppOptions = {
   users: User[];
   myPlayerId: string;
-  gameMapJson: JSON;
+  gameMapJson: TileMap;
   gameMapTileset: string;
   initialSetupCompleted: boolean;
+};
+
+export type TileMap = {
+  width: number;
+  height: number;
+  tilewidth: number;
+  tileheight: number;
+  layers: Layer[];
 };

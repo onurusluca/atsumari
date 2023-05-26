@@ -36,8 +36,6 @@ export default class Game extends Phaser.Scene {
     const { worldLayer, wallsLayer } = this.createMapLayers();
 
     this.createPlayer();
-
-    // Movement
     this.createControls();
 
     // Add collision between player and walls
@@ -52,17 +50,25 @@ export default class Game extends Phaser.Scene {
 
   createMapLayers() {
     const map = this.make.tilemap({ key: "main-map" });
+
+    // phaser-tiles is the name of the tileset in Tiled exported JSON
     const tileset = map.addTilesetImage("phaser-tiles", "main-tiles", 16, 16);
 
+    // ground-layer is the name of the layer in Tiled exported JSON
     const worldLayer = map.createLayer("ground-layer", tileset!);
     const wallsLayer = map.createLayer("walls-layer", tileset!);
 
+    // Collides is a custom property for the tile map, set in Tiled
     wallsLayer!.setCollisionByProperty({ collides: true });
+
+    // Set world bounds to the size of the map. When close to the edge of the map, the camera will stop scrolling
+    this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
 
     return { worldLayer, wallsLayer };
   }
 
   createPlayer() {
+    // walk-down-0 is the name of the frame in the .json file
     this.myPlayer = this.physics.add.sprite(
       PLAYER_INITIAL_POSITION.x,
       PLAYER_INITIAL_POSITION.y,
@@ -70,6 +76,8 @@ export default class Game extends Phaser.Scene {
       "walk-down-0"
     );
     this.myPlayer.setScale(PLAYER_SCALE);
+
+    // Player hitbox
     this.myPlayer.body!.setSize(PLAYER_BODY_SIZE.width, PLAYER_BODY_SIZE.height);
     this.myPlayer.body!.setOffset(PLAYER_BODY_OFFSET.x, PLAYER_BODY_OFFSET.y);
 
@@ -162,3 +170,9 @@ export default class Game extends Phaser.Scene {
     this.myPlayer.setPosition(Math.round(this.myPlayer.x), Math.round(this.myPlayer.y));
   }
 }
+
+/* NOTES:
+The TypeScript error about stuff being null is due to strict null checks in TypeScript configuration. Phaser is written in JavaScript, and when used it with TypeScript, TypeScript's static type checking cause issues with Phaser's JavaScript code. So we add '!', the non-null assertion operator, to tell TypeScript that we know what we're doing and that we're sure that the value is not null.
+
+Phaser is typically synced to the refresh rate of the display it's running on
+*/

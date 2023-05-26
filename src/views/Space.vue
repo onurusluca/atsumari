@@ -9,6 +9,7 @@ import type { User } from "@/types/general";
 import type { SpacesType, ProfilesType } from "@/api/types";
 import Joystick from "@/components/space/Joystick.vue";
 import { createGame } from "@/game";
+import { TileMap } from "@/types/canvasTypes";
 
 /****************************************
  * DECLARATIONS
@@ -144,7 +145,7 @@ const handleReadProfile = async () => {
 };
 
 // Get space map
-let gameMapJson = ref<JSON>();
+let gameMapJson = ref<TileMap>();
 let gameMapTileset = ref<string>();
 const downloadSpaceMap = async () => {
   try {
