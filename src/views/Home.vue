@@ -31,6 +31,7 @@ const handleReadUserSpaces = async () => {
       .eq("user_id", authStore?.session?.user?.id);
     if (spaces) {
       userSpaces = spaces;
+      isUserSpacesLoaded.value = true;
 
       // Show no spaces message if user has no spaces
       if (userSpaces.length <= 0) {
@@ -41,8 +42,6 @@ const handleReadUserSpaces = async () => {
     }
     if (error) {
       throw error;
-    } else {
-      isUserSpacesLoaded.value = true;
     }
   } catch (error: any) {
     console.log("READ SPACE CATCH ERROR: ", error.message);
@@ -57,8 +56,8 @@ const handleReadVisitedSpaces = async () => {
       .eq("visited_user_id", authStore?.session?.user?.id);
     if (spaces) {
       visitedSpaces = spaces;
+      isVisitedSpacesLoaded.value = true;
 
-      // Show no spaces message if user has no spaces
       if (visitedSpaces.length <= 0) {
         showNoVisitedSpacesMessage.value = true;
       } else {
@@ -67,10 +66,6 @@ const handleReadVisitedSpaces = async () => {
     }
     if (error) {
       throw error;
-    } else {
-      console.log("fsdfsdf");
-
-      isVisitedSpacesLoaded.value = true;
     }
   } catch (error: any) {
     console.log("READ SPACE CATCH ERROR: ", error.message);

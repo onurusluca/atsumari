@@ -11,42 +11,7 @@ export type User = {
 export type CanvasAppOptions = {
   users: User[];
   myPlayerId: string;
-  speed: number;
-  canvas: HTMLCanvasElement;
-  canvasFrameRate: number;
-  spaceMap: string;
+  gameMapJson: JSON;
+  gameMapTileset: string;
   initialSetupCompleted: boolean;
-};
-
-export type RoomsObjectLayerData = {
-  id: number;
-  name: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  polyline: Array<{ x: number; y: number }>;
-};
-
-export type Layer = {
-  id: number;
-  name: string;
-  data: number[];
-  width: number;
-  height: number;
-};
-
-export type TileMap = {
-  width: number;
-  height: number;
-  tilewidth: number;
-  tileheight: number;
-  layers: Layer[];
-};
-
-export type Rectangle = {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
 };

@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 
+// Shows the collision boxes for the tilemap
 const debugDraw = (layer: Phaser.Tilemaps.TilemapLayer, scene: Phaser.Scene) => {
   const debugGraphics = scene.add.graphics().setAlpha(0.7);
   layer.renderDebug(debugGraphics, {

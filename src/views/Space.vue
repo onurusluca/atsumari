@@ -8,7 +8,8 @@ import { emitter } from "@/composables/useEmit";
 import type { User } from "@/types/general";
 import type { SpacesType, ProfilesType } from "@/api/types";
 import Joystick from "@/components/space/Joystick.vue";
-import "@/game";
+import { createGame } from "@/game";
+
 /****************************************
  * DECLARATIONS
  ****************************************/
@@ -21,22 +22,20 @@ const spaceId = String(route.currentRoute.value.params.id);
 const spaceName = String(route.currentRoute.value.params.name);
 const userId = authStore.user?.id;
 
-const canvasLocalStorage = useStorage("atsumari_canvas", {
-  lastUserPosition: { x: 0, y: 0 },
-});
-
 let users = reactive<Array<User>>([]);
 
-// Request animation frame every ..ms
-let canvasFrameRate = ref<number>(60);
 let canvasLoaded = ref<boolean>(false);
-// TODO: Need to change user speed based on canvasFrameRate
-let speed = 3.5;
+let initialSetupCompleted = ref<boolean>(true);
 
 let initialUserPosition = {
   x: 100,
   y: 100,
 };
+
+// TODO: add to database instead of localStorage
+const canvasLocalStorage = useStorage("atsumari_canvas", {
+  lastUserPosition: { x: 0, y: 0 },
+});
 
 let rightClickMenuIsEnabled = ref<boolean>(false);
 let rightClickMenuPosition = ref<{ mouseX: number; mouseY: number }>({
@@ -48,29 +47,8 @@ let rightClickWorldPosition = ref<{ worldX: number; worldY: number }>({
   worldY: 0,
 });
 
-// Windows size to canvas size
-let windowWidth = ref(window.innerWidth);
-let windowHeight = ref(window.innerHeight);
-window.addEventListener("resize", () => {
-  windowWidth.value = window.innerWidth;
-  windowHeight.value = window.innerHeight;
-});
-
-let initialSetupCompleted = ref<boolean>(true);
-
 onMounted(async () => {
-  /*  canvas.addEventListener("click", function () {
-    // Close right click menu on click
-    rightClickMenuIsEnabled.value = false;
-    canvas.focus();
-  }); */
-  /*   await handleReadProfile().then(async () => {
-    if (initialSetupCompleted.value) {
-      await initialPreparations();
-      doRealtimeStuff();
-      await handleAddSpaceToVisitedSpaces();
-    }
-  }); */
+  await initialPreparations();
 });
 
 const initialPreparations = async () => {
@@ -84,51 +62,14 @@ const initialPreparations = async () => {
 
   await downloadSpaceMap();
   await downloadCharacterSpriteSheets();
+  await handleAddSpaceToVisitedSpaces();
 
-  const canvas = document.getElementById("main-canvas") as HTMLCanvasElement;
-
-  // Listen to canvasLoaded event
-  emitter.on("canvasLoaded", () => {
-    canvasLoaded.value = true;
-  });
-
-  // Change canvas size to window size dynamically
-  watch(
-    () => [windowWidth.value, windowHeight.value],
-    ([width, height]) => {
-      canvas.width = width;
-      canvas.height = height - 10;
-    },
-    { immediate: true }
-  );
-  // Watch menu open and update canvas size accordingly
-  watch(
-    () => chatMenuOpen.value || onlineUsersMenuOpen.value,
-    (newValue) => {
-      if (newValue) {
-        canvas.width = windowWidth.value - 380;
-      } else {
-        canvas.width = windowWidth.value;
-      }
-    },
-    { immediate: true }
-  );
-
-  /*   createCanvasApp({
+  createGame({
     users: users,
     myPlayerId: userId,
-    speed: speed,
-    canvas: canvas,
-    canvasFrameRate: canvasFrameRate.value,
-    spaceMap: spaceMap.value,
+    gameMapJson: gameMapJson.value!,
+    gameMapTileset: gameMapTileset.value!,
     initialSetupCompleted: initialSetupCompleted.value,
-  }); */
-
-  // Focus canvas on click
-  canvas.addEventListener("click", function () {
-    // Close right click menu on click
-    rightClickMenuIsEnabled.value = false;
-    canvas.focus();
   });
 
   // Define helper function to update and broadcast user position
@@ -203,21 +144,38 @@ const handleReadProfile = async () => {
 };
 
 // Get space map
-let spaceMap = ref<string>("");
+let gameMapJson = ref<JSON>();
+let gameMapTileset = ref<string>();
 const downloadSpaceMap = async () => {
   try {
     const { data, error } = await supabase.storage
       .from("space-maps")
-      .download("newworld.png");
+      .download("nature-map.json");
+
+    if (data) {
+      const text = await data.text(); // Convert the Blob into a string
+      const jsonData = JSON.parse(text); // Parse the string as JSON
+
+      gameMapJson.value = jsonData;
+    }
+    if (error) throw error;
+  } catch (error: any) {
+    console.log("DOWNLOAD gameMapJson CATCH ERROR: ", error.message);
+  }
+
+  try {
+    const { data, error } = await supabase.storage
+      .from("space-maps")
+      .download("tileset_nature-map.png");
 
     if (data) {
       // Get the URL of the image
       const url = URL.createObjectURL(data);
-      spaceMap.value = url;
+      gameMapTileset.value = url;
     }
     if (error) throw error;
   } catch (error: any) {
-    console.log("DOWNLOAD SPACE MAP CATCH ERROR: ", error.message);
+    console.log("DOWNLOAD gameMapTileset CATCH ERROR: ", error.message);
   }
 };
 
@@ -233,12 +191,7 @@ const downloadCharacterSpriteSheets = async () => {
         // Get the URL of the image
         const url = URL.createObjectURL(data);
 
-        // Create an image as the canvas drawImage() method requires an image
-        const img = new Image();
-        img.onload = () => {
-          user.characterSprite = img as HTMLImageElement;
-        };
-        img.src = url;
+        user.characterSprite = url;
       }
       if (error) throw error;
     } catch (error: any) {
@@ -440,7 +393,7 @@ const onlineUsersMenuOpen = ref<Boolean>(false);
 
 // Main menu
 let mainMenuOpen = ref<Boolean>(false);
-const mainMenuClickOutsideHandler: OnClickOutsideHandler = (event) => {
+const mainMenuClickOutsideHandler: OnClickOutsideHandler = () => {
   mainMenuOpen.value = false;
 };
 
