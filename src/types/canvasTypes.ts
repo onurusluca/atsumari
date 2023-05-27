@@ -23,3 +23,22 @@ export type TileMap = {
   tileheight: number;
   layers: Layer[];
 };
+
+export type Layer = {
+  data: number[];
+  height: number;
+  width: number;
+  name: string;
+  opacity: number;
+  type: string;
+  visible: boolean;
+  x: number;
+  y: number;
+  properties: Property[];
+};
+
+export type Property = {
+  name: string;
+  type: string;
+  value: string;
+};

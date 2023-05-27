@@ -21,11 +21,13 @@ export async function createGame(options: CanvasAppOptions): Promise<void> {
   const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
     parent: "phaser-game",
+    width: 800,
+    height: 600,
     physics: {
       default: "arcade",
       arcade: {
         gravity: { y: 0, x: 0 },
-        debug: false, // Enable debug
+        debug: true, // Enable debug
         // TODO: Add QuadTree
       },
     },
@@ -41,8 +43,7 @@ export async function createGame(options: CanvasAppOptions): Promise<void> {
 
     render: {
       roundPixels: true,
-      pixelArt: true,
-      antialias: false,
+      desynchronized: true,
     },
   };
 
