@@ -22,8 +22,6 @@ export default class MainScene extends Phaser.Scene {
     // character-sprite-frame is same for all characters so it doesn't need to be passed in. Made with: https://asyed94.github.io/sprite-sheet-to-json/
     this.load.atlas("character-sprite", this.characterSprite, CharacterSpriteFrames);
 
-    this.load.image("player-shadow", PlayerShadowSprite);
-
     // JoyStick
   }
 

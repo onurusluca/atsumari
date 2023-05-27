@@ -1,15 +1,11 @@
 <script setup lang="ts">
-import type { OnClickOutsideHandler } from "@vueuse/core";
 import { vOnClickOutside } from "@vueuse/components";
-// import { createCanvasApp } from "@/canvas/ts/canvasMain";
-import InitialCharacterSetupModal from "@/components/global/InitialCharacterSetupModal.vue";
 import { emitter } from "@/composables/useEmit";
-
-import type { User } from "@/types/general";
-import type { SpacesType, ProfilesType } from "@/api/types";
-import Joystick from "@/components/space/Joystick.vue";
 import { createGame } from "@/game";
 import { TileMap } from "@/types/canvasTypes";
+import type { OnClickOutsideHandler } from "@vueuse/core";
+import type { User } from "@/types/general";
+import type { SpacesType, ProfilesType } from "@/api/types";
 
 /****************************************
  * DECLARATIONS

@@ -1,39 +1,29 @@
 import Phaser from "phaser";
+import { PlayerBanner } from "./PlayerBanner";
 import { debugDraw } from "./helpers/debug";
-
-enum Direction {
-  Up = "up",
-  Down = "down",
-  Left = "left",
-  Right = "right",
-}
-
-enum ControlKeys {
-  W = "W",
-  A = "A",
-  S = "S",
-  D = "D",
-}
-
-const PLAYER_INITIAL_POSITION = { x: 500, y: 500 };
-const PLAYER_SPEED = 30;
-const PLAYER_SCALE = 2;
-const PLAYER_BODY_SIZE = { width: 15, height: 15 };
-const PLAYER_BODY_OFFSET = { x: 1, y: 1 };
+import {
+  Direction,
+  ControlKeys,
+  PLAYER_INITIAL_POSITION,
+  PLAYER_SPEED,
+  PLAYER_SCALE,
+  PLAYER_BODY_SIZE,
+  PLAYER_BODY_OFFSET,
+} from "./helpers/constants";
 
 export default class Game extends Phaser.Scene {
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private wasd!: Record<ControlKeys, Phaser.Input.Keyboard.Key>;
   private myPlayer!: Phaser.Physics.Arcade.Sprite;
-
+  private keysDown: ControlKeys[] = [];
+  private myPlayerBanner!: PlayerBanner;
   constructor() {
     super("game-scene");
   }
 
-  preload() {}
-
+  // PHASER CREATE FUNCTION
   create() {
-    const { worldLayer, wallsLayer } = this.createMapLayers();
+    const { groundLayer, wallsLayer } = this.createMapLayers();
 
     this.createPlayer();
     this.createControls();
@@ -55,7 +45,7 @@ export default class Game extends Phaser.Scene {
     const tileset = map.addTilesetImage("phaser-tiles", "main-tiles", 16, 16);
 
     // ground-layer is the name of the layer in Tiled exported JSON
-    const worldLayer = map.createLayer("ground-layer", tileset!);
+    const groundLayer = map.createLayer("ground-layer", tileset!);
     const wallsLayer = map.createLayer("walls-layer", tileset!);
 
     // Collides is a custom property for the tile map, set in Tiled
@@ -64,7 +54,7 @@ export default class Game extends Phaser.Scene {
     // Set world bounds to the size of the map. When close to the edge of the map, the camera will stop scrolling
     this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
 
-    return { worldLayer, wallsLayer };
+    return { groundLayer, wallsLayer };
   }
 
   createPlayer() {
@@ -81,6 +71,15 @@ export default class Game extends Phaser.Scene {
     this.myPlayer.body!.setSize(PLAYER_BODY_SIZE.width, PLAYER_BODY_SIZE.height);
     this.myPlayer.body!.setOffset(PLAYER_BODY_OFFSET.x, PLAYER_BODY_OFFSET.y);
 
+    this.myPlayerBanner = new PlayerBanner(
+      this,
+      PLAYER_INITIAL_POSITION.x,
+      PLAYER_INITIAL_POSITION.y,
+      "UserName",
+      "online",
+      "Status Text"
+    );
+
     this.createAnimations();
   }
 
@@ -93,8 +92,9 @@ export default class Game extends Phaser.Scene {
   }
 
   createWalkAnimation(direction: Direction) {
+    const animationKey = this.getAnimationKey("character", "walk", direction);
     this.anims.create({
-      key: `character-walk-${direction}`,
+      key: animationKey,
       frames: this.anims.generateFrameNames("character-sprite", {
         prefix: `walk-${direction}-`,
         start: 0,
@@ -106,8 +106,9 @@ export default class Game extends Phaser.Scene {
   }
 
   createIdleAnimation(direction: Direction) {
+    const animationKey = this.getAnimationKey("character", "idle", direction);
     this.anims.create({
-      key: `character-idle-${direction}`,
+      key: animationKey,
       frames: [
         {
           key: "character-sprite",
@@ -117,57 +118,109 @@ export default class Game extends Phaser.Scene {
     });
   }
 
-  createControls() {
-    this.cursors = this.input.keyboard!.createCursorKeys();
-    this.wasd = this.input.keyboard!.addKeys("W,A,S,D") as Record<
-      ControlKeys,
-      Phaser.Input.Keyboard.Key
-    >;
+  getAnimationKey(character: string, action: string, direction: Direction) {
+    return `${character}-${action}-${direction}`;
   }
 
-  update() {
-    if (!this.cursors) {
-      console.warn("Cursors not found.");
-      return;
-    }
+  createControls() {
+    this.cursors = this.input.keyboard!.createCursorKeys();
+    this.wasd = {
+      [ControlKeys.W]: this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.W),
+      [ControlKeys.A]: this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.A),
+      [ControlKeys.S]: this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.S),
+      [ControlKeys.D]: this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.D),
+    };
 
-    const speed = PLAYER_SPEED * this.game.loop.delta;
-    this.handlePlayerMovement(speed);
-    this.roundPlayerPosition();
+    Object.entries(this.wasd).forEach(([direction, key]) => {
+      key.on("down", () => {
+        this.keysDown = this.keysDown.filter((k) => k !== direction);
+        this.keysDown.push(direction as ControlKeys);
+      });
+
+      key.on("up", () => {
+        this.keysDown = this.keysDown.filter((k) => k !== direction);
+      });
+    });
   }
 
   handlePlayerMovement(speed: number) {
-    if (this.cursors.up.isDown || this.wasd[ControlKeys.W].isDown) {
-      this.movePlayer(0, -speed, Direction.Up);
-    } else if (this.cursors.down.isDown || this.wasd[ControlKeys.S].isDown) {
-      this.movePlayer(0, speed, Direction.Down);
-    } else if (this.cursors.left.isDown || this.wasd[ControlKeys.A].isDown) {
-      this.movePlayer(-speed, 0, Direction.Left);
-    } else if (this.cursors.right.isDown || this.wasd[ControlKeys.D].isDown) {
-      this.movePlayer(speed, 0, Direction.Right);
-    } else {
-      this.stopPlayer();
+    const lastKey = this.keysDown[this.keysDown.length - 1];
+
+    switch (lastKey) {
+      case ControlKeys.W:
+        this.movePlayerUp(speed);
+        break;
+      case ControlKeys.S:
+        this.movePlayerDown(speed);
+        break;
+      case ControlKeys.A:
+        this.movePlayerLeft(speed);
+        break;
+      case ControlKeys.D:
+        this.movePlayerRight(speed);
+        break;
+      default:
+        this.stopPlayer();
+        break;
     }
   }
 
+  movePlayerUp(speed: number) {
+    this.movePlayer(0, -speed, Direction.Up);
+  }
+
+  movePlayerDown(speed: number) {
+    this.movePlayer(0, speed, Direction.Down);
+  }
+
+  movePlayerLeft(speed: number) {
+    this.movePlayer(-speed, 0, Direction.Left);
+  }
+
+  movePlayerRight(speed: number) {
+    this.movePlayer(speed, 0, Direction.Right);
+  }
+
   movePlayer(xVelocity: number, yVelocity: number, direction: Direction) {
+    const animationKey = this.getAnimationKey("character", "walk", direction);
+
+    // If the correct animation is not playing yet, play it and don't move the player yet.
+    if (this.myPlayer.anims.currentAnim?.key !== animationKey) {
+      this.myPlayer.anims.play(animationKey, true);
+      return;
+    }
     this.myPlayer.setVelocity(xVelocity, yVelocity);
-    setTimeout(() => {
-      this.myPlayer.anims.play(`character-walk-${direction}`, true);
-    }, 0);
   }
 
   stopPlayer() {
     this.myPlayer.setVelocity(0, 0);
     const currentDirection = this.myPlayer.anims.currentAnim?.key;
     if (currentDirection) {
-      const direction = currentDirection.split("-")[2];
-      this.myPlayer.anims.play(`character-idle-${direction}`, true);
+      const direction = currentDirection.split("-")[2] as Direction;
+      this.myPlayer.anims.play(
+        this.getAnimationKey("character", "idle", direction),
+        true
+      );
     }
   }
 
-  roundPlayerPosition() {
-    this.myPlayer.setPosition(Math.round(this.myPlayer.x), Math.round(this.myPlayer.y));
+  // TODO: Use this function to update the player's status
+  // Update user status
+  /*   onUserStatusUpdate(status: string, textStatus: string) {
+    this.myPlayerBanner.updateUserStatus(status, textStatus);
+  } */
+
+  // PHASER UPDATE FUNCTION
+  update() {
+    if (!this.cursors) {
+      console.warn("Cursors not found. Cannot update the game scene.");
+      return;
+    }
+
+    const speed = PLAYER_SPEED * this.game.loop.delta;
+    this.handlePlayerMovement(speed);
+
+    this.myPlayerBanner.updatePosition(this.myPlayer.x, this.myPlayer.y - 50); // 50 is the offset to display banner above player, adjust it as needed
   }
 }
 
