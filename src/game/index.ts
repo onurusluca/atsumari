@@ -40,10 +40,20 @@ export async function createGame(options: CanvasAppOptions): Promise<void> {
       autoCenter: Phaser.Scale.CENTER_BOTH,
       zoom: 2,
     },
-
     render: {
       roundPixels: true,
-      desynchronized: true,
+      pixelArt: true,
+      antialias: false,
+
+      //desynchronized: true,
+    },
+
+    fps: {
+      //limit: 165,
+      //limit: 144
+      //limit: 60
+      //limit: 40
+      //limit: 15
     },
   };
 

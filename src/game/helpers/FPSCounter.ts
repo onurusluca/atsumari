@@ -1,4 +1,4 @@
-export default class UiScene extends Phaser.Scene {
+export default class FPSCounter extends Phaser.Scene {
   private fpsText!: Phaser.GameObjects.Text;
   private frameTimes: number[] = [];
 
@@ -11,12 +11,12 @@ export default class UiScene extends Phaser.Scene {
     this.fpsText = this.add
       .text(10, 10, "FPS: 0", {
         font: "bold 12px Arial",
-        fill: "#000",
+        color: "#000",
       })
       .setDepth(1);
   }
 
-  update(time: number, delta: number): void {
+  update(/* time: number, */ delta: number): void {
     // Reference to the main scene's camera
     const mainCamera = this.scene.get("game-scene").cameras.main;
 
