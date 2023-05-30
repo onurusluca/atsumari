@@ -18,7 +18,7 @@ export default class Game extends Phaser.Scene {
     this.myPlayer = new Player(this);
 
     // Follow player with camera
-    this.cameras.main.startFollow(this.myPlayer);
+    this.cameras.main.startFollow(this.myPlayer.getPlayer());
 
     // Wall collisions
     wallsLayer!.setCollisionByProperty({ collides: true });

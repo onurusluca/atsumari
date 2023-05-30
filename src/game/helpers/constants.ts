@@ -12,10 +12,18 @@ export enum ControlKeys {
   D = "D",
 }
 
-export const PLAYER_INITIAL_POSITION = { x: 100, y: 100 };
-export const PLAYER_SPEED = 350;
-export const PLAYER_SCALE = 4;
-export const PLAYER_BODY_SIZE = { width: 16, height: 16 };
-export const PLAYER_BODY_OFFSET = { x: 1, y: 1 };
-export const PLAYER_HUD_OFFSET = 15;
-export const MAP_SCALE_FACTOR = 2;
+interface Position {
+  readonly x: number;
+  readonly y: number;
+}
+
+export const UserConstants = {
+  PLAYER_INITIAL_POSITION: { x: 600, y: 600 } as Position,
+  PLAYER_SPEED: 350 as const,
+  PLAYER_SCALE: 4 as const,
+  PLAYER_BODY_SIZE: { width: 15, height: 15 },
+  PLAYER_BODY_OFFSET: { x: 1, y: 1 } as Position,
+  PLAYER_HUD_OFFSET: { x: 60, y: 80 } as Position,
+};
+
+export const MAP_SCALE_FACTOR: number = 2;
