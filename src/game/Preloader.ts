@@ -16,8 +16,8 @@ export default class Preloader extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image("main-tiles", this.tileSetSprite);
-    this.load.tilemapTiledJSON("main-map", this.mapJson);
+    this.load.image("world-tiles", this.tileSetSprite);
+    this.load.tilemapTiledJSON("world-map", this.mapJson);
 
     // character-sprite-frame is same for all characters so it doesn't need to be passed in. Made with: https://asyed94.github.io/sprite-sheet-to-json/
     this.load.atlas("character-sprite", this.characterSprite, CharacterSpriteFrames);

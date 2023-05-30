@@ -7,31 +7,24 @@ import {
   PLAYER_SCALE,
   PLAYER_BODY_SIZE,
   PLAYER_BODY_OFFSET,
-  PLAYER_HUD_OFFSET,
 } from "./helpers/constants";
 
-export default class Player extends Phaser.GameObjects.Container {
+export default class Player {
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private wasd!: Record<ControlKeys, Phaser.Input.Keyboard.Key>;
   private myPlayer!: Phaser.Physics.Arcade.Sprite;
   private keysDown: ControlKeys[] = [];
-  private playerName!: Phaser.GameObjects.Text;
 
-  private playerNameStr: string;
-
-  constructor(scene: Phaser.Scene, playerNameStr: string) {
-    super(scene, PLAYER_INITIAL_POSITION.x, PLAYER_INITIAL_POSITION.y);
-    this.playerNameStr = playerNameStr;
+  constructor(private scene: Phaser.Scene) {
     this.createPlayer();
     this.createControls();
-    this.createName();
   }
 
   createPlayer() {
     // walk-down-0 is the name of the frame in the .json file
     this.myPlayer = this.scene.physics.add.sprite(
-      0, // Update position values to be relative to the container
-      0,
+      PLAYER_INITIAL_POSITION.x,
+      PLAYER_INITIAL_POSITION.y,
       "character-sprite",
       "walk-down-0"
     );
@@ -46,10 +39,8 @@ export default class Player extends Phaser.GameObjects.Container {
     this.myPlayer.setCollideWorldBounds(true);
 
     this.createAnimations();
-
-    // Add player sprite to the container
-    this.add(this.myPlayer);
   }
+
   createAnimations() {
     const directions = Object.values(Direction);
     directions.forEach((direction) => {
@@ -67,7 +58,7 @@ export default class Player extends Phaser.GameObjects.Container {
         start: 0,
         end: 3,
       }),
-      frameRate: 10,
+      frameRate: 8,
       repeat: -1,
     });
   }
@@ -83,25 +74,6 @@ export default class Player extends Phaser.GameObjects.Container {
         },
       ],
     });
-  }
-
-  createName() {
-    this.playerName = this.scene.add.text(
-      0, // Update position values to be relative to the container
-      -PLAYER_HUD_OFFSET,
-      this.playerNameStr,
-      {
-        fontSize: "16px",
-        color: "#ffffff",
-      }
-    );
-
-    // Add player name to the container
-    this.add(this.playerName);
-  }
-
-  updateNamePosition() {
-    this.playerName.setPosition(this.myPlayer.x, this.myPlayer.y - PLAYER_HUD_OFFSET);
   }
 
   getAnimationKey(character: string, action: string, direction: Direction) {
@@ -127,7 +99,6 @@ export default class Player extends Phaser.GameObjects.Container {
 
     Object.entries(this.wasd).forEach(([direction, key]) => {
       key.on("down", () => {
-        this.keysDown = this.keysDown.filter((k) => k !== direction);
         this.keysDown.push(direction as ControlKeys);
       });
 
@@ -138,36 +109,36 @@ export default class Player extends Phaser.GameObjects.Container {
   }
 
   handlePlayerMovement() {
-    // Update method to change the container's position
-    const speed = PLAYER_SPEED * this.scene.game.loop.delta;
-    const lastKey = this.keysDown[this.keysDown.length - 1];
+    const speed = PLAYER_SPEED * Math.round(this.scene.game.loop.delta);
+    let xVelocity = 0;
+    let yVelocity = 0;
+    let direction = null;
 
-    switch (lastKey) {
-      case ControlKeys.W:
-        this.setPosition(this.x, this.y - speed);
-        this.movePlayer(0, -speed, Direction.Up);
-        break;
-      case ControlKeys.S:
-        this.setPosition(this.x, this.y + speed);
-        this.movePlayer(0, speed, Direction.Down);
-        break;
-      case ControlKeys.A:
-        this.setPosition(this.x - speed, this.y);
-        this.movePlayer(-speed, 0, Direction.Left);
-        break;
-      case ControlKeys.D:
-        this.setPosition(this.x + speed, this.y);
-        this.movePlayer(speed, 0, Direction.Right);
-        break;
-      default:
-        this.stopPlayer();
-        break;
+    if (this.keysDown.includes(ControlKeys.W)) {
+      yVelocity -= speed;
+      direction = Direction.Up;
     }
 
-    // Make sure the sprite stays at the center of the container
-    this.myPlayer.setPosition(0, 0);
+    if (this.keysDown.includes(ControlKeys.S)) {
+      yVelocity += speed;
+      direction = Direction.Down;
+    }
 
-    this.updateNamePosition();
+    if (this.keysDown.includes(ControlKeys.A)) {
+      xVelocity -= speed;
+      direction = Direction.Left;
+    }
+
+    if (this.keysDown.includes(ControlKeys.D)) {
+      xVelocity += speed;
+      direction = Direction.Right;
+    }
+
+    if (direction) {
+      this.movePlayer(xVelocity, yVelocity, direction);
+    } else {
+      this.stopPlayer();
+    }
   }
 
   movePlayer(xVelocity: number, yVelocity: number, direction: Direction) {
@@ -187,10 +158,6 @@ export default class Player extends Phaser.GameObjects.Container {
         true
       );
     }
-  }
-
-  setCollidersWith(layer: Phaser.Tilemaps.TilemapLayer) {
-    this.scene.physics.add.collider(this.myPlayer, layer);
   }
 
   getPlayer() {

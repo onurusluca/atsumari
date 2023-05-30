@@ -324,7 +324,6 @@
   "meta": {
     "app": "sprite-sheet-to-json",
     "version": "1.0.0",
-    "image": "dog.png",
     "format": "RGBA8888",
     "size": {
       "w": 64,

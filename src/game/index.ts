@@ -5,6 +5,7 @@ import Game from "./Game";
 import character_sprite_url from "./images/dog.png";
 
 export async function createGame(options: CanvasAppOptions): Promise<void> {
+  // Get stuff sent from Space.vue
   const { users, myPlayerId, gameMapJson, gameMapTileset, initialSetupCompleted } =
     options;
 
@@ -17,35 +18,49 @@ export async function createGame(options: CanvasAppOptions): Promise<void> {
   /* const GameScene: Game = new Game(
 
   ); */
-
+  const dpr = window.devicePixelRatio;
+  const width = window.innerWidth * dpr;
+  const height = window.innerHeight * dpr;
   const config: Phaser.Types.Core.GameConfig = {
-    type: Phaser.AUTO,
-    parent: "phaser-game",
-    width: 800,
-    height: 600,
+    type: Phaser.AUTO, // Phaser will use WebGL if available, if not it will use Canvas
+    parent: "atsumari-game",
+    /*   width: 800,
+    height: 600, */
     physics: {
       default: "arcade",
       arcade: {
-        gravity: { y: 0, x: 0 },
+        gravity: { y: 0 }, // Top down game, so no gravity
         debug: true, // Enable debug
         // TODO: Add QuadTree
       },
+    },
+    backgroundColor: "#38393D",
+    dom: {
+      createContainer: true,
+    },
+    autoFocus: true,
+    input: {
+      touch: true,
+      keyboard: true,
     },
     audio: {
       disableWebAudio: true,
     },
     scene: [PreloaderScene, Game],
     scale: {
-      mode: Phaser.Scale.NONE,
-      autoCenter: Phaser.Scale.CENTER_BOTH,
-      zoom: 2,
+      mode: Phaser.Scale.FIT, // Fit to window
+      autoCenter: Phaser.Scale.CENTER_BOTH, // Center game
+      parent: "phaser-game", // ID of the DOM element to which the canvas should be added
+      width: window.innerWidth,
+      height: window.innerHeight,
     },
+    pixelArt: true,
     render: {
       roundPixels: true,
       pixelArt: true,
       antialias: false,
 
-      //desynchronized: true,
+      desynchronized: true,
     },
 
     fps: {
