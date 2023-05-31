@@ -1,19 +1,24 @@
-export type User = {
+// Types for canvas users array
+export interface User {
   id: string;
   userName: string;
   x: number;
   y: number;
-  characterSprite: HTMLImageElement;
   facingTo: string;
+  lastPosition: {
+    x: number;
+    y: number;
+  };
+  characterSprite: string;
   userStatus: string;
-};
+  userPersonalMessage?: string;
+}
 
 export type CanvasAppOptions = {
-  users: User[];
-  myPlayerId: string;
   gameMapJson: TileMap;
   gameMapTileset: string;
-  initialSetupCompleted: boolean;
+  users: User[];
+  stuffLoaded: boolean;
 };
 
 export type TileMap = {

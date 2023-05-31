@@ -1,17 +1,18 @@
 import Phaser from "phaser";
-import { Direction, ControlKeys, UserConstants } from "./helpers/constants";
+import { Direction, ControlKeys, UserConstants } from "../helpers/constants";
 import { PlayerBanner } from "./PlayerBanner";
+import { User } from "@/types/canvasTypes";
 
 export default class Player {
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private wasd!: Record<ControlKeys, Phaser.Input.Keyboard.Key>;
   private myPlayer!: Phaser.Physics.Arcade.Sprite;
   private keysDown: ControlKeys[] = [];
-  private playerName!: string;
-  private playerNameText!: Phaser.GameObjects.Text;
   private playerBanner!: PlayerBanner;
+  private myUser: User;
 
-  constructor(private scene: Phaser.Scene) {
+  constructor(private scene: Phaser.Scene, myUser: User) {
+    this.myUser = myUser;
     this.createPlayer();
     this.createControls();
   }
@@ -20,9 +21,9 @@ export default class Player {
     // walk-down-0 is the name of the frame in the .json file
     this.myPlayer = this.scene.physics.add
       .sprite(
-        UserConstants.PLAYER_INITIAL_POSITION.x,
-        UserConstants.PLAYER_INITIAL_POSITION.y,
-        "character-sprite",
+        this.myUser.lastPosition.x,
+        this.myUser.lastPosition.y,
+        this.myUser.id,
         "walk-down-0"
       )
       .setScale(UserConstants.PLAYER_SCALE);
@@ -44,7 +45,6 @@ export default class Player {
     this.createAnimations();
 
     this.createPlayerBanner();
-    this.updatePlayerBanner();
   }
 
   private createAnimations() {
@@ -59,7 +59,7 @@ export default class Player {
     const animationKey = this.getAnimationKey("character", "walk", direction);
     this.scene.anims.create({
       key: animationKey,
-      frames: this.scene.anims.generateFrameNames("character-sprite", {
+      frames: this.scene.anims.generateFrameNames(this.myUser.id, {
         prefix: `walk-${direction}-`,
         start: 0,
         end: 3,
@@ -76,7 +76,7 @@ export default class Player {
       key: animationKey,
       frames: [
         {
-          key: "character-sprite",
+          key: this.myUser.id,
           frame: `walk-${direction}-0`,
         },
       ],
@@ -87,24 +87,25 @@ export default class Player {
     return `${character}-${action}-${direction}`;
   }
 
-  // Create nam text above the player
+  // Create name text above the player
   private createPlayerBanner() {
     this.playerBanner = new PlayerBanner(
       this.scene,
-      10,
-      10,
-      "online",
-      "John Doe",
-      "guest",
+      0,
+      0,
+      this.myUser.userStatus,
+      this.myUser.userName,
+      "admin",
       "Hello, world!",
       "#ffffff",
-      "#000000"
+      "#2020204d"
     );
+    this.updatePlayerBanner();
   }
 
   private updatePlayerBanner() {
     this.playerBanner.updatePosition(
-      this.myPlayer.body!.center.x - UserConstants.PLAYER_HUD_OFFSET.x,
+      this.myPlayer.body!.center.x - this.playerBanner.getBannerWidth() / 2,
       this.myPlayer.body!.center.y - UserConstants.PLAYER_HUD_OFFSET.y
     );
   }
@@ -137,6 +138,9 @@ export default class Player {
         this.keysDown = this.keysDown.filter((keyDown) => keyDown !== direction);
         if (this.keysDown.length === 0) {
           this.myPlayer.setVelocity(0);
+
+          // Send player position to the server
+          emitter.emit("playerMove", this.myUser);
         }
       });
     });
@@ -151,21 +155,25 @@ export default class Player {
     if (this.keysDown.includes(ControlKeys.W)) {
       yVelocity -= speed;
       direction = Direction.Up;
+      this.myUser.facingTo = "up";
     }
 
     if (this.keysDown.includes(ControlKeys.S)) {
       yVelocity += speed;
       direction = Direction.Down;
+      this.myUser.facingTo = "down";
     }
 
     if (this.keysDown.includes(ControlKeys.A)) {
       xVelocity -= speed;
       direction = Direction.Left;
+      this.myUser.facingTo = "left";
     }
 
     if (this.keysDown.includes(ControlKeys.D)) {
       xVelocity += speed;
       direction = Direction.Right;
+      this.myUser.facingTo = "right";
     }
 
     if (direction) {
@@ -176,6 +184,8 @@ export default class Player {
         this.stopPlayer();
       }
     }
+
+    this.updatePlayerBanner();
   }
 
   movePlayer(xVelocity: number, yVelocity: number, direction: Direction) {
@@ -186,7 +196,8 @@ export default class Player {
     this.myPlayer.anims.play(animationKey, true);
     this.myPlayer.setVelocity(xVelocity, yVelocity);
 
-    this.updatePlayerBanner();
+    this.myUser.x = this.myPlayer.x;
+    this.myUser.y = this.myPlayer.y;
 
     // Normalize and scale the velocity so that player can't move faster along a diagonal
     this.myPlayer.body!.velocity.normalize().scale(UserConstants.PLAYER_SPEED);

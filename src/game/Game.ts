@@ -1,37 +1,47 @@
 import Phaser from "phaser";
 import { debugDraw } from "./helpers/debug";
-import Player from "./Player";
-
+import PlayerManager from "./player/PlayerManager";
+import { User } from "@/types/canvasTypes";
 import { MAP_SCALE_FACTOR } from "./helpers/constants";
 
 export default class Game extends Phaser.Scene {
-  private myPlayer!: Player;
+  private playerManager!: PlayerManager;
+  private users: User[] = [];
 
-  constructor() {
+  constructor(users: User[]) {
     super("game-scene");
+    this.users = users;
   }
 
   create() {
+    this.createPlayersAndStartGame();
+  }
+
+  update(/* time: number, delta: number */) {
+    if (this.playerManager) {
+      this.playerManager.handlePlayerMovement();
+    }
+  }
+
+  createPlayersAndStartGame() {
     const { wallsLayer } = this.createMapLayers();
 
     // Create player instance
-    this.myPlayer = new Player(this);
+    this.playerManager = new PlayerManager(this, this.users);
 
     // Follow player with camera
-    this.cameras.main.startFollow(this.myPlayer.getPlayer());
-
+    this.cameras.main.startFollow(this.playerManager.getLocalPlayer().getPlayer());
     // Wall collisions
     wallsLayer!.setCollisionByProperty({ collides: true });
 
     // Add collision between player and walls
-    this.physics.add.collider(this.myPlayer.getPlayer(), wallsLayer!);
+    this.physics.add.collider(
+      this.playerManager.getLocalPlayer().getPlayer(),
+      wallsLayer!
+    );
 
     // Debug: draw borders and color for collision tiles
     debugDraw(wallsLayer!, this);
-  }
-
-  update(/* time: number, delta: number */) {
-    this.myPlayer.handlePlayerMovement();
   }
 
   private createMapLayers() {
@@ -61,6 +71,9 @@ export default class Game extends Phaser.Scene {
       map.widthInPixels * MAP_SCALE_FACTOR,
       map.heightInPixels * MAP_SCALE_FACTOR
     );
+
+    // When Phaser is ready, log a message in the console
+    emitter.emit("canvasLoaded");
 
     return { groundLayer, wallsLayer };
   }

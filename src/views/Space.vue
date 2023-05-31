@@ -4,7 +4,7 @@ import { emitter } from "@/composables/useEmit";
 import { createGame } from "@/game";
 import { TileMap } from "@/types/canvasTypes";
 import type { OnClickOutsideHandler } from "@vueuse/core";
-import type { User } from "@/types/general";
+import type { User } from "@/types/canvasTypes";
 import type { SpacesType, ProfilesType } from "@/api/types";
 
 /****************************************
@@ -23,6 +23,7 @@ let users = reactive<Array<User>>([]);
 
 let canvasLoaded = ref<boolean>(false);
 let initialSetupCompleted = ref<boolean>(true);
+let stuffLoaded = ref<boolean>(false);
 
 let initialUserPosition = {
   x: 100,
@@ -51,23 +52,15 @@ onMounted(async () => {
 const initialPreparations = async () => {
   // We need to do a lot of stuff in onMounted because we need to wait for the DOM to be ready because of canvas
 
-  generalStore.spaceId = spaceId;
-  generalStore.spaceName = spaceName;
-  generalStore.userId = userId;
-  generalStore.userName = userName.value;
-  generalStore.users = users;
-
-  await downloadSpaceMap();
+  await handleReadProfile();
+  doRealtimeStuff();
   await downloadCharacterSpriteSheets();
   await handleAddSpaceToVisitedSpaces();
 
-  createGame({
-    users: users,
-    myPlayerId: userId,
-    gameMapJson: gameMapJson.value!,
-    gameMapTileset: gameMapTileset.value!,
-    initialSetupCompleted: initialSetupCompleted.value,
-  });
+  generalStore.spaceId = spaceId;
+  generalStore.spaceName = spaceName;
+  generalStore.userName = userName.value;
+  generalStore.users = users;
 
   // Define helper function to update and broadcast user position
   const updateUserPositionAndBroadcast = async (
@@ -82,17 +75,20 @@ const initialPreparations = async () => {
   // Find user by ID
   const findUserById = (userId: string) => users.find((user) => user.id === userId);
 
+  emitter.on("canvasLoaded", () => {
+    canvasLoaded.value = true;
+  });
+
   // Listener to handle player move event
   emitter.on("playerMove", (myPlayer) => {
     const user = findUserById(userId);
     if (!user) return;
     updateUserPositionAndBroadcast(user, myPlayer);
+    console.log("playerMove", myPlayer);
   });
 
   // Listener to handle right click event
   emitter.on("rightClick", (positions) => {
-    console.log("rightClick", positions);
-
     rightClickMenuPosition.value = positions.mousePos;
     rightClickWorldPosition.value = positions.worldPos;
 
@@ -102,6 +98,15 @@ const initialPreparations = async () => {
   // Sent from canvas, when user presses a key, close right click menu
   emitter.on("closeRightClickMenu", () => {
     rightClickMenuIsEnabled.value = false;
+  });
+};
+
+const startGame = async () => {
+  createGame({
+    gameMapJson: gameMapJson.value!,
+    gameMapTileset: gameMapTileset.value!,
+    users: users,
+    stuffLoaded: stuffLoaded.value,
   });
 };
 
@@ -136,7 +141,7 @@ const handleReadProfile = async () => {
       initialSetupCompleted.value = false;
     }
   } catch (error: any) {
-    console.log("READ PROFILES CATCH ERROR: ", error.message);
+    console.warn("READ PROFILES CATCH ERROR: ", error.message);
   }
 };
 
@@ -157,7 +162,7 @@ const downloadSpaceMap = async () => {
     }
     if (error) throw error;
   } catch (error: any) {
-    console.log("DOWNLOAD gameMapJson CATCH ERROR: ", error.message);
+    console.warn("DOWNLOAD gameMapJson CATCH ERROR: ", error.message);
   }
 
   try {
@@ -172,7 +177,7 @@ const downloadSpaceMap = async () => {
     }
     if (error) throw error;
   } catch (error: any) {
-    console.log("DOWNLOAD gameMapTileset CATCH ERROR: ", error.message);
+    console.warn("DOWNLOAD gameMapTileset CATCH ERROR: ", error.message);
   }
 };
 
@@ -182,17 +187,16 @@ const downloadCharacterSpriteSheets = async () => {
     try {
       const { data, error } = await supabase.storage
         .from("character-sprites")
-        .download(`characters/${user.characterSpriteName}`);
+        .download(`characters/${characterSpriteName.value}`);
 
       if (data) {
         // Get the URL of the image
         const url = URL.createObjectURL(data);
-
         user.characterSprite = url;
       }
       if (error) throw error;
     } catch (error: any) {
-      console.log("DOWNLOAD OTHER CHARACTERS SPRITE SHEET CATCH ERROR: ", error);
+      console.warn("DOWNLOAD OTHER CHARACTERS SPRITE SHEET CATCH ERROR: ", error);
     }
   });
 };
@@ -253,6 +257,8 @@ const addSpaceToVisitedSpaces = async () => {
 const handleInitiateDownloadsAfterUsersLoaded = async () => {
   await downloadCharacterSpriteSheets();
   await downloadSpaceMap();
+
+  startGame();
 };
 
 // After all the initial setups are done in the modal, do the preparations
@@ -330,12 +336,16 @@ const handleJoinEvent = ({ newPresences }: { newPresences: User[] }) => {
   sendUserAction(lastUserPosition.x, lastUserPosition.y, "down");
 
   const [newUser] = newPresences as User[];
+
+  // Adds users to the users array
   users.push({
     ...newUser,
     facingTo: "down",
     userStatus: generalStore.userStatus,
     userPersonalMessage: generalStore.userPersonalMessage,
   });
+
+  stuffLoaded.value = true;
 
   handleInitiateDownloadsAfterUsersLoaded();
 };
@@ -369,7 +379,6 @@ const doRealtimeStuff = () => {
         broadCastChannel.track({
           ...getUserPayload(lastPosition.x, lastPosition.y, "down"),
           online_at: new Date().toISOString(),
-          characterSpriteName: characterSpriteName.value,
           lastPosition,
         });
       }
@@ -406,9 +415,9 @@ const handleChatMenuOpen = () => {
 
 <template>
   <!-- Loading animation to show until app mount -->
-  <!--   <section v-if="!canvasLoaded" class="route-loading-overlay">
+  <section v-if="!canvasLoaded" class="route-loading-overlay">
     <span class="loader"></span>
-  </section> -->
+  </section>
 
   <div class="space">
     <div class="canvas-container">
