@@ -23,24 +23,25 @@ export default class Preloader extends Phaser.Scene {
 
     this.loadCharacterSprites();
 
-    // Let Phaser know to wait for these to finish loading before calling create.
-    this.load.once("complete", () => {
-      console.log("All assets loaded");
-      // Tell the game scene that all assets have been loaded
-      this.scene.get("game-scene").events.emit("allAssetsLoaded");
-
-      // Starting the game scene here.
-      this.scene.start("game-scene");
-    });
+    // Listener for when all the load requests have completed
+    this.load.on("complete", this.onLoadComplete, this);
   }
 
-  create() {}
+  create() {
+    // Remove the listener to avoid it being called again on next preloading
+    this.load.off("complete", this.onLoadComplete, this);
+  }
 
   loadCharacterSprites() {
     // character-sprite-frame is same for all characters so it doesn't need to be passed in. Made with: https://asyed94.github.io/sprite-sheet-to-json/
-    this.users.forEach((user) => {
+    this.users.forEach((user: User) => {
       this.load.atlas(user.id, user.characterSprite, CharacterSpriteFrames);
+      /*     this.load.atlas(user.id, user.characterSprite, CharacterSpriteFrames); */
     });
+  }
+  onLoadComplete() {
+    // After all the load requests are complete, start the game-scene
+    this.scene.start("game-scene");
   }
 
   update() {}

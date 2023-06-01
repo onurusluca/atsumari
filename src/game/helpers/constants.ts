@@ -19,7 +19,7 @@ interface Position {
 
 export const UserConstants = {
   PLAYER_INITIAL_POSITION: { x: 600, y: 600 } as Position,
-  PLAYER_SPEED: 400 as const,
+  PLAYER_SPEED: 500 as const,
   PLAYER_SCALE: 4 as const,
   PLAYER_BODY_SIZE: { width: 14, height: 14 },
   PLAYER_BODY_OFFSET: { x: 1, y: 2 } as Position,

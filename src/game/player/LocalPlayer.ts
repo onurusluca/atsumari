@@ -15,6 +15,8 @@ export default class Player {
     this.myUser = myUser;
     this.createPlayer();
     this.createControls();
+
+    console.log(myUser.id);
   }
 
   private createPlayer() {
@@ -23,7 +25,7 @@ export default class Player {
       .sprite(
         this.myUser.lastPosition.x,
         this.myUser.lastPosition.y,
-        this.myUser.id,
+        this.myUser.id, // sprite sheet name set in preload for each user
         "walk-down-0"
       )
       .setScale(UserConstants.PLAYER_SCALE);

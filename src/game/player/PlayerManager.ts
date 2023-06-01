@@ -44,8 +44,18 @@ export default class PlayerManager {
     });
   }
 
+  moveRemotePlayers() {
+    Object.keys(this.remotePlayers).forEach((userId) => {
+      this.remotePlayers[userId].movePlayer();
+    });
+  }
+
   getLocalPlayer(): LocalPlayer {
     return this.localPlayer;
+  }
+
+  getRemotePlayers(): Record<string, RemotePlayer> {
+    return this.remotePlayers;
   }
 
   handlePlayerMovement() {

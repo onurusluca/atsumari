@@ -23,7 +23,6 @@ let users = reactive<Array<User>>([]);
 
 let canvasLoaded = ref<boolean>(false);
 let initialSetupCompleted = ref<boolean>(true);
-let stuffLoaded = ref<boolean>(false);
 
 let initialUserPosition = {
   x: 100,
@@ -51,63 +50,83 @@ onMounted(async () => {
 
 const initialPreparations = async () => {
   // We need to do a lot of stuff in onMounted because we need to wait for the DOM to be ready because of canvas
+  try {
+    await handleReadProfile();
 
-  await handleReadProfile();
-  doRealtimeStuff();
-  await downloadCharacterSpriteSheets();
-  await handleAddSpaceToVisitedSpaces();
+    doRealtimeStuff();
+    await new Promise((resolve) => {
+      const checkUsersPopulated = setInterval(() => {
+        if (users.length > 0) {
+          clearInterval(checkUsersPopulated);
+          resolve(null);
+        }
+      }, 100);
+    });
+    await downloadSpaceMap();
+    await downloadCharacterSpriteSheets();
+    createGame({
+      gameMapJson: gameMapJson.value!,
+      gameMapTileset: gameMapTileset.value!,
+      users: users,
+    });
+    /*
+  setTimeout(async () => {
+    await downloadCharacterSpriteSheets();
+    await downloadSpaceMap();
 
-  generalStore.spaceId = spaceId;
-  generalStore.spaceName = spaceName;
-  generalStore.userName = userName.value;
-  generalStore.users = users;
+    createGame({
+      gameMapJson: gameMapJson.value!,
+      gameMapTileset: gameMapTileset.value!,
+      users: users,
+      stuffLoaded: stuffLoaded.value,
+    });
+  }, 1000); */
 
-  // Define helper function to update and broadcast user position
-  const updateUserPositionAndBroadcast = async (
-    user: User,
-    position: { x: number; y: number; facingTo: string }
-  ) => {
-    Object.assign(user, position);
-    sendUserAction(user.x, user.y, user.facingTo);
-    canvasLocalStorage.value = { lastUserPosition: { x: user.x, y: user.y } };
-  };
+    generalStore.spaceId = spaceId;
+    generalStore.spaceName = spaceName;
+    generalStore.userName = userName.value;
+    generalStore.users = users;
 
-  // Find user by ID
-  const findUserById = (userId: string) => users.find((user) => user.id === userId);
+    // Define helper function to update and broadcast user position
+    const updateUserPositionAndBroadcast = async (
+      user: User,
+      position: { x: number; y: number; facingTo: string }
+    ) => {
+      Object.assign(user, position);
+      sendUserAction(user.x, user.y, user.facingTo);
+      canvasLocalStorage.value = { lastUserPosition: { x: user.x, y: user.y } };
+    };
 
-  emitter.on("canvasLoaded", () => {
-    canvasLoaded.value = true;
-  });
+    // Find user by ID
+    const findUserById = (userId: string) => users.find((user) => user.id === userId);
 
-  // Listener to handle player move event
-  emitter.on("playerMove", (myPlayer) => {
-    const user = findUserById(userId);
-    if (!user) return;
-    updateUserPositionAndBroadcast(user, myPlayer);
-    console.log("playerMove", myPlayer);
-  });
+    emitter.on("canvasLoaded", () => {
+      canvasLoaded.value = true;
+    });
 
-  // Listener to handle right click event
-  emitter.on("rightClick", (positions) => {
-    rightClickMenuPosition.value = positions.mousePos;
-    rightClickWorldPosition.value = positions.worldPos;
+    // Listener to handle player move event
+    emitter.on("playerMove", (myPlayer) => {
+      const user = findUserById(userId);
+      if (!user) return;
+      updateUserPositionAndBroadcast(user, myPlayer);
+      console.log("playerMove", myPlayer);
+    });
 
-    rightClickMenuIsEnabled.value = true;
-  });
+    // Listener to handle right click event
+    emitter.on("rightClick", (positions) => {
+      rightClickMenuPosition.value = positions.mousePos;
+      rightClickWorldPosition.value = positions.worldPos;
 
-  // Sent from canvas, when user presses a key, close right click menu
-  emitter.on("closeRightClickMenu", () => {
-    rightClickMenuIsEnabled.value = false;
-  });
-};
+      rightClickMenuIsEnabled.value = true;
+    });
 
-const startGame = async () => {
-  createGame({
-    gameMapJson: gameMapJson.value!,
-    gameMapTileset: gameMapTileset.value!,
-    users: users,
-    stuffLoaded: stuffLoaded.value,
-  });
+    // Sent from canvas, when user presses a key, close right click menu
+    emitter.on("closeRightClickMenu", () => {
+      rightClickMenuIsEnabled.value = false;
+    });
+  } catch (error) {
+    console.warn("INITIAL PREPARATIONS CATCH ERROR: ", error);
+  }
 };
 
 /****************************************
@@ -128,21 +147,53 @@ const handleReadProfile = async () => {
     if (!profiles || profiles.length === 0)
       throw new Error("No user profile found for the user");
 
-    const fetchedUserProfile = profiles[0];
-    const userNameForThisSpace = Object(
-      fetchedUserProfile.user_name_for_each_space
-    ).find((space: { [key: string]: string }) => space[spaceId]);
+    const userProfile = profiles[0];
 
-    if (userNameForThisSpace && fetchedUserProfile.character_sprite) {
+    // Get user name for this space
+    const userNameForThisSpace = Object(userProfile.user_name_for_each_space).find(
+      (space: { [key: string]: string }) => space[spaceId]
+    );
+
+    // Set user name and character sprite name. If user name for this space is not set, set initialSetupCompleted to false to show the inital setups modal
+    if (userNameForThisSpace && userProfile.character_sprite) {
       userName.value = userNameForThisSpace[spaceId];
-      characterSpriteName.value = fetchedUserProfile.character_sprite;
+      characterSpriteName.value = userProfile.character_sprite;
       initialSetupCompleted.value = true;
+
+      console.log(
+        "User name and character sprite name set",
+        userName.value,
+        "|",
+        characterSpriteName.value
+      );
     } else {
       initialSetupCompleted.value = false;
     }
   } catch (error: any) {
     console.warn("READ PROFILES CATCH ERROR: ", error.message);
   }
+};
+
+// Download user character sprite sheet
+const downloadCharacterSpriteSheets = async () => {
+  users.map(async (user) => {
+    try {
+      const { data, error } = await supabase.storage
+        .from("character-sprites")
+        .download(`characters/${characterSpriteName.value}`);
+
+      if (data) {
+        // Get the URL of the image
+        const url = URL.createObjectURL(data);
+        user.characterSprite = url;
+
+        console.warn("Downloaded character sprite sheet", users);
+      }
+      if (error) throw error;
+    } catch (error: any) {
+      console.warn("DOWNLOAD OTHER CHARACTERS SPRITE SHEET CATCH ERROR: ", error);
+    }
+  });
 };
 
 // Get space map
@@ -159,6 +210,8 @@ const downloadSpaceMap = async () => {
       const jsonData = JSON.parse(text); // Parse the string as JSON
 
       gameMapJson.value = jsonData;
+
+      console.log("Downloaded game map JSON", jsonData);
     }
     if (error) throw error;
   } catch (error: any) {
@@ -174,31 +227,13 @@ const downloadSpaceMap = async () => {
       // Get the URL of the image
       const url = URL.createObjectURL(data);
       gameMapTileset.value = url;
+
+      console.log("Downloaded game map tileset", url);
     }
     if (error) throw error;
   } catch (error: any) {
     console.warn("DOWNLOAD gameMapTileset CATCH ERROR: ", error.message);
   }
-};
-
-// Download user character sprite sheet
-const downloadCharacterSpriteSheets = async () => {
-  users.forEach(async (user) => {
-    try {
-      const { data, error } = await supabase.storage
-        .from("character-sprites")
-        .download(`characters/${characterSpriteName.value}`);
-
-      if (data) {
-        // Get the URL of the image
-        const url = URL.createObjectURL(data);
-        user.characterSprite = url;
-      }
-      if (error) throw error;
-    } catch (error: any) {
-      console.warn("DOWNLOAD OTHER CHARACTERS SPRITE SHEET CATCH ERROR: ", error);
-    }
-  });
 };
 
 const handleAddSpaceToVisitedSpaces = async () => {
@@ -251,14 +286,6 @@ const addSpaceToVisitedSpaces = async () => {
   });
 
   if (error) throw error;
-};
-
-// After all the users are loaded, do the preparations
-const handleInitiateDownloadsAfterUsersLoaded = async () => {
-  await downloadCharacterSpriteSheets();
-  await downloadSpaceMap();
-
-  startGame();
 };
 
 // After all the initial setups are done in the modal, do the preparations
@@ -329,30 +356,33 @@ const sendUserAction = (x: number, y: number, facingTo: string) => {
     event: EVENT_SEND_USER_POSITION,
     payload: getUserPayload(x, y, facingTo),
   });
+
+  console.log("sendUserAction", getUserPayload(x, y, facingTo));
 };
 
-const handleJoinEvent = ({ newPresences }: { newPresences: User[] }) => {
+const handleJoinEvent = async ({ newPresences }: { newPresences: User[] }) => {
   const { lastUserPosition = initialUserPosition } = canvasLocalStorage.value;
   sendUserAction(lastUserPosition.x, lastUserPosition.y, "down");
 
   const [newUser] = newPresences as User[];
 
   // Adds users to the users array
-  users.push({
-    ...newUser,
-    facingTo: "down",
-    userStatus: generalStore.userStatus,
-    userPersonalMessage: generalStore.userPersonalMessage,
-  });
+  if (newUser) {
+    users.push({
+      ...newUser,
+      facingTo: "down",
+      userStatus: generalStore.userStatus,
+      userPersonalMessage: generalStore.userPersonalMessage,
+    });
+  }
 
-  stuffLoaded.value = true;
-
-  handleInitiateDownloadsAfterUsersLoaded();
+  console.log("Someone joined the space!", newPresences);
 };
 
 const handleLeaveEvent = ({ leftPresences }: { leftPresences: User[] }) => {
   const userIndex = users.findIndex(({ id }) => id === leftPresences[0].id);
   if (userIndex !== -1) users.splice(userIndex, 1);
+  console.log("Someone left the space!", leftPresences);
 };
 
 const handleUserPositionBroadcast = ({ payload: userPayload }: { payload: User }) => {
@@ -364,7 +394,10 @@ const handleUserPositionBroadcast = ({ payload: userPayload }: { payload: User }
   const user = users.find(({ id }) => id === userPayload.id);
   if (user) {
     Object.assign(user, userPayload);
+    console.log("User position updated: ", user);
   }
+
+  console.log("User position updated: ", user);
 };
 
 const doRealtimeStuff = () => {
@@ -374,6 +407,7 @@ const doRealtimeStuff = () => {
     .on("broadcast", { event: EVENT_SEND_USER_POSITION }, handleUserPositionBroadcast)
     .subscribe((status: string) => {
       if (status === BROADCAST_SUBSCRIBED_STATUS) {
+        // Set user's last position
         const lastPosition =
           canvasLocalStorage.value.lastUserPosition || initialUserPosition;
         broadCastChannel.track({

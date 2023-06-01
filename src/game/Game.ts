@@ -21,6 +21,8 @@ export default class Game extends Phaser.Scene {
     if (this.playerManager) {
       this.playerManager.handlePlayerMovement();
     }
+
+    this.playerManager.moveRemotePlayers();
   }
 
   createPlayersAndStartGame() {
@@ -31,6 +33,7 @@ export default class Game extends Phaser.Scene {
 
     // Follow player with camera
     this.cameras.main.startFollow(this.playerManager.getLocalPlayer().getPlayer());
+
     // Wall collisions
     wallsLayer!.setCollisionByProperty({ collides: true });
 
@@ -40,6 +43,14 @@ export default class Game extends Phaser.Scene {
       wallsLayer!
     );
 
+    // Add collision between local and remote players
+    Object.keys(this.playerManager.getRemotePlayers()).forEach((userId) => {
+      this.physics.add.collider(
+        this.playerManager.getLocalPlayer().getPlayer(),
+        this.playerManager.getRemotePlayers()[userId].getPlayer()
+      );
+    });
+
     // Debug: draw borders and color for collision tiles
     debugDraw(wallsLayer!, this);
   }
@@ -47,7 +58,7 @@ export default class Game extends Phaser.Scene {
   private createMapLayers() {
     // Using 16x16 tiles, so scale up by 2x. Instead of zooming in, we scale up the tilemap and sprites to keep the ui elements on screen and keep the picture crisp.
 
-    // Create map
+    // Create map using the loaded tilemap in Preloader
     const map = this.make.tilemap({ key: "world-map" });
     const tileset = map.addTilesetImage("phaser-tiles", "world-tiles", 16, 16, 1, 2);
     const groundLayer = map.createLayer("ground-layer", tileset!, 0, 0);

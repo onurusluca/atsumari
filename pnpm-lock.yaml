@@ -1,9 +1,13 @@
-lockfileVersion: '6.0'
+lockfileVersion: '6.1'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
 
 dependencies:
   '@100mslive/hms-video-store':
-    specifier: ^0.10.5
-    version: 0.10.5
+    specifier: ^0.10.6
+    version: 0.10.6
   '@intlify/unplugin-vue-i18n':
     specifier: ^0.10.1
     version: 0.10.1(vue-i18n@9.2.2)
@@ -25,6 +29,9 @@ dependencies:
   nanoid:
     specifier: ^4.0.2
     version: 4.0.2
+  papaparse:
+    specifier: ^5.4.1
+    version: 5.4.1
   phaser:
     specifier: ^3.60.0
     version: 3.60.0
@@ -49,11 +56,11 @@ dependencies:
 
 devDependencies:
   '@100mslive/hms-noise-suppression':
-    specifier: ^0.9.5
-    version: 0.9.5(@100mslive/hms-video@0.7.4)
+    specifier: ^0.9.6
+    version: 0.9.6(@100mslive/hms-video@0.7.4)
   '@iconify/json':
-    specifier: ^2.2.71
-    version: 2.2.71
+    specifier: ^2.2.72
+    version: 2.2.72
   '@rushstack/eslint-patch':
     specifier: ^1.3.0
     version: 1.3.0
@@ -117,8 +124,8 @@ devDependencies:
 
 packages:
 
-  /@100mslive/hms-noise-suppression@0.9.5(@100mslive/hms-video@0.7.4):
-    resolution: {integrity: sha512-d0cTYfXliG2XMNIkr5cP43YXbq0wi3I4MwICyoi0JjyyvVdeKdiSmr3iGtxu5wiaEGW0QYhetcyAzLuxTOu9Ag==}
+  /@100mslive/hms-noise-suppression@0.9.6(@100mslive/hms-video@0.7.4):
+    resolution: {integrity: sha512-ek3mgae8pnc8s/2ft19X4gmLGBNYnmIf1VHgL+MQds4aiYKdu6ErS607Smmeh8/MBoe+ADTZz4PknSkbFqoyTQ==}
     engines: {node: '>=10'}
     peerDependencies:
       '@100mslive/hms-video': ^0.7.2
@@ -126,11 +133,11 @@ packages:
       '@100mslive/hms-video': 0.7.4
     dev: true
 
-  /@100mslive/hms-video-store@0.10.5:
-    resolution: {integrity: sha512-4wHv2f6mi511ILV0yC0JKkz/H41i5/1jKN63q/s2CfMBYj8xYsaQLhPfCsiSti8zwZWDbd5Qh3S3Y4JvPxAYxg==}
+  /@100mslive/hms-video-store@0.10.6:
+    resolution: {integrity: sha512-K0y3PBIAl4YnSsNRcX+/Mk1sa1uCGMHASf8j1ngI5vwhF/3CIxob66A1WgsF0wjXWDe5PcxHnLSANpAmdtuOPA==}
     engines: {node: '>=12'}
     dependencies:
-      '@100mslive/hms-video': 0.9.5
+      '@100mslive/hms-video': 0.9.6
       eventemitter2: 6.4.9
       immer: 9.0.21
       reselect: 4.0.0
@@ -150,8 +157,8 @@ packages:
       webrtc-adapter: 8.2.2
     dev: true
 
-  /@100mslive/hms-video@0.9.5:
-    resolution: {integrity: sha512-/Df4x0eFYxW7yelTmqyQpbgTfl1rs3v6af3cmQhNbbj8xT7DshOmZCVjpQqlMbn5jpj8Iv8WVzvgbt/q6TWnEg==}
+  /@100mslive/hms-video@0.9.6:
+    resolution: {integrity: sha512-zbs6lFnfki8GDbbzIdxQU+3X8pOMPzuamqyjfkRbwxzwsIT5NZ+9RKTbHy4PiNIFouLMZDlZdCEa7bUe3TWFrQ==}
     engines: {node: '>=10'}
     dependencies:
       eventemitter2: 6.4.9
@@ -168,8 +175,8 @@ packages:
       find-up: 5.0.0
     dev: true
 
-  /@antfu/utils@0.7.3:
-    resolution: {integrity: sha512-sAPXKvlJFVQB4cvmdGoUa9IAavzRrm7N2ctxdD1GuAEIOZu8BRrv2SUzquGXTpRDUa0sY7OkkVHqhi6ySMnMTg==}
+  /@antfu/utils@0.7.4:
+    resolution: {integrity: sha512-qe8Nmh9rYI/HIspLSTwtbMFPj6dISG6+dJnOguTlPNXtCvS2uezdxscVBb7/3DrmNbQK49TDqpkSQ1chbRGdpQ==}
     dev: true
 
   /@babel/helper-string-parser@7.21.5:
@@ -450,8 +457,8 @@ packages:
     resolution: {integrity: sha512-ZnQMnLV4e7hDlUvw8H+U8ASL02SS2Gn6+9Ac3wGGLIe7+je2AeAOxPY+izIPJDfFDb7eDjev0Us8MO1iFRN8hA==}
     dev: true
 
-  /@iconify/json@2.2.71:
-    resolution: {integrity: sha512-UBA548isCGLgsEHUwg7qN/UdKdOUrdUHFnbvRPvIsqHqamsqfWG74UYeJT4U007zOymeHy7ZPsRvNoRY4M4YaA==}
+  /@iconify/json@2.2.72:
+    resolution: {integrity: sha512-1837vBdmUMdr2yj7AEq3dnvBCWAYguIFlEKTaur4It42oPa3bfshEKIo3Rgubf7vh3VzuU4D+NZtFTyeJjPcjQ==}
     dependencies:
       '@iconify/types': 2.0.0
       pathe: 1.1.0
@@ -465,7 +472,7 @@ packages:
     resolution: {integrity: sha512-6MvDI+I6QMvXn5rK9KQGdpEE4mmLTcuQdLZEiX5N+uZB+vc4Yw9K1OtnOgkl8mp4d9X0UrILREyZgF1NUwUt+Q==}
     dependencies:
       '@antfu/install-pkg': 0.1.1
-      '@antfu/utils': 0.7.3
+      '@antfu/utils': 0.7.4
       '@iconify/types': 2.0.0
       debug: 4.3.4
       kolorist: 1.8.0
@@ -671,8 +678,8 @@ packages:
       - encoding
     dev: false
 
-  /@supabase/gotrue-js@2.28.0:
-    resolution: {integrity: sha512-uHDMnivhsarcS70fm4zj5+Kp2aqQjKnM0+DvzU0djv1vaVOzeB00B+mZ+KjrOkY3j1wM65joLX6kuIDbYdx6MA==}
+  /@supabase/gotrue-js@2.28.1:
+    resolution: {integrity: sha512-i2IR8IRDhcrWfBjC7o5T0F8liOA1X6+moqCam6F5pIURI5PM+087hH+tDZ9dKu0AqAFgT0TpLmWK82fKWQlkfg==}
     dependencies:
       cross-fetch: 3.1.6
     transitivePeerDependencies:
@@ -690,7 +697,7 @@ packages:
   /@supabase/realtime-js@2.7.2:
     resolution: {integrity: sha512-Fi6xAl5PUkqnjl3wo4rdcQIbMG3+yTRX1aUZe/yfvTG84RMvmCXJ1yN6MmafVLeZpU1xkaz5Vx4L0tnHcLiy6w==}
     dependencies:
-      '@types/phoenix': 1.5.6
+      '@types/phoenix': 1.6.0
       '@types/websocket': 1.0.5
       websocket: 1.0.34
     transitivePeerDependencies:
@@ -709,7 +716,7 @@ packages:
     resolution: {integrity: sha512-zrAm+hp6DBICqZ7xVPk+KofmlfjJWQzXuf2sHAyPz8XVjpha84z2OVWcow2aI10YkMOrPwhRtBBQYJOnh/fx2w==}
     dependencies:
       '@supabase/functions-js': 2.1.1
-      '@supabase/gotrue-js': 2.28.0
+      '@supabase/gotrue-js': 2.28.1
       '@supabase/postgrest-js': 1.7.0
       '@supabase/realtime-js': 2.7.2
       '@supabase/storage-js': 2.5.1
@@ -729,8 +736,8 @@ packages:
   /@types/node@20.2.5:
     resolution: {integrity: sha512-JJulVEQXmiY9Px5axXHeYGLSjhkZEnD+MDPDGbCbIAbMslkKwmygtZFy1X6s/075Yo94sf8GuSlFfPzysQrWZQ==}
 
-  /@types/phoenix@1.5.6:
-    resolution: {integrity: sha512-e7jZ6I9uyRGsg7MNwQcarmBvRlbGb9DibbocE9crVnxqsy6C23RMxLWbJ2CQ3vgCW7taoL1L+F02EcjA6ld7XA==}
+  /@types/phoenix@1.6.0:
+    resolution: {integrity: sha512-qwfpsHmFuhAS/dVd4uBIraMxRd56vwBUYQGZ6GpXnFuM2XMRFJbIyruFKKlW2daQliuYZwe0qfn/UjFCDKic5g==}
     dev: false
 
   /@types/semver@7.5.0:
@@ -2779,6 +2786,10 @@ packages:
       p-limit: 3.1.0
     dev: true
 
+  /papaparse@5.4.1:
+    resolution: {integrity: sha512-HipMsgJkZu8br23pW15uvo6sib6wne/4woLZPlFf3rpDyMe9ywEXUsuD7+6K9PRkJlVT51j/sCOYDKGGS3ZJrw==}
+    dev: false
+
   /parent-module@1.0.1:
     resolution: {integrity: sha512-GQ2EWRpQV8/o+Aw8YqtfZZPfNRWZYkbidE9k5rpl/hC3vtHHBfGm2Ifi6qWV+coDGkrUKZAxE3Lot5kcsRlh+g==}
     engines: {node: '>=6'}
@@ -3432,7 +3443,7 @@ packages:
       '@vueuse/core':
         optional: true
     dependencies:
-      '@antfu/utils': 0.7.3
+      '@antfu/utils': 0.7.4
       '@rollup/pluginutils': 5.0.2
       '@vueuse/core': 10.1.2(vue@3.3.4)
       local-pkg: 0.4.3
@@ -3462,7 +3473,7 @@ packages:
         optional: true
     dependencies:
       '@antfu/install-pkg': 0.1.1
-      '@antfu/utils': 0.7.3
+      '@antfu/utils': 0.7.4
       '@iconify/utils': 2.1.5
       debug: 4.3.4
       kolorist: 1.8.0
@@ -3485,7 +3496,7 @@ packages:
       '@nuxt/kit':
         optional: true
     dependencies:
-      '@antfu/utils': 0.7.3
+      '@antfu/utils': 0.7.4
       '@rollup/pluginutils': 5.0.2
       chokidar: 3.5.3
       debug: 4.3.4

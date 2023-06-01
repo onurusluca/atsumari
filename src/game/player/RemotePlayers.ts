@@ -11,7 +11,6 @@ export default class RemotePlayer {
   constructor(private scene: Phaser.Scene, user: User) {
     this.user = user;
     this.createPlayer();
-    this.movePlayer();
   }
 
   private createPlayer() {
@@ -62,9 +61,8 @@ export default class RemotePlayer {
     );
   }
 
-  movePlayer() {
-    this.remotePlayer.x = this.user.x;
-    this.remotePlayer.y = this.user.y;
+  public movePlayer() {
+    this.remotePlayer.setPosition(this.user.x, this.user.y);
   }
 
   // Function to get the sprite. It can be used when you need to interact with the sprite (e.g., for collisions)
