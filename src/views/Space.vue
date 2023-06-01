@@ -69,6 +69,8 @@ const initialPreparations = async () => {
       gameMapTileset: gameMapTileset.value!,
       users: users,
     });
+
+    await handleAddSpaceToVisitedSpaces();
     /*
   setTimeout(async () => {
     await downloadCharacterSpriteSheets();
@@ -187,7 +189,7 @@ const downloadCharacterSpriteSheets = async () => {
         const url = URL.createObjectURL(data);
         user.characterSprite = url;
 
-        console.warn("Downloaded character sprite sheet", users);
+        console.log("Downloaded character sprite sheet", users);
       }
       if (error) throw error;
     } catch (error: any) {

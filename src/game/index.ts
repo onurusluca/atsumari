@@ -2,7 +2,6 @@ import * as Phaser from "phaser";
 import type { CanvasAppOptions } from "@/types/canvasTypes";
 import Preloader from "./Preloader";
 import Game from "./Game";
-import { use } from "matter";
 
 export async function createGame(options: CanvasAppOptions): Promise<void> {
   // Get stuff sent from Space.vue
@@ -39,13 +38,12 @@ export async function createGame(options: CanvasAppOptions): Promise<void> {
       width: window.innerWidth,
       height: window.innerHeight,
     },
-    pixelArt: true,
     render: {
       roundPixels: true,
       pixelArt: true,
-      antialias: false,
+      // antialias: true,
 
-      desynchronized: true,
+      // desynchronized: true,
     },
     fps: {
       //limit: 165,
