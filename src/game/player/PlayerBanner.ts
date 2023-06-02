@@ -48,6 +48,7 @@ export class PlayerBanner extends Phaser.GameObjects.Container {
     this.statusIcon.fillStyle(this.getStatusColor(userStatus), 1);
     this.statusIcon.fillCircle(statusIconPosition.x, statusIconPosition.y, 5); // Status icon size
 
+    // Player name
     this.playerName = scene.add
       .text(playerNamePosition.x, playerNamePosition.y, userName, {
         color: userNameColor,
@@ -56,6 +57,7 @@ export class PlayerBanner extends Phaser.GameObjects.Container {
       })
       .setOrigin(0, 0.5);
 
+    // Guest, admin, etc.
     this.playerType = scene.add
       .text(
         this.playerName.x + this.playerName.width + playerTypePosition.x,
@@ -68,6 +70,7 @@ export class PlayerBanner extends Phaser.GameObjects.Container {
       )
       .setOrigin(0, 0.5);
 
+    // Online, offline, away, etc.
     this.playerStatus = scene.add
       .text(playerStatusPosition.x, playerStatusPosition.y, userCustomTextStatus, {
         color: "rgba(255,255,255,0.8)",
@@ -75,6 +78,7 @@ export class PlayerBanner extends Phaser.GameObjects.Container {
       })
       .setOrigin(0, 0.5);
 
+    // Banner body
     // Calculate the banner width
     bannerWidth =
       this.playerStatus.width > this.playerName.width + this.playerType.width

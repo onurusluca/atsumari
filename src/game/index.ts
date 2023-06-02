@@ -54,12 +54,5 @@ export async function createGame(options: CanvasAppOptions): Promise<void> {
     },
   };
 
-  const checkConditionsBeforeLoop = setInterval(() => {
-    if (users.length > 0) {
-      clearInterval(checkConditionsBeforeLoop);
-      console.log("creating game!!!!!!!!!!!!!!!!!!!!!", users);
-
-      new Phaser.Game(config);
-    }
-  }, 100);
+  new Phaser.Game(config);
 }

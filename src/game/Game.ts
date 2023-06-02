@@ -1,28 +1,49 @@
 import Phaser from "phaser";
 import { debugDraw } from "./helpers/debug";
 import PlayerManager from "./player/PlayerManager";
-import { User } from "@/types/canvasTypes";
+import type { User } from "@/types/canvasTypes";
+
 import { MAP_SCALE_FACTOR } from "./helpers/constants";
 
 export default class Game extends Phaser.Scene {
-  private playerManager!: PlayerManager;
   private users: User[] = [];
+  private playerManager!: PlayerManager;
 
   constructor(users: User[]) {
     super("game-scene");
+
     this.users = users;
   }
 
+  preload() {}
+
   create() {
     this.createPlayersAndStartGame();
+
+    emitter.on("userJoined", (user) => this.onUserJoin(user));
   }
 
   update(/* time: number, delta: number */) {
-    if (this.playerManager) {
-      this.playerManager.handlePlayerMovement();
-    }
-
+    this.playerManager.handlePlayerMovement();
     this.playerManager.moveRemotePlayers();
+  }
+
+  onUserJoin(newUser: User) {
+    console.log(`New user has joined:`, newUser);
+
+    // Add to users array
+    this.users.push(newUser);
+
+    // Only send user if they are not already in the game
+    if (!this.playerManager.getRemotePlayers()[newUser.id]) {
+      // Load user sprite
+      //this.load.atlas(newUser.id, "", CharacterSpriteFrames);
+      this.load.once("complete", () => {
+        // Update remote player with new sprite
+        this.playerManager.updateUsers(newUser);
+      });
+      this.load.start();
+    }
   }
 
   createPlayersAndStartGame() {

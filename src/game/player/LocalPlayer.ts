@@ -6,17 +6,20 @@ import { User } from "@/types/canvasTypes";
 export default class Player {
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private wasd!: Record<ControlKeys, Phaser.Input.Keyboard.Key>;
-  private myPlayer!: Phaser.Physics.Arcade.Sprite;
   private keysDown: ControlKeys[] = [];
-  private playerBanner!: PlayerBanner;
+
+  private myPlayer!: Phaser.Physics.Arcade.Sprite;
   private myUser: User;
+
+  private playerBanner!: PlayerBanner;
+  private playerBannerWidth!: number;
+  private shadow!: Phaser.GameObjects.Sprite;
 
   constructor(private scene: Phaser.Scene, myUser: User) {
     this.myUser = myUser;
     this.createPlayer();
     this.createControls();
-
-    console.log(myUser.id);
+    this.playerBannerWidth = this.playerBanner.getBannerWidth();
   }
 
   private createPlayer() {
@@ -28,7 +31,8 @@ export default class Player {
         this.myUser.id, // sprite sheet name set in preload for each user
         "walk-down-0"
       )
-      .setScale(UserConstants.PLAYER_SCALE);
+      .setScale(UserConstants.PLAYER_SCALE)
+      .setDepth(4);
 
     // Player hitbox
     const { body } = this.myPlayer;
@@ -47,6 +51,8 @@ export default class Player {
     this.createAnimations();
 
     this.createPlayerBanner();
+
+    this.createShadow();
   }
 
   private createAnimations() {
@@ -107,8 +113,21 @@ export default class Player {
 
   private updatePlayerBanner() {
     this.playerBanner.updatePosition(
-      this.myPlayer.body!.center.x - this.playerBanner.getBannerWidth() / 2,
+      this.myPlayer.body!.center.x - this.playerBannerWidth / 2,
       this.myPlayer.body!.center.y - UserConstants.PLAYER_HUD_OFFSET.y
+    );
+  }
+
+  private createShadow() {
+    this.shadow = this.scene.add.sprite(this.myPlayer.x, this.myPlayer.y, "shadow");
+    this.shadow.setScale(4);
+    this.shadow.setDepth(1); // Render shadow below the player but above the map/background
+  }
+
+  private updateShadow() {
+    this.shadow.setPosition(
+      this.myPlayer.body!.center.x,
+      this.myPlayer.body!.center.y + this.myPlayer.height - 5
     );
   }
 
@@ -188,6 +207,7 @@ export default class Player {
     }
 
     this.updatePlayerBanner();
+    this.updateShadow();
   }
 
   movePlayer(xVelocity: number, yVelocity: number, direction: Direction) {

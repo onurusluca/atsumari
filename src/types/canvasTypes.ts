@@ -10,6 +10,7 @@ export interface User {
     y: number;
   };
   characterSprite: string;
+  characterSpriteName: string;
   userStatus: string;
   userPersonalMessage?: string;
 }

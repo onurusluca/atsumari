@@ -52,8 +52,9 @@ const initialPreparations = async () => {
   // We need to do a lot of stuff in onMounted because we need to wait for the DOM to be ready because of canvas
   try {
     await handleReadProfile();
-
     doRealtimeStuff();
+    await downloadSpaceMap();
+
     await new Promise((resolve) => {
       const checkUsersPopulated = setInterval(() => {
         if (users.length > 0) {
@@ -62,8 +63,7 @@ const initialPreparations = async () => {
         }
       }, 100);
     });
-    await downloadSpaceMap();
-    await downloadCharacterSpriteSheets();
+
     createGame({
       gameMapJson: gameMapJson.value!,
       gameMapTileset: gameMapTileset.value!,
@@ -71,22 +71,24 @@ const initialPreparations = async () => {
     });
 
     await handleAddSpaceToVisitedSpaces();
-    /*
-  setTimeout(async () => {
-    await downloadCharacterSpriteSheets();
-    await downloadSpaceMap();
 
-    createGame({
-      gameMapJson: gameMapJson.value!,
-      gameMapTileset: gameMapTileset.value!,
-      users: users,
-      stuffLoaded: stuffLoaded.value,
+    // When all preparations are done, emit event to let the game know that it can start loading
+
+    /*
+    await new Promise((resolve) => {
+      const checkUsersPopulated = setInterval(() => {
+        if (users.length > 0) {
+          clearInterval(checkUsersPopulated);
+          resolve(null);
+        }
+      }, 100);
     });
-  }, 1000); */
+     */
 
     generalStore.spaceId = spaceId;
     generalStore.spaceName = spaceName;
     generalStore.userName = userName.value;
+    generalStore.characterSpriteName = characterSpriteName.value;
     generalStore.users = users;
 
     // Define helper function to update and broadcast user position
@@ -177,26 +179,26 @@ const handleReadProfile = async () => {
 };
 
 // Download user character sprite sheet
-const downloadCharacterSpriteSheets = async () => {
-  users.map(async (user) => {
-    try {
-      const { data, error } = await supabase.storage
-        .from("character-sprites")
-        .download(`characters/${characterSpriteName.value}`);
+/* const downloadCharacterSpriteSheets = async (spriteSheetName: string) => {
+  try {
+    const { data, error } = await supabase.storage
+      .from("character-sprites")
+      .download(`characters/${spriteSheetName}`);
 
-      if (data) {
-        // Get the URL of the image
-        const url = URL.createObjectURL(data);
-        user.characterSprite = url;
-
-        console.log("Downloaded character sprite sheet", users);
-      }
-      if (error) throw error;
-    } catch (error: any) {
-      console.warn("DOWNLOAD OTHER CHARACTERS SPRITE SHEET CATCH ERROR: ", error);
+    if (data) {
+      const url = URL.createObjectURL(data);
+      console.log("Downloaded character sprite sheet", url);
+      return url as string;
     }
-  });
-};
+
+    if (error) throw error;
+  } catch (error: any) {
+    console.warn("DOWNLOAD OTHER CHARACTERS SPRITE SHEET CATCH ERROR: ", error);
+  }
+
+  // Return an empty string if the function fails
+  return "";
+}; */
 
 // Get space map
 let gameMapJson = ref<TileMap>();
@@ -347,6 +349,7 @@ const broadCastChannel = supabase.channel(spaceId, BROADCAST_CONFIG);
 const getUserPayload = (x: number, y: number, facingTo: string) => ({
   id: userId,
   userName: userName.value,
+  characterSpriteName: characterSpriteName.value,
   x,
   y,
   facingTo,
@@ -363,22 +366,27 @@ const sendUserAction = (x: number, y: number, facingTo: string) => {
 };
 
 const handleJoinEvent = async ({ newPresences }: { newPresences: User[] }) => {
-  const { lastUserPosition = initialUserPosition } = canvasLocalStorage.value;
-  sendUserAction(lastUserPosition.x, lastUserPosition.y, "down");
+  // Send my position
+  /*   sendUserAction(
+    canvasLocalStorage.value.lastUserPosition.x,
+    canvasLocalStorage.value.lastUserPosition.y,
+    "down"
+  ); */
 
   const [newUser] = newPresences as User[];
 
   // Adds users to the users array
-  if (newUser) {
-    users.push({
-      ...newUser,
-      facingTo: "down",
-      userStatus: generalStore.userStatus,
-      userPersonalMessage: generalStore.userPersonalMessage,
-    });
-  }
+
+  users.push({
+    ...newUser,
+  });
 
   console.log("Someone joined the space!", newPresences);
+
+  // Emit new user with their character sprite
+  emitter.emit("userJoined", {
+    ...newUser,
+  });
 };
 
 const handleLeaveEvent = ({ leftPresences }: { leftPresences: User[] }) => {

@@ -7,6 +7,7 @@ export const useGeneralStore = defineStore("generalStore", {
       spaceId: "" as string,
       spaceName: "" as string,
       userName: "" as string,
+      characterSpriteName: "" as string,
       users: [] as User[],
       userStatus: "online" as string,
       userPersonalMessage: "" as string,
