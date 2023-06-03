@@ -31,24 +31,15 @@ export default class PlayerManager {
   }
 
   public updateUsers(newUser: User) {
-    console.log("PLAYER MANAGER: updateUsers", newUser);
-
-    // Emit to download new sprite sheets
-    if (newUser.characterSprite) {
-      console.log("SPRITE SHEET", newUser.characterSprite);
-      console.log(this.remotePlayers);
-
-      // Refresh existing remote player or create new one
-      if (this.remotePlayers[newUser.id]) {
-        this.remotePlayers[newUser.id].createPlayer();
-      } else {
-        this.remotePlayers[newUser.id] = new RemotePlayer(this.scene, newUser);
-      }
-      console.log(this.remotePlayers);
-    }
+    this.remotePlayers[newUser.id] = new RemotePlayer(this.scene, newUser);
+    console.log(this.remotePlayers);
 
     // Handle users leaving the game: remove their RemotePlayer instances
-    delete this.remotePlayers[newUser.id];
+    Object.keys(this.remotePlayers).forEach((userId) => {
+      if (!newUser.id.includes(userId)) {
+        delete this.remotePlayers[userId];
+      }
+    });
   }
 
   public moveRemotePlayers() {

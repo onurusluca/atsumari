@@ -4,18 +4,7 @@ import { User } from "@/types/canvasTypes";
 
 import CharacterSpriteFrames from "./images/character-sprite-frames.json";
 import ShadowSprite from "./images/shadow.png";
-
-let avatarUrls: Record<string, string> = {};
-const loadAvatars = async (avatarNames: string[]) => {
-  const images = import.meta.globEager("./images/characters/*.png");
-  for (let avatarName of avatarNames) {
-    const avatarImportFunction = images[`./images/characters/${avatarName}.png`];
-    if (avatarImportFunction) {
-      const avatar = await avatarImportFunction();
-      avatarUrls[avatarName] = avatar.default;
-    }
-  }
-};
+import { getCharacterSpriteSheet } from "./images/characters/imports";
 
 export default class Preloader extends Phaser.Scene {
   private tileSetSprite: string;
@@ -44,19 +33,16 @@ export default class Preloader extends Phaser.Scene {
 
   loadCharacterSprites() {
     // character-sprite-frame is same for all characters so it doesn't need to be passed in. Made with: https://asyed94.github.io/sprite-sheet-to-json/
-    loadAvatars(this.users.map((user) => user.characterSpriteName));
-
     this.users.forEach((user: User) => {
       this.load.atlas(
         user.id,
-        avatarUrls[user.characterSpriteName],
+        getCharacterSpriteSheet(user.characterSpriteName),
         CharacterSpriteFrames
       );
     });
   }
   onLoadComplete() {
-    console.log("wowwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww", avatarUrls);
-
+    console.log;
     // After all the load requests are complete, start the game-scene
     this.scene.start("game-scene");
   }

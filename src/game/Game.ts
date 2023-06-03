@@ -2,6 +2,8 @@ import Phaser from "phaser";
 import { debugDraw } from "./helpers/debug";
 import PlayerManager from "./player/PlayerManager";
 import type { User } from "@/types/canvasTypes";
+import { getCharacterSpriteSheet } from "./images/characters/imports";
+import CharacterSpriteFrames from "./images/character-sprite-frames.json";
 
 import { MAP_SCALE_FACTOR } from "./helpers/constants";
 
@@ -37,12 +39,16 @@ export default class Game extends Phaser.Scene {
     // Only send user if they are not already in the game
     if (!this.playerManager.getRemotePlayers()[newUser.id]) {
       // Load user sprite
-      //this.load.atlas(newUser.id, "", CharacterSpriteFrames);
+      this.load.atlas(
+        newUser.id,
+        getCharacterSpriteSheet(newUser.characterSpriteName),
+        CharacterSpriteFrames
+      );
       this.load.once("complete", () => {
         // Update remote player with new sprite
         this.playerManager.updateUsers(newUser);
       });
-      this.load.start();
+      // this.load.start();
     }
   }
 
