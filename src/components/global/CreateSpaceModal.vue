@@ -511,8 +511,7 @@ const handleClickGoToSpace = (spaceId: string, spaceName: string) => {
                   class="btn btn-create"
                 >
                   <!-- Confetti -->
-                  <component
-                    :is="ConfettiExplosion"
+                  <ConfettiExplosion
                     :particleCount="200"
                     :particleSize="8"
                     :duration="4000"

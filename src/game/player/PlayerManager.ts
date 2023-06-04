@@ -31,7 +31,9 @@ export default class PlayerManager {
   }
 
   public updateUsers(newUser: User) {
-    this.remotePlayers[newUser.id] = new RemotePlayer(this.scene, newUser);
+    if (this.scene.textures.exists(newUser.id)) {
+      this.remotePlayers[newUser.id] = new RemotePlayer(this.scene, newUser);
+    }
     console.log(this.remotePlayers);
 
     // Handle users leaving the game: remove their RemotePlayer instances

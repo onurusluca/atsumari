@@ -48,7 +48,7 @@ export default class Game extends Phaser.Scene {
         // Update remote player with new sprite
         this.playerManager.updateUsers(newUser);
       });
-      // this.load.start();
+      this.load.start();
     }
   }
 

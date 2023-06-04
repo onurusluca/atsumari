@@ -42,7 +42,7 @@ export default class RemotePlayer {
   }
 
   // Create name text above the player
-  private createPlayerBanner() {
+  createPlayerBanner() {
     this.playerBanner = new PlayerBanner(
       this.scene,
       0,
@@ -54,6 +54,7 @@ export default class RemotePlayer {
       "#ffffff",
       "#FFA5004d"
     );
+    this.playerBanner.setScrollFactor(0);
     this.updatePlayerBanner();
   }
 
@@ -66,6 +67,7 @@ export default class RemotePlayer {
 
   public movePlayer() {
     this.remotePlayer.setPosition(this.user.x, this.user.y);
+    this.updatePlayerBanner();
   }
 
   // Function to get the sprite. It can be used when you need to interact with the sprite (e.g., for collisions)

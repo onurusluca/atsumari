@@ -27,3 +27,11 @@ export const UserConstants = {
 };
 
 export const MAP_SCALE_FACTOR: number = 2;
+
+export const Depths = {
+  Map: 0,
+  Player: 1,
+  RemotePlayer: 1,
+  PlayerBanner: 2,
+  Shadow: 3,
+};
