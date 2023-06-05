@@ -54,5 +54,29 @@ export async function createGame(options: CanvasAppOptions): Promise<void> {
     },
   };
 
-  new Phaser.Game(config);
+  let gameInstance = new Phaser.Game(config);
+
+  // On destroyGame emit, destroy the game
+  emitter.on("destroyGame", () => {
+    // Stop game loop
+    gameInstance.loop.stop();
+
+    // Loop through each scene in the game
+    gameInstance.scene.getScenes(true).forEach((scene) => {
+      scene.sys.events.shutdown();
+      // Stop the scene
+      scene.scene.stop();
+
+      // Remove the scene from the game
+      gameInstance.scene.remove(scene.sys.settings.key);
+    });
+
+    // Remove game canvas from the DOM
+    if (gameInstance.canvas.parentNode) {
+      gameInstance.canvas.parentNode.removeChild(gameInstance.canvas);
+    }
+
+    // Destroy the game instance
+    gameInstance.destroy(true);
+  });
 }

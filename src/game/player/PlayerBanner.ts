@@ -43,7 +43,7 @@ export class PlayerBanner extends Phaser.GameObjects.Container {
     userBannerColor: string
   ) {
     super(scene, x, y);
-    this.setDepth(4);
+    this.setDepth(2);
     this.statusIcon = scene.add.graphics({ x: 0, y: 0 });
     this.statusIcon.fillStyle(this.getStatusColor(userStatus), 1);
     this.statusIcon.fillCircle(statusIconPosition.x, statusIconPosition.y, 5); // Status icon size

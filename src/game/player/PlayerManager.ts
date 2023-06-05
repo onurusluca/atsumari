@@ -30,8 +30,10 @@ export default class PlayerManager {
     });
   }
 
-  public updateUsers(newUser: User) {
-    if (this.scene.textures.exists(newUser.id)) {
+  public addRemotePlayer(newUser: User) {
+    console.log("Updating users", newUser);
+    // Create new remote player if it doesn't exist and the user is not the local player
+    if (!this.remotePlayers[newUser.id] && newUser.id !== authStore.user?.id) {
       this.remotePlayers[newUser.id] = new RemotePlayer(this.scene, newUser);
     }
   }
@@ -43,10 +45,10 @@ export default class PlayerManager {
     delete this.remotePlayers[userId];
   }
 
-  public moveRemotePlayers() {
-    Object.keys(this.remotePlayers).forEach((userId) => {
-      if (userId !== authStore.user?.id) {
-        this.remotePlayers[userId].movePlayer();
+  public moveRemotePlayers(users: User[]) {
+    users.forEach((user) => {
+      if (user.id !== authStore.user?.id) {
+        this.remotePlayers[user.id].movePlayer(user);
       }
     });
   }

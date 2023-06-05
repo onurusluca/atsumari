@@ -17,13 +17,13 @@ export default class RemotePlayer {
     this.playerBannerWidth = this.playerBanner.getBannerWidth();
   }
 
-  createPlayer() {
+  private createPlayer() {
     // walk-down-0 is the name of the frame in the .json file
     this.remotePlayer = this.scene.physics.add
       .sprite(
         this.user.lastPosition.x,
         this.user.lastPosition.y,
-        this.user.id,
+        "char-atlas",
         "walk-down-0"
       )
       .setScale(UserConstants.PLAYER_SCALE)
@@ -45,7 +45,7 @@ export default class RemotePlayer {
   }
 
   // Create name text above the player
-  createPlayerBanner() {
+  private createPlayerBanner() {
     this.playerBanner = new PlayerBanner(
       this.scene,
       0,
@@ -84,7 +84,10 @@ export default class RemotePlayer {
     );
   }
 
-  public movePlayer() {
+  public movePlayer(user: User) {
+    console.log("Moving remote player", user.x, user.y);
+
+    this.user = user; // Update the user with the new position
     this.remotePlayer.setPosition(this.user.x, this.user.y);
     this.updatePlayerBanner();
     this.updateShadow();
@@ -97,7 +100,7 @@ export default class RemotePlayer {
   }
 
   // Function to get the sprite. It can be used when you need to interact with the sprite (e.g., for collisions)
-  getPlayer() {
+  public getPlayer() {
     return this.remotePlayer;
   }
 }

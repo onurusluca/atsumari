@@ -28,16 +28,13 @@ export default class Game extends Phaser.Scene {
 
   update(/* time: number, delta: number */) {
     this.playerManager.handlePlayerMovement();
-    this.playerManager.moveRemotePlayers();
+    this.playerManager.moveRemotePlayers(this.users);
   }
 
   onUserJoin(newUser: User) {
     console.log(`New user has joined:`, newUser);
 
-    // Only send user if they are not already in the game
-    if (!this.playerManager.getRemotePlayers()[newUser.id]) {
-      this.playerManager.updateUsers(newUser);
-    }
+    this.playerManager.addRemotePlayer(newUser);
 
     /*    if (!this.playerManager.getRemotePlayers()[newUser.id]) {
       // Load user sprite
@@ -89,12 +86,12 @@ export default class Game extends Phaser.Scene {
     );
 
     // Add collision between local and remote players
-    Object.keys(this.playerManager.getRemotePlayers()).forEach((userId) => {
+    /* Object.keys(this.playerManager.getRemotePlayers()).forEach((userId) => {
       this.physics.add.collider(
         this.playerManager.getLocalPlayer().getPlayer(),
         this.playerManager.getRemotePlayers()[userId].getPlayer()
       );
-    });
+    }); */
 
     // Debug: draw borders and color for collision tiles
     debugDraw(wallsLayer!, this);

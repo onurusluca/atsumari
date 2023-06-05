@@ -48,6 +48,10 @@ onMounted(async () => {
   await initialPreparations();
 });
 
+onBeforeUnmount(() => {
+  emitter.emit("destroyGame");
+});
+
 const initialPreparations = async () => {
   // We need to do a lot of stuff in onMounted because we need to wait for the DOM to be ready because of canvas
   await handleReadProfile();
