@@ -28,7 +28,7 @@ export default class Player {
       .sprite(
         this.myUser.lastPosition.x,
         this.myUser.lastPosition.y,
-        this.myUser.id, // sprite sheet name set in preload for each user
+        "char-atlas", // sprite sheet name set in preload for each user
         "walk-down-0"
       )
       .setScale(UserConstants.PLAYER_SCALE)
@@ -49,9 +49,7 @@ export default class Player {
     this.myPlayer.setCollideWorldBounds(true);
 
     this.createAnimations();
-
     this.createPlayerBanner();
-
     this.createShadow();
   }
 
@@ -67,7 +65,7 @@ export default class Player {
     const animationKey = this.getAnimationKey("character", "walk", direction);
     this.scene.anims.create({
       key: animationKey,
-      frames: this.scene.anims.generateFrameNames(this.myUser.id, {
+      frames: this.scene.anims.generateFrameNames("char-atlas", {
         prefix: `walk-${direction}-`,
         start: 0,
         end: 3,
@@ -84,7 +82,7 @@ export default class Player {
       key: animationKey,
       frames: [
         {
-          key: this.myUser.id,
+          key: "char-atlas",
           frame: `walk-${direction}-0`,
         },
       ],

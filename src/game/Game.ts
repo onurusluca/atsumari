@@ -22,7 +22,8 @@ export default class Game extends Phaser.Scene {
   create() {
     this.createPlayersAndStartGame();
 
-    emitter.on("userJoined", (user) => this.onUserJoin(user));
+    emitter.on("newUserJoined", (user) => this.onUserJoin(user));
+    emitter.on("userLeft", (user) => this.onUserLeave(user));
   }
 
   update(/* time: number, delta: number */) {
@@ -33,23 +34,40 @@ export default class Game extends Phaser.Scene {
   onUserJoin(newUser: User) {
     console.log(`New user has joined:`, newUser);
 
-    // Add to users array
-    this.users.push(newUser);
-
     // Only send user if they are not already in the game
     if (!this.playerManager.getRemotePlayers()[newUser.id]) {
+      this.playerManager.updateUsers(newUser);
+    }
+
+    /*    if (!this.playerManager.getRemotePlayers()[newUser.id]) {
       // Load user sprite
       this.load.atlas(
         newUser.id,
         getCharacterSpriteSheet(newUser.characterSpriteName),
         CharacterSpriteFrames
       );
+
       this.load.once("complete", () => {
         // Update remote player with new sprite
         this.playerManager.updateUsers(newUser);
       });
+
+      this.load.on("loaderror", (file: Phaser.Loader.File) => {
+        console.error(
+          `Error occurred when loading sprite for user ${newUser.id}:`,
+          file.src
+        );
+      });
+
       this.load.start();
-    }
+    } */
+  }
+
+  onUserLeave(user: User) {
+    console.log(`User has left:`, user);
+
+    // Remove user from remote players
+    this.playerManager.removeRemotePlayer(user.id);
   }
 
   createPlayersAndStartGame() {
@@ -111,7 +129,7 @@ export default class Game extends Phaser.Scene {
     );
 
     // When Phaser is ready, log a message in the console
-    emitter.emit("canvasLoaded");
+    emitter.emit("gameLoaded");
 
     return { groundLayer, wallsLayer };
   }

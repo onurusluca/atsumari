@@ -21,7 +21,12 @@ export default class Preloader extends Phaser.Scene {
   preload() {
     this.load.image("world-tiles", this.tileSetSprite);
     this.load.tilemapTiledJSON("world-map", this.mapJson);
-    this.loadCharacterSprites();
+    //this.loadCharacterSprites();
+    this.load.atlas(
+      "char-atlas",
+      getCharacterSpriteSheet("dog.png"),
+      CharacterSpriteFrames
+    );
     this.load.image("shadow", ShadowSprite);
     this.load.on("complete", this.onLoadComplete, this);
   }

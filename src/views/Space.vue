@@ -50,88 +50,67 @@ onMounted(async () => {
 
 const initialPreparations = async () => {
   // We need to do a lot of stuff in onMounted because we need to wait for the DOM to be ready because of canvas
-  try {
-    await handleReadProfile();
-    doRealtimeStuff();
-    await downloadSpaceMap();
+  await handleReadProfile();
+  doRealtimeStuff();
+  await downloadSpaceMap();
 
-    await new Promise((resolve) => {
-      const checkUsersPopulated = setInterval(() => {
-        if (users.length > 0) {
-          clearInterval(checkUsersPopulated);
-          resolve(null);
-        }
-      }, 100);
-    });
+  await new Promise((resolve) => {
+    const checkUsersPopulated = setInterval(() => {
+      if (users.length > 0) {
+        clearInterval(checkUsersPopulated);
+        resolve(null);
+      }
+    }, 100);
+  });
 
-    createGame({
-      gameMapJson: gameMapJson.value!,
-      gameMapTileset: gameMapTileset.value!,
-      users: users,
-    });
+  createGame({
+    gameMapJson: gameMapJson.value!,
+    gameMapTileset: gameMapTileset.value!,
+    users: users,
+  });
 
-    await handleAddSpaceToVisitedSpaces();
+  await handleAddSpaceToVisitedSpaces();
 
-    // When all preparations are done, emit event to let the game know that it can start loading
-
-    /*
-    await new Promise((resolve) => {
-      const checkUsersPopulated = setInterval(() => {
-        if (users.length > 0) {
-          clearInterval(checkUsersPopulated);
-          resolve(null);
-        }
-      }, 100);
-    });
-     */
-
-    generalStore.spaceId = spaceId;
-    generalStore.spaceName = spaceName;
-    generalStore.userName = userName.value;
-    generalStore.characterSpriteName = characterSpriteName.value;
-    generalStore.users = users;
-
-    // Define helper function to update and broadcast user position
-    const updateUserPositionAndBroadcast = async (
-      user: User,
-      position: { x: number; y: number; facingTo: string }
-    ) => {
-      Object.assign(user, position);
-      sendUserAction(user.x, user.y, user.facingTo);
-      canvasLocalStorage.value = { lastUserPosition: { x: user.x, y: user.y } };
-    };
-
-    // Find user by ID
-    const findUserById = (userId: string) => users.find((user) => user.id === userId);
-
-    emitter.on("canvasLoaded", () => {
-      canvasLoaded.value = true;
-    });
-
-    // Listener to handle player move event
-    emitter.on("playerMove", (myPlayer) => {
-      const user = findUserById(userId);
-      if (!user) return;
-      updateUserPositionAndBroadcast(user, myPlayer);
-      console.log("playerMove", myPlayer);
-    });
-
-    // Listener to handle right click event
-    emitter.on("rightClick", (positions) => {
-      rightClickMenuPosition.value = positions.mousePos;
-      rightClickWorldPosition.value = positions.worldPos;
-
-      rightClickMenuIsEnabled.value = true;
-    });
-
-    // Sent from canvas, when user presses a key, close right click menu
-    emitter.on("closeRightClickMenu", () => {
-      rightClickMenuIsEnabled.value = false;
-    });
-  } catch (error) {
-    console.warn("INITIAL PREPARATIONS CATCH ERROR: ", error);
-  }
+  generalStore.spaceId = spaceId;
+  generalStore.spaceName = spaceName;
+  generalStore.userName = userName.value;
+  generalStore.users = users;
 };
+
+emitter.on("gameLoaded", () => {
+  console.log("gameLoaded");
+
+  canvasLoaded.value = true;
+});
+
+const updateUserPositionAndBroadcast = async (
+  user: User,
+  position: { x: number; y: number; facingTo: string }
+) => {
+  Object.assign(user, position);
+  sendUserAction(user.x, user.y, user.facingTo);
+  canvasLocalStorage.value = { lastUserPosition: { x: user.x, y: user.y } };
+};
+
+// Listener to handle player move event
+emitter.on("playerMove", (myPlayer) => {
+  const user = users.find((user) => user.id === userId);
+  if (!user) return;
+  updateUserPositionAndBroadcast(user, myPlayer);
+});
+
+// Listener to handle right click event
+emitter.on("rightClick", (positions) => {
+  rightClickMenuPosition.value = positions.mousePos;
+  rightClickWorldPosition.value = positions.worldPos;
+
+  rightClickMenuIsEnabled.value = true;
+});
+
+// Sent from canvas, when user presses a key, close right click menu
+emitter.on("closeRightClickMenu", () => {
+  rightClickMenuIsEnabled.value = false;
+});
 
 /****************************************
  * INITIAL SETUPS
@@ -242,20 +221,26 @@ const downloadSpaceMap = async () => {
 
 const handleAddSpaceToVisitedSpaces = async () => {
   try {
-    const visitedSpaces = await getVisitedSpaces();
+    await getVisitedSpaces().then(async (visitedSpaces) => {
+      console.log("Visited spaces: ", visitedSpaces);
 
-    // If space is not in visited spaces
-    if (visitedSpaces.some((space: SpacesType) => space.id !== spaceId)) {
-      const userSpaces = await getUserSpaces();
+      // If space is not in visited spaces
+      if (!visitedSpaces.some((space: SpacesType) => space.id === spaceId)) {
+        console.log("Space is not in visited spaces");
 
-      // If user is not the owner of the space
-      if (
-        userSpaces.some((space: SpacesType) => space.user_id !== userId) ||
-        userSpaces.length === 0
-      ) {
-        await addSpaceToVisitedSpaces();
+        await getUserSpaces().then(async (userSpaces) => {
+          console.log("User spaces: ", userSpaces);
+
+          // If user is not the owner of the space
+          if (!userSpaces.some((space: SpacesType) => space.id === spaceId)) {
+            console.log("User is not the owner of the space");
+
+            // Add space to visited spaces
+            await addSpaceToVisitedSpaces();
+          }
+        });
       }
-    }
+    });
   } catch (error) {
     console.error("Error in handleAddSpaceToVisitedSpaces: ", error);
   }
@@ -288,6 +273,8 @@ const addSpaceToVisitedSpaces = async () => {
     id: spaceId,
     visited_user_id: userId,
   });
+
+  console.log("Space added to visited spaces");
 
   if (error) throw error;
 };
@@ -333,8 +320,8 @@ const moveUserToRightClickedPosition = async () => {
 const BROADCAST_CONFIG = {
   config: {
     broadcast: {
-      self: false,
-      ack: false,
+      self: false, // Receive events that you send
+      ack: false, // Request an acknowledgement from subscribers
     },
   },
 };
@@ -374,8 +361,7 @@ const handleJoinEvent = async ({ newPresences }: { newPresences: User[] }) => {
   ); */
 
   const [newUser] = newPresences as User[];
-
-  // Adds users to the users array
+  console.log("newUser", newUser);
 
   users.push({
     ...newUser,
@@ -383,16 +369,23 @@ const handleJoinEvent = async ({ newPresences }: { newPresences: User[] }) => {
 
   console.log("Someone joined the space!", newPresences);
 
-  // Emit new user with their character sprite
-  emitter.emit("userJoined", {
-    ...newUser,
-  });
+  // Emit new user unless it's me
+  if (newUser.id !== userId) {
+    emitter.emit("newUserJoined", newUser);
+    console.log("Emit new user", newUser);
+  }
 };
 
 const handleLeaveEvent = ({ leftPresences }: { leftPresences: User[] }) => {
   const userIndex = users.findIndex(({ id }) => id === leftPresences[0].id);
   if (userIndex !== -1) users.splice(userIndex, 1);
   console.log("Someone left the space!", leftPresences);
+
+  // Emit left user unless it's me
+  if (leftPresences[0].id !== userId) {
+    emitter.emit("userLeft", leftPresences[0]);
+    console.log("Emit left user", leftPresences[0]);
+  }
 };
 
 const handleUserPositionBroadcast = ({ payload: userPayload }: { payload: User }) => {

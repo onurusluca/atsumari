@@ -6,8 +6,10 @@ import { PlayerBanner } from "./PlayerBanner";
 export default class RemotePlayer {
   private user: User;
   private remotePlayer!: Phaser.Physics.Arcade.Sprite;
+
   private playerBanner!: PlayerBanner;
   private playerBannerWidth!: number;
+  private shadow!: Phaser.GameObjects.Sprite;
 
   constructor(private scene: Phaser.Scene, user: User) {
     this.user = user;
@@ -39,6 +41,7 @@ export default class RemotePlayer {
     );
 
     this.createPlayerBanner();
+    this.createShadow();
   }
 
   // Create name text above the player
@@ -54,7 +57,6 @@ export default class RemotePlayer {
       "#ffffff",
       "#FFA5004d"
     );
-    this.playerBanner.setScrollFactor(0);
     this.updatePlayerBanner();
   }
 
@@ -65,9 +67,33 @@ export default class RemotePlayer {
     );
   }
 
+  private createShadow() {
+    this.shadow = this.scene.add.sprite(
+      this.remotePlayer.x,
+      this.remotePlayer.y,
+      "shadow"
+    );
+    this.shadow.setScale(4);
+    this.shadow.setDepth(1); // Render shadow below the player but above the map/background
+  }
+
+  private updateShadow() {
+    this.shadow.setPosition(
+      this.remotePlayer.body!.center.x,
+      this.remotePlayer.body!.center.y + this.remotePlayer.height - 5
+    );
+  }
+
   public movePlayer() {
     this.remotePlayer.setPosition(this.user.x, this.user.y);
     this.updatePlayerBanner();
+    this.updateShadow();
+  }
+
+  public destroyPlayer() {
+    this.remotePlayer.destroy();
+    this.playerBanner.destroy();
+    this.shadow.destroy();
   }
 
   // Function to get the sprite. It can be used when you need to interact with the sprite (e.g., for collisions)
