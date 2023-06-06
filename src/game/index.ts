@@ -7,20 +7,20 @@ export async function createGame(options: CanvasAppOptions): Promise<void> {
   // Get stuff sent from Space.vue
   const { gameMapJson, gameMapTileset, users } = options;
 
-  const config: Phaser.Types.Core.GameConfig = {
+  let gameInstance = new Phaser.Game({
     type: Phaser.AUTO, // Phaser will use WebGL if available, if not it will use Canvas
     parent: "atsumari-game",
     physics: {
       default: "arcade",
       arcade: {
         gravity: { y: 0 }, // Top down game, so no gravity
-        debug: true, // Enable debug
+        debug: false, // Enable debug
         // TODO: Add QuadTree
       },
     },
     backgroundColor: "#38393D",
     dom: {
-      createContainer: true,
+      createContainer: false,
     },
     autoFocus: true,
     input: {
@@ -42,7 +42,6 @@ export async function createGame(options: CanvasAppOptions): Promise<void> {
       roundPixels: true,
       pixelArt: true,
       // antialias: true,
-
       // desynchronized: true,
     },
     fps: {
@@ -52,24 +51,22 @@ export async function createGame(options: CanvasAppOptions): Promise<void> {
       //limit: 40
       //limit: 15
     },
-  };
-
-  let gameInstance = new Phaser.Game(config);
+  });
 
   // On destroyGame emit, destroy the game
-  emitter.on("destroyGame", () => {
+  emitter.on("destroyGame", async () => {
     // Stop game loop
     gameInstance.loop.stop();
 
     // Loop through each scene in the game
-    gameInstance.scene.getScenes(true).forEach((scene) => {
+    for (let scene of gameInstance.scene.getScenes(true)) {
       scene.sys.events.shutdown();
       // Stop the scene
       scene.scene.stop();
 
       // Remove the scene from the game
       gameInstance.scene.remove(scene.sys.settings.key);
-    });
+    }
 
     // Remove game canvas from the DOM
     if (gameInstance.canvas.parentNode) {

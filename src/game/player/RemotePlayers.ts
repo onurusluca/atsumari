@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 import type { User } from "@/types/canvasTypes";
-import { UserConstants } from "../helpers/constants";
+import { UserConstants, Depths } from "../helpers/constants";
 import { PlayerBanner } from "./PlayerBanner";
 
 export default class RemotePlayer {
@@ -23,11 +23,11 @@ export default class RemotePlayer {
       .sprite(
         this.user.lastPosition.x,
         this.user.lastPosition.y,
-        "char-atlas",
+        this.user.id, // sprite sheet name set in preload for each user
         "walk-down-0"
       )
       .setScale(UserConstants.PLAYER_SCALE)
-      .setDepth(3);
+      .setDepth(Depths.RemotePlayer);
 
     // Player hitbox
     const { body } = this.remotePlayer;
@@ -40,8 +40,8 @@ export default class RemotePlayer {
       UserConstants.PLAYER_BODY_OFFSET.y
     );
 
-    this.createPlayerBanner();
     this.createShadow();
+    this.createPlayerBanner();
   }
 
   // Create name text above the player
@@ -53,41 +53,34 @@ export default class RemotePlayer {
       this.user.userStatus,
       this.user.userName,
       "remote",
-      "I AM REMOTE!",
+      this.user.userPersonalMessage || "",
       "#ffffff",
-      "#FFA5004d"
+      "#FFA5004d",
+      Depths.RemotePlayerBanner
     );
     this.updatePlayerBanner();
   }
 
-  private updatePlayerBanner() {
+  updatePlayerBanner() {
     this.playerBanner.updatePosition(
-      this.remotePlayer.body!.center.x - this.playerBannerWidth / 2,
-      this.remotePlayer.body!.center.y - UserConstants.PLAYER_HUD_OFFSET.y
+      this.user.x - this.playerBannerWidth / 2,
+      this.user.y - UserConstants.PLAYER_HUD_OFFSET.y
     );
   }
 
   private createShadow() {
-    this.shadow = this.scene.add.sprite(
-      this.remotePlayer.x,
-      this.remotePlayer.y,
-      "shadow"
-    );
+    this.shadow = this.scene.add.sprite(0, 0, "shadow");
     this.shadow.setScale(4);
-    this.shadow.setDepth(1); // Render shadow below the player but above the map/background
+    this.shadow.setDepth(Depths.Shadow); // Render shadow below the player but above the map/background
+    this.updateShadow();
   }
 
   private updateShadow() {
-    this.shadow.setPosition(
-      this.remotePlayer.body!.center.x,
-      this.remotePlayer.body!.center.y + this.remotePlayer.height - 5
-    );
+    this.shadow.setPosition(this.user.x, this.user.y + this.remotePlayer.height - 10);
   }
 
   public movePlayer(user: User) {
-    console.log("Moving remote player", user.x, user.y);
-
-    this.user = user; // Update the user with the new position
+    this.user = user;
     this.remotePlayer.setPosition(this.user.x, this.user.y);
     this.updatePlayerBanner();
     this.updateShadow();

@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { Direction, ControlKeys, UserConstants } from "../helpers/constants";
+import { Direction, ControlKeys, UserConstants, Depths } from "../helpers/constants";
 import { PlayerBanner } from "./PlayerBanner";
 import { User } from "@/types/canvasTypes";
 
@@ -28,11 +28,11 @@ export default class Player {
       .sprite(
         this.myUser.lastPosition.x,
         this.myUser.lastPosition.y,
-        "char-atlas", // sprite sheet name set in preload for each user
+        this.myUser.id, // sprite sheet name set in preload for each user
         "walk-down-0"
       )
       .setScale(UserConstants.PLAYER_SCALE)
-      .setDepth(4);
+      .setDepth(Depths.Player);
 
     // Player hitbox
     const { body } = this.myPlayer;
@@ -65,7 +65,7 @@ export default class Player {
     const animationKey = this.getAnimationKey("character", "walk", direction);
     this.scene.anims.create({
       key: animationKey,
-      frames: this.scene.anims.generateFrameNames("char-atlas", {
+      frames: this.scene.anims.generateFrameNames(this.myUser.id, {
         prefix: `walk-${direction}-`,
         start: 0,
         end: 3,
@@ -82,7 +82,7 @@ export default class Player {
       key: animationKey,
       frames: [
         {
-          key: "char-atlas",
+          key: this.myUser.id,
           frame: `walk-${direction}-0`,
         },
       ],
@@ -102,9 +102,10 @@ export default class Player {
       this.myUser.userStatus,
       this.myUser.userName,
       "admin",
-      "Hello, world!",
+      this.myUser.userPersonalMessage || "",
       "#ffffff",
-      "#2020204d"
+      "#2020204d",
+      Depths.PlayerBanner
     );
     this.updatePlayerBanner();
   }
@@ -119,13 +120,13 @@ export default class Player {
   private createShadow() {
     this.shadow = this.scene.add.sprite(this.myPlayer.x, this.myPlayer.y, "shadow");
     this.shadow.setScale(4);
-    this.shadow.setDepth(1); // Render shadow below the player but above the map/background
+    this.shadow.setDepth(Depths.Shadow); // Render shadow below the player but above the map/background
   }
 
   private updateShadow() {
     this.shadow.setPosition(
       this.myPlayer.body!.center.x,
-      this.myPlayer.body!.center.y + this.myPlayer.height - 5
+      this.myPlayer.body!.center.y + this.myPlayer.height - 10
     );
   }
 

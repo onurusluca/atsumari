@@ -19,10 +19,13 @@ onMounted(() => {});
 
 let isUserInARoom = ref<boolean>(false);
 emitter.on("playerInRoom", (data: any) => {
-  if (data === true && !isUserInARoom.value) {
+  console.log("Received playerInRoom event");
+
+  if (data.inRoom === true && !isUserInARoom.value) {
     console.log("joining room");
+    roomName.value = data.roomName;
     isUserInARoom.value = true;
-  } else if (data === false && isUserInARoom.value) {
+  } else if (data.inRoom === false && isUserInARoom.value) {
     console.log("leaving room");
     isUserInARoom.value = false;
   }

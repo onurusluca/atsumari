@@ -6,6 +6,7 @@ import { TileMap } from "@/types/canvasTypes";
 import type { OnClickOutsideHandler } from "@vueuse/core";
 import type { User } from "@/types/canvasTypes";
 import type { SpacesType, ProfilesType } from "@/api/types";
+import { emit } from "process";
 
 /****************************************
  * DECLARATIONS
@@ -64,7 +65,7 @@ const initialPreparations = async () => {
         clearInterval(checkUsersPopulated);
         resolve(null);
       }
-    }, 100);
+    }, 0);
   });
 
   createGame({
@@ -401,10 +402,9 @@ const handleUserPositionBroadcast = ({ payload: userPayload }: { payload: User }
   const user = users.find(({ id }) => id === userPayload.id);
   if (user) {
     Object.assign(user, userPayload);
-    console.log("User position updated: ", user);
   }
 
-  console.log("User position updated: ", user);
+  emitter.emit("userPositionUpdated", userPayload);
 };
 
 const doRealtimeStuff = () => {
@@ -456,9 +456,9 @@ const handleChatMenuOpen = () => {
 
 <template>
   <!-- Loading animation to show until app mount -->
-  <section v-if="!canvasLoaded" class="route-loading-overlay">
+  <!--  <section v-if="!canvasLoaded" class="route-loading-overlay">
     <span class="loader"></span>
-  </section>
+  </section> -->
 
   <div class="space">
     <div class="canvas-container">

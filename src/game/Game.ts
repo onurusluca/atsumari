@@ -8,83 +8,76 @@ import CharacterSpriteFrames from "./images/character-sprite-frames.json";
 import { MAP_SCALE_FACTOR } from "./helpers/constants";
 
 export default class Game extends Phaser.Scene {
-  private users: User[] = [];
+  private readonly users: User[] = [];
   private playerManager!: PlayerManager;
+  private rooms: [{}] = [{}];
 
   constructor(users: User[]) {
     super("game-scene");
-
     this.users = users;
-  }
 
-  preload() {}
+    this.rooms = [{}];
+  }
 
   create() {
     this.createPlayersAndStartGame();
 
     emitter.on("newUserJoined", (user) => this.onUserJoin(user));
     emitter.on("userLeft", (user) => this.onUserLeave(user));
+    emitter.on("userPositionUpdated", (user) =>
+      this.playerManager.moveRemotePlayer(user)
+    );
+
+    this.playerManager.initialMoveRemotePlayers(this.users);
   }
 
   update(/* time: number, delta: number */) {
-    this.playerManager.handlePlayerMovement();
-    this.playerManager.moveRemotePlayers(this.users);
+    this.playerManager.handleLocalPlayerMovement();
   }
 
-  onUserJoin(newUser: User) {
-    console.log(`New user has joined:`, newUser);
+  private onUserJoin(newUser: User) {
+    // Load the atlas for the new user and then create the player
+    this.load.atlas(
+      newUser.id,
+      getCharacterSpriteSheet(newUser.characterSpriteName),
+      CharacterSpriteFrames
+    );
 
-    this.playerManager.addRemotePlayer(newUser);
+    this.load.once("complete", () => {
+      this.playerManager.addRemotePlayer(newUser);
+    });
 
-    /*    if (!this.playerManager.getRemotePlayers()[newUser.id]) {
-      // Load user sprite
-      this.load.atlas(
-        newUser.id,
-        getCharacterSpriteSheet(newUser.characterSpriteName),
-        CharacterSpriteFrames
-      );
+    this.load.start();
 
-      this.load.once("complete", () => {
-        // Update remote player with new sprite
-        this.playerManager.updateUsers(newUser);
-      });
-
-      this.load.on("loaderror", (file: Phaser.Loader.File) => {
-        console.error(
-          `Error occurred when loading sprite for user ${newUser.id}:`,
-          file.src
-        );
-      });
-
-      this.load.start();
-    } */
+    console.log(`New user joined:`, newUser);
   }
 
-  onUserLeave(user: User) {
+  private onUserLeave(user: User) {
     console.log(`User has left:`, user);
 
     // Remove user from remote players
     this.playerManager.removeRemotePlayer(user.id);
   }
 
-  createPlayersAndStartGame() {
+  private createPlayersAndStartGame() {
+    // Create player instance
+    this.playerManager = new PlayerManager(this, this.users, this.rooms);
+
     const { wallsLayer } = this.createMapLayers();
 
-    // Create player instance
-    this.playerManager = new PlayerManager(this, this.users);
-
     // Follow player with camera
-    this.cameras.main.startFollow(this.playerManager.getLocalPlayer().getPlayer());
+    let localPlayer = this.playerManager?.getLocalPlayer().getPlayer();
+    if (localPlayer) {
+      this.cameras.main.startFollow(localPlayer);
+
+      // Add collision between player and walls
+      this.physics.add.collider(localPlayer, wallsLayer!);
+    }
 
     // Wall collisions
     wallsLayer!.setCollisionByProperty({ collides: true });
 
-    // Add collision between player and walls
-    this.physics.add.collider(
-      this.playerManager.getLocalPlayer().getPlayer(),
-      wallsLayer!
-    );
-
+    // FIXME: For some reason, when players collide they vibrate and glitch
     // Add collision between local and remote players
     /* Object.keys(this.playerManager.getRemotePlayers()).forEach((userId) => {
       this.physics.add.collider(
@@ -94,7 +87,7 @@ export default class Game extends Phaser.Scene {
     }); */
 
     // Debug: draw borders and color for collision tiles
-    debugDraw(wallsLayer!, this);
+    // debugDraw(wallsLayer!, this);
   }
 
   private createMapLayers() {
@@ -105,6 +98,10 @@ export default class Game extends Phaser.Scene {
     const tileset = map.addTilesetImage("phaser-tiles", "world-tiles", 16, 16, 1, 2);
     const groundLayer = map.createLayer("ground-layer", tileset!, 0, 0);
     const wallsLayer = map.createLayer("walls-layer", tileset!, 0, 0);
+    const roomObjectLayer = map.getObjectLayer("roomObjectLayer")["objects"];
+    roomObjectLayer.forEach((obj: any) => {
+      this.rooms.push(obj);
+    });
 
     groundLayer?.setScale(MAP_SCALE_FACTOR);
     wallsLayer?.setScale(MAP_SCALE_FACTOR);

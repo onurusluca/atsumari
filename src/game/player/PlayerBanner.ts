@@ -30,7 +30,6 @@ export class PlayerBanner extends Phaser.GameObjects.Container {
   private playerName: Phaser.GameObjects.Text;
   private playerType: Phaser.GameObjects.Text;
   private playerStatus: Phaser.GameObjects.Text;
-
   constructor(
     scene: Phaser.Scene,
     x: number,
@@ -40,10 +39,11 @@ export class PlayerBanner extends Phaser.GameObjects.Container {
     userType: string,
     userCustomTextStatus: string,
     userNameColor: string,
-    userBannerColor: string
+    userBannerColor: string,
+    bannerDepth: number
   ) {
     super(scene, x, y);
-    this.setDepth(2);
+    this.setDepth(bannerDepth);
     this.statusIcon = scene.add.graphics({ x: 0, y: 0 });
     this.statusIcon.fillStyle(this.getStatusColor(userStatus), 1);
     this.statusIcon.fillCircle(statusIconPosition.x, statusIconPosition.y, 5); // Status icon size
@@ -88,13 +88,8 @@ export class PlayerBanner extends Phaser.GameObjects.Container {
     this.background.fillStyle(parseInt(userBannerColor.replace(/^#/, ""), 16), 1);
     this.background.fillRoundedRect(0, 0, bannerWidth, bannerHeight, 10); // Rounded corners
 
-    this.add([
-      this.background,
-      this.statusIcon,
-      this.playerName,
-      this.playerType,
-      this.playerStatus,
-    ]);
+    this.add([this.background, this.statusIcon, this.playerName, this.playerType]);
+
     scene.add.existing(this);
   }
 
