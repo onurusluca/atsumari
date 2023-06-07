@@ -47,3 +47,16 @@ export type Property = {
   type: string;
   value: string;
 };
+
+export type Room = {
+  id: number;
+  name: string;
+  type: string;
+  rotation: number;
+  visible: boolean;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  rectangle: boolean;
+};

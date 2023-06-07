@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 import type { User } from "@/types/canvasTypes";
-import { UserConstants, Depths } from "../helpers/constants";
+import { Direction, UserConstants, Depths } from "../helpers/constants";
 import { PlayerBanner } from "./PlayerBanner";
 
 export default class RemotePlayer {
@@ -42,6 +42,35 @@ export default class RemotePlayer {
 
     this.createShadow();
     this.createPlayerBanner();
+    this.createAnimations();
+  }
+
+  private createAnimations() {
+    const directions = Object.values(Direction);
+    directions.forEach((direction) => {
+      this.createIdleAnimation(direction);
+    });
+  }
+
+  private createIdleAnimation(direction: Direction) {
+    const animationKey = this.getAnimationKey(
+      `remotePlayer${this.user.id}`,
+      "idle",
+      direction
+    );
+    this.scene.anims.create({
+      key: animationKey,
+      frames: [
+        {
+          key: this.user.id,
+          frame: `walk-${direction}-0`,
+        },
+      ],
+    });
+  }
+
+  private getAnimationKey(character: string, action: string, direction: Direction) {
+    return `${character}-${action}-${direction}`;
   }
 
   // Create name text above the player
@@ -82,6 +111,10 @@ export default class RemotePlayer {
   public movePlayer(user: User) {
     this.user = user;
     this.remotePlayer.setPosition(this.user.x, this.user.y);
+    this.remotePlayer.anims.play(
+      this.getAnimationKey(`remotePlayer${this.user.id}`, "idle", this.user.facingTo),
+      true
+    );
     this.updatePlayerBanner();
     this.updateShadow();
   }

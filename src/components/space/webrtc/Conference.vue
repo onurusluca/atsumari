@@ -10,8 +10,10 @@ const route = useRouter();
 const webrtcLocalStorage = useStorage("atsumari_webrtc", {
   userAuthToken: "",
   userAuthTokenExpiry: "",
+  isMicEnabled: false,
 });
 
+// TODO: I still don't know how to implement such a logic
 // Another room for the users that are close to each other
 const myClosePerimeterRoomName = "my-close-perimeter-room";
 
@@ -24,36 +26,30 @@ const wssUrl = ref("wss://atsumari.livekit.cloud");
 const remoteVideoContainer = ref();
 onMounted(() => {});
 
-let isJoinedToARoom = ref<boolean>(false);
-emitter.on(
-  "playerInRoom",
-  async (data: { isPlayerInARoom: boolean; roomName: string }) => {
-    if (data.isPlayerInARoom === true && !isJoinedToARoom.value) {
-      console.log("in room", data);
+emitter.once("playerInRoom").then(async (data) => {
+  if (data.isPlayerInARoom === true) {
+    console.log("in room", data);
 
-      isJoinedToARoom.value = true;
-      isUserInARoom.value = true;
-      roomName.value = data.roomName;
+    isUserInARoom.value = true;
+    roomName.value = data.roomName;
 
-      await joinRoom();
-      if (webRtcStore.devices.isMicrophoneEnabled) {
-        room.localParticipant.setMicrophoneEnabled(true);
-      }
-    } else if (data.isPlayerInARoom === false && isJoinedToARoom.value) {
-      isJoinedToARoom.value = false;
-      isUserInARoom.value = false;
-      roomName.value = "";
-
-      leaveRoom();
-
-      if (!webRtcStore.devices.isMicrophoneEnabled) {
-        room.localParticipant.setMicrophoneEnabled(false);
-      }
-
-      console.log("outside of room", data);
+    await joinRoom();
+    if (webRtcStore.devices.isMicrophoneEnabled) {
+      room.localParticipant.setMicrophoneEnabled(true);
     }
+  } else if (data.isPlayerInARoom === false) {
+    isUserInARoom.value = false;
+    roomName.value = "";
+
+    leaveRoom();
+
+    if (!webRtcStore.devices.isMicrophoneEnabled) {
+      room.localParticipant.setMicrophoneEnabled(false);
+    }
+
+    console.log("outside of room", data);
   }
-);
+});
 
 const room = new Room({
   audioCaptureDefaults: {
@@ -206,7 +202,7 @@ watch(
   (newValue) => {
     isMicEnabled.value = newValue;
 
-    if (isMicEnabled.value) {
+    if (isMicEnabled.value || webrtcLocalStorage.value.isMicEnabled) {
       room.localParticipant.setMicrophoneEnabled(true);
     } else {
       room.localParticipant.setMicrophoneEnabled(false);

@@ -1,6 +1,6 @@
 import LocalPlayer from "./LocalPlayer";
-import RemotePlayer from "./RemotePlayers";
-import type { User } from "@/types/canvasTypes";
+import RemotePlayer from "./RemotePlayer";
+import type { User, Room } from "@/types/canvasTypes";
 import { MAP_SCALE_FACTOR } from "../helpers/constants";
 
 const authStore = useAuthStore();
@@ -8,16 +8,20 @@ const authStore = useAuthStore();
 export default class PlayerManager {
   private localPlayer!: LocalPlayer;
   private remotePlayers: Record<string, RemotePlayer> = {};
+  private isPlayerInARoom: boolean = false;
 
-  constructor(private scene: Phaser.Scene, users: User[], private rooms: [{}]) {
+  constructor(private scene: Phaser.Scene, users: User[], private rooms: Room[]) {
     this.initializePlayers(users);
   }
 
   private initializePlayers(users: User[]) {
+    console.log("Initializing players. PlayerManager.ts");
+
     const myUserId = authStore.user?.id!;
     users.forEach((user) => {
       if (user.id === myUserId) {
         this.localPlayer = new LocalPlayer(this.scene, user);
+        console.log("Local player initialized. PlayerManager.ts");
       } else {
         this.remotePlayers[user.id] = new RemotePlayer(this.scene, user);
       }
@@ -27,9 +31,11 @@ export default class PlayerManager {
   public addRemotePlayer(newUser: User) {
     // Create new remote player if it doesn't exist and the user is not the local player
 
-    if (this.isUserLocal(newUser)) {
+    if (!this.isUserLocal(newUser)) {
       this.remotePlayers[newUser.id] = new RemotePlayer(this.scene, newUser);
       this.remotePlayers[newUser.id].movePlayer(newUser);
+
+      console.log("New remote player added. PlayerManager.ts");
     }
   }
 
@@ -55,8 +61,9 @@ export default class PlayerManager {
 
     const playerX = this.localPlayer.getPlayer().x;
     const playerY = this.localPlayer.getPlayer().y;
+    let inRoom: Room | null = null;
 
-    this.rooms.forEach((room) => {
+    for (let room of this.rooms) {
       // Check if the player is in the room;
       const roomX = room.x * MAP_SCALE_FACTOR;
       const roomY = room.y * MAP_SCALE_FACTOR;
@@ -67,16 +74,26 @@ export default class PlayerManager {
       const inRoomY = playerY > roomY && playerY < roomY + roomHeight;
 
       if (inRoomX && inRoomY) {
-        console.log(`Player is in room: ${room.name}`);
-
-        emitter.emit("playerInRoom", { isPlayerInARoom: true, roomName: room.name });
-      } else {
-        emitter.emit("playerInRoom", {
-          isPlayerInARoom: false,
-          roomName: "",
-        });
+        inRoom = room;
+        break; // If player is found in a room, break the loop
       }
-    });
+    }
+
+    // If the player is in a room, emit an event
+    if (inRoom !== null) {
+      if (!this.isPlayerInARoom) {
+        this.isPlayerInARoom = true;
+        emitter.emit("playerInRoom", {
+          isPlayerInARoom: true,
+          roomName: inRoom.name,
+        });
+        console.log("Player is in a room. PlayerManager.ts");
+      }
+    } else if (this.isPlayerInARoom) {
+      this.isPlayerInARoom = false;
+      emitter.emit("playerInRoom", { isPlayerInARoom: false, roomName: "" });
+      console.log("Player is not in a room. PlayerManager.ts");
+    }
   }
 
   public getLocalPlayer(): LocalPlayer {

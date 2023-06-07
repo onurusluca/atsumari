@@ -5,6 +5,7 @@ import { User } from "@/types/canvasTypes";
 import CharacterSpriteFrames from "./images/character-sprite-frames.json";
 import ShadowSprite from "./images/shadow.png";
 import { getCharacterSpriteSheet } from "./images/characters/imports";
+const authStore = useAuthStore();
 
 export default class Preloader extends Phaser.Scene {
   private readonly tileSetSprite: string;
@@ -19,9 +20,10 @@ export default class Preloader extends Phaser.Scene {
   }
 
   preload() {
+    console.log("ALL USERS", this.users);
+    this.loadCharacterSprites();
     this.load.image("world-tiles", this.tileSetSprite);
     this.load.tilemapTiledJSON("world-map", this.mapJson);
-    this.loadCharacterSprites();
     this.load.image("shadow", ShadowSprite);
     this.load.on("complete", this.onLoadComplete, this);
   }
@@ -31,15 +33,21 @@ export default class Preloader extends Phaser.Scene {
     this.load.off("complete", this.onLoadComplete, this);
   }
 
-  private loadCharacterSprites() {
-    // character-sprite-frame is same for all characters so it doesn't need to be passed in. Made with: https://asyed94.github.io/sprite-sheet-to-json/
-    this.users.forEach((user: User) => {
-      this.load.atlas(
-        user.id,
-        getCharacterSpriteSheet(user.characterSpriteName),
-        CharacterSpriteFrames
-      );
-    });
+  private async loadCharacterSprites() {
+    console.log("ALLLL USERS", this.users);
+
+    for (let user of this.users) {
+      if (!this.textures.exists(user.id)) {
+        console.log(`Loading character sprite for ${user}`);
+        this.load.atlas(
+          user.id,
+          getCharacterSpriteSheet(user.characterSpriteName),
+          CharacterSpriteFrames
+        );
+
+        await new Promise((resolve) => setTimeout(resolve, 100)); // Add delay
+      }
+    }
   }
 
   private onLoadComplete() {

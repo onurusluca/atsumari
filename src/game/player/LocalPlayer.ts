@@ -62,7 +62,7 @@ export default class Player {
   }
 
   private createWalkAnimation(direction: Direction) {
-    const animationKey = this.getAnimationKey("character", "walk", direction);
+    const animationKey = this.getAnimationKey("localPlayer", "walk", direction);
     this.scene.anims.create({
       key: animationKey,
       frames: this.scene.anims.generateFrameNames(this.myUser.id, {
@@ -77,7 +77,7 @@ export default class Player {
   }
 
   private createIdleAnimation(direction: Direction) {
-    const animationKey = this.getAnimationKey("character", "idle", direction);
+    const animationKey = this.getAnimationKey("localPlayer", "idle", direction);
     this.scene.anims.create({
       key: animationKey,
       frames: [
@@ -89,8 +89,8 @@ export default class Player {
     });
   }
 
-  private getAnimationKey(character: string, action: string, direction: Direction) {
-    return `${character}-${action}-${direction}`;
+  private getAnimationKey(localPlayer: string, action: string, direction: Direction) {
+    return `${localPlayer}-${action}-${direction}`;
   }
 
   // Create name text above the player
@@ -213,7 +213,7 @@ export default class Player {
     // Stop any previous movement from the last frame
     this.myPlayer.setVelocity(0);
 
-    const animationKey = this.getAnimationKey("character", "walk", direction);
+    const animationKey = this.getAnimationKey("localPlayer", "walk", direction);
     this.myPlayer.anims.play(animationKey, true);
     this.myPlayer.setVelocity(xVelocity, yVelocity);
 
@@ -231,7 +231,7 @@ export default class Player {
     )[2] as Direction;
     if (currentDirection) {
       this.myPlayer.anims.play(
-        this.getAnimationKey("character", "idle", currentDirection),
+        this.getAnimationKey("localPlayer", "idle", currentDirection),
         true
       );
     }

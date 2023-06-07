@@ -54,7 +54,7 @@ export async function createGame(options: CanvasAppOptions): Promise<void> {
   });
 
   // On destroyGame emit, destroy the game
-  emitter.on("destroyGame", async () => {
+  /*   emitter.on("destroyGame", async () => {
     // Stop game loop
     gameInstance.loop.stop();
 
@@ -75,5 +75,5 @@ export async function createGame(options: CanvasAppOptions): Promise<void> {
 
     // Destroy the game instance
     gameInstance.destroy(true);
-  });
+  }); */
 }

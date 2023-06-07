@@ -1,7 +1,7 @@
 import Phaser from "phaser";
 import { debugDraw } from "./helpers/debug";
 import PlayerManager from "./player/PlayerManager";
-import type { User } from "@/types/canvasTypes";
+import type { User, Room } from "@/types/canvasTypes";
 import { getCharacterSpriteSheet } from "./images/characters/imports";
 import CharacterSpriteFrames from "./images/character-sprite-frames.json";
 
@@ -9,33 +9,36 @@ import { MAP_SCALE_FACTOR } from "./helpers/constants";
 
 export default class Game extends Phaser.Scene {
   private readonly users: User[] = [];
-  private playerManager!: PlayerManager;
-  private rooms: [{}] = [{}];
+  private playerManager?: PlayerManager;
+  private rooms: Room[];
 
   constructor(users: User[]) {
     super("game-scene");
     this.users = users;
 
-    this.rooms = [{}];
+    this.rooms = [];
   }
 
   create() {
+    this.playerManager = new PlayerManager(this, this.users, this.rooms);
     this.createPlayersAndStartGame();
 
     emitter.on("newUserJoined", (user) => this.onUserJoin(user));
     emitter.on("userLeft", (user) => this.onUserLeave(user));
     emitter.on("userPositionUpdated", (user) =>
-      this.playerManager.moveRemotePlayer(user)
+      this.playerManager!.moveRemotePlayer(user)
     );
 
     this.playerManager.initialMoveRemotePlayers(this.users);
   }
 
   update(/* time: number, delta: number */) {
-    this.playerManager.handleLocalPlayerMovement();
+    this.playerManager!.handleLocalPlayerMovement();
   }
 
   private onUserJoin(newUser: User) {
+    console.log(`New user joined:`, newUser);
+
     // Load the atlas for the new user and then create the player
     this.load.atlas(
       newUser.id,
@@ -44,29 +47,29 @@ export default class Game extends Phaser.Scene {
     );
 
     this.load.once("complete", () => {
-      this.playerManager.addRemotePlayer(newUser);
+      this.playerManager!.addRemotePlayer(newUser);
+      console.log(this.users);
     });
 
     this.load.start();
-
-    console.log(`New user joined:`, newUser);
   }
 
   private onUserLeave(user: User) {
     console.log(`User has left:`, user);
-
     // Remove user from remote players
-    this.playerManager.removeRemotePlayer(user.id);
+    this.playerManager!.removeRemotePlayer(user.id);
   }
 
   private createPlayersAndStartGame() {
-    // Create player instance
-    this.playerManager = new PlayerManager(this, this.users, this.rooms);
-
     const { wallsLayer } = this.createMapLayers();
 
     // Follow player with camera
-    let localPlayer = this.playerManager?.getLocalPlayer().getPlayer();
+    if (!this.playerManager || !this.playerManager.getLocalPlayer()) {
+      console.error("No local player found");
+      return;
+    }
+    let localPlayer = this.playerManager.getLocalPlayer().getPlayer();
+
     if (localPlayer) {
       this.cameras.main.startFollow(localPlayer);
 
@@ -98,7 +101,7 @@ export default class Game extends Phaser.Scene {
     const tileset = map.addTilesetImage("phaser-tiles", "world-tiles", 16, 16, 1, 2);
     const groundLayer = map.createLayer("ground-layer", tileset!, 0, 0);
     const wallsLayer = map.createLayer("walls-layer", tileset!, 0, 0);
-    const roomObjectLayer = map.getObjectLayer("roomObjectLayer")["objects"];
+    const roomObjectLayer = map.getObjectLayer("roomObjectLayer")!["objects"];
     roomObjectLayer.forEach((obj: any) => {
       this.rooms.push(obj);
     });
