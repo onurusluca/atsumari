@@ -58,6 +58,9 @@ export default class RemotePlayer {
       "idle",
       direction
     );
+
+    // If the animation already exists, don't recreate it
+    if (this.scene.anims.exists(animationKey)) return;
     this.scene.anims.create({
       key: animationKey,
       frames: [

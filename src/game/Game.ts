@@ -58,24 +58,25 @@ export default class Game extends Phaser.Scene {
     console.log(`User has left:`, user);
     // Remove user from remote players
     this.playerManager!.removeRemotePlayer(user.id);
+    // Remove user sprite and animations
+    // FIXME: This is not done yet, currently instead of removing the sprite, we keep it but won't load it again
+    /*  this.anims.remove(`${user.id}-down`);
+    this.textures.remove(user.id);
+ */
   }
 
   private createPlayersAndStartGame() {
     const { wallsLayer } = this.createMapLayers();
 
+    let localPlayer = this.playerManager
+      ?.getLocalPlayer()
+      .getPlayer() as Phaser.Physics.Arcade.Sprite;
+
     // Follow player with camera
-    if (!this.playerManager || !this.playerManager.getLocalPlayer()) {
-      console.error("No local player found");
-      return;
-    }
-    let localPlayer = this.playerManager.getLocalPlayer().getPlayer();
+    this.cameras.main.startFollow(localPlayer);
 
-    if (localPlayer) {
-      this.cameras.main.startFollow(localPlayer);
-
-      // Add collision between player and walls
-      this.physics.add.collider(localPlayer, wallsLayer!);
-    }
+    // Add collision between player and walls
+    this.physics.add.collider(localPlayer, wallsLayer!);
 
     // Wall collisions
     wallsLayer!.setCollisionByProperty({ collides: true });

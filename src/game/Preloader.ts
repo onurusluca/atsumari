@@ -38,7 +38,7 @@ export default class Preloader extends Phaser.Scene {
 
     for (let user of this.users) {
       if (!this.textures.exists(user.id)) {
-        console.log(`Loading character sprite for ${user}`);
+        console.log(`Loading character sprite for`, user);
         this.load.atlas(
           user.id,
           getCharacterSpriteSheet(user.characterSpriteName),

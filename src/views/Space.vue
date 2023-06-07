@@ -6,7 +6,6 @@ import { TileMap } from "@/types/canvasTypes";
 import type { OnClickOutsideHandler } from "@vueuse/core";
 import type { User } from "@/types/canvasTypes";
 import type { SpacesType, ProfilesType } from "@/api/types";
-import { emit } from "process";
 
 /****************************************
  * DECLARATIONS
@@ -382,14 +381,27 @@ const handleJoinEvent = async ({ newPresences }: { newPresences: User[] }) => {
 };
 
 const handleLeaveEvent = ({ leftPresences }: { leftPresences: User[] }) => {
-  const userIndex = users.findIndex(({ id }) => id === leftPresences[0].id);
-  if (userIndex !== -1) users.splice(userIndex, 1);
-  console.log("Someone left the space!", leftPresences);
+  const leftUser = leftPresences[0];
+  if (!leftUser) {
+    console.log("No user in leftPresences array");
+    return;
+  }
+
+  const userIndex = users.findIndex(({ id }) => id === leftUser.id);
+  if (userIndex === -1) {
+    console.log(`No user found with id ${leftUser.id}`);
+    return;
+  }
+
+  // Remove the user
+  users.splice(userIndex, 1);
+
+  console.log("Someone left the space!", leftUser);
 
   // Emit left user unless it's me
-  if (leftPresences[0].id !== userId) {
-    emitter.emit("userLeft", leftPresences[0]);
-    console.log("Emit left user", leftPresences[0]);
+  if (leftUser.id !== userId) {
+    emitter.emit("userLeft", leftUser);
+    console.log("Emit left user", leftUser);
   }
 };
 
@@ -408,22 +420,26 @@ const handleUserPositionBroadcast = ({ payload: userPayload }: { payload: User }
 };
 
 const doRealtimeStuff = () => {
-  broadCastChannel
-    .on("presence", { event: EVENT_JOIN }, handleJoinEvent)
-    .on("presence", { event: EVENT_LEAVE }, handleLeaveEvent)
-    .on("broadcast", { event: EVENT_SEND_USER_POSITION }, handleUserPositionBroadcast)
-    .subscribe((status: string) => {
-      if (status === BROADCAST_SUBSCRIBED_STATUS) {
-        // Set user's last position
-        const lastPosition =
-          canvasLocalStorage.value.lastUserPosition || initialUserPosition;
-        broadCastChannel.track({
-          ...getUserPayload(lastPosition.x, lastPosition.y, "down"),
-          online_at: new Date().toISOString(),
-          lastPosition,
-        });
-      }
-    });
+  try {
+    broadCastChannel
+      .on("presence", { event: EVENT_JOIN }, handleJoinEvent)
+      .on("presence", { event: EVENT_LEAVE }, handleLeaveEvent)
+      .on("broadcast", { event: EVENT_SEND_USER_POSITION }, handleUserPositionBroadcast)
+      .subscribe((status: string) => {
+        if (status === BROADCAST_SUBSCRIBED_STATUS) {
+          // Set user's last position
+          const lastPosition =
+            canvasLocalStorage.value.lastUserPosition || initialUserPosition;
+          broadCastChannel.track({
+            ...getUserPayload(lastPosition.x, lastPosition.y, "down"),
+            online_at: new Date().toISOString(),
+            lastPosition,
+          });
+        }
+      });
+  } catch (error) {
+    console.error("An error occurred in doRealtimeStuff:", error);
+  }
 };
 
 // Unsubscribe from channel when component is unmounted

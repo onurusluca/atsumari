@@ -91,3 +91,15 @@ To help narrow down the issue, you may want to consider the following:
 - **Experiment with Different Settings:** Try changing some of your game's settings and see how that impacts performance. For example, you might try disabling physics, reducing the number of game objects, or simplifying your rendering settings to see if any of these things reduce CPU usage.
 
 Remember, optimizing a game often involves a lot of trial and error, and it can be helpful to make one change at a time and then test to see how that change impacts performance. That way, you can identify exactly what's causing the issue.
+
+
+Race Condition: The potential race condition occurs when multiple instances of your application are trying to read from and write to the users array simultaneously. Consider a scenario where two users join the game at the exact same time, and both instances are trying to push to the users array simultaneously. This could potentially lead to inconsistent data. To avoid this, you could use locks or some form of synchronization to ensure that only one operation happens at a time. JavaScript is single-threaded, so this might not be an issue, but if Supabase operates on another thread or in a web worker, there could be potential problems.
+
+
+Code Review / Refactor - Here is a list of potential files and the logic that could be moved there:
+
+    RealtimeService.js: Move all Supabase Realtime related code. This includes the doRealtimeStuff function, as well as handleJoinEvent, handleLeaveEvent and handleUserPositionBroadcast.
+
+    SpaceService.js: This would contain the space related logic. Move getVisitedSpaces, getUserSpaces, and addSpaceToVisitedSpaces into this file. You might also want to include other space related functions that are currently in Space.vue.
+
+    UserDataService.js: (as mentioned above) Move the logic related to updating, broadcasting, and logging user actions into this file.

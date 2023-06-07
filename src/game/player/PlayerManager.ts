@@ -16,10 +16,10 @@ export default class PlayerManager {
 
   private initializePlayers(users: User[]) {
     console.log("Initializing players. PlayerManager.ts");
+    console.log(users);
 
-    const myUserId = authStore.user?.id!;
     users.forEach((user) => {
-      if (user.id === myUserId) {
+      if (user.id === authStore.user.id) {
         this.localPlayer = new LocalPlayer(this.scene, user);
         console.log("Local player initialized. PlayerManager.ts");
       } else {
@@ -101,7 +101,7 @@ export default class PlayerManager {
   }
 
   public getRemotePlayers(): Record<string, RemotePlayer> {
-    return this.remotePlayers;
+    return this.remotePlayers as Record<string, RemotePlayer>;
   }
 
   private isUserLocal(user: User) {
