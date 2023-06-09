@@ -11,8 +11,6 @@ import samurai from "./samurai.png";
 import suitMan from "./suit-man.png";
 import woman from "./woman.png";
 
-import car from "./car.png";
-
 const avatarImages: {
   [key: string]: string;
 } = {
@@ -28,8 +26,6 @@ const avatarImages: {
   "samurai.png": samurai,
   "suit-man.png": suitMan,
   "woman.png": woman,
-
-  "car.png": car,
 };
 
 export const getCharacterSpriteSheet = (avatarName: string) => avatarImages[avatarName];
