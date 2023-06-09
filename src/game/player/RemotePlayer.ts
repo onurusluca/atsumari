@@ -23,7 +23,7 @@ export default class RemotePlayer {
       .sprite(
         this.user.lastPosition.x,
         this.user.lastPosition.y,
-        this.user.id, // sprite sheet name set in preload for each user
+        "character-sprite-name" /* this.user.id */, // sprite sheet name set in preload for each user
         "walk-down-0"
       )
       .setScale(UserConstants.PLAYER_SCALE)
@@ -111,11 +111,13 @@ export default class RemotePlayer {
     this.shadow.setPosition(this.user.x, this.user.y + this.remotePlayer.height - 10);
   }
 
-  public movePlayer(user: User) {
-    this.user = user;
-    this.remotePlayer.setPosition(this.user.x, this.user.y);
+  public movePlayer(x: number, y: number, direction: Direction) {
+    this.user.x = x;
+    this.user.y = y;
+    this.remotePlayer.setPosition(x, y);
+
     this.remotePlayer.anims.play(
-      this.getAnimationKey(`remotePlayer${this.user.id}`, "idle", this.user.facingTo),
+      this.getAnimationKey(`remotePlayer${this.user.id}`, "idle", direction),
       true
     );
     this.updatePlayerBanner();

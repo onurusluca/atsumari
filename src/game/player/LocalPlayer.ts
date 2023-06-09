@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import { Direction, ControlKeys, UserConstants, Depths } from "../helpers/constants";
 import { PlayerBanner } from "./PlayerBanner";
 import { User } from "@/types/canvasTypes";
+import socket from "@/composables/useSocketIO";
 
 export default class Player {
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -28,7 +29,7 @@ export default class Player {
       .sprite(
         this.myUser.lastPosition.x,
         this.myUser.lastPosition.y,
-        this.myUser.id, // sprite sheet name set in preload for each user
+        "character-sprite-name" /* this.myUser.id */, // sprite sheet name set in preload for each user
         "walk-down-0"
       )
       .setScale(UserConstants.PLAYER_SCALE)
@@ -65,7 +66,7 @@ export default class Player {
     const animationKey = this.getAnimationKey("localPlayer", "walk", direction);
     this.scene.anims.create({
       key: animationKey,
-      frames: this.scene.anims.generateFrameNames(this.myUser.id, {
+      frames: this.scene.anims.generateFrameNames("character-sprite-name", {
         prefix: `walk-${direction}-`,
         start: 0,
         end: 3,
@@ -82,7 +83,7 @@ export default class Player {
       key: animationKey,
       frames: [
         {
-          key: this.myUser.id,
+          key: "character-sprite-name",
           frame: `walk-${direction}-0`,
         },
       ],
@@ -158,9 +159,6 @@ export default class Player {
         this.keysDown = this.keysDown.filter((keyDown) => keyDown !== direction);
         if (this.keysDown.length === 0) {
           this.myPlayer.setVelocity(0);
-
-          // Send player position to the server
-          emitter.emit("playerMove", this.myUser);
         }
       });
     });
@@ -222,6 +220,14 @@ export default class Player {
 
     // Normalize and scale the velocity so that player can't move faster along a diagonal
     this.myPlayer.body!.velocity.normalize().scale(UserConstants.PLAYER_SPEED);
+
+    console.log("Player is moving", this.myPlayer.x, this.myPlayer.y);
+
+    socket.emit("playerMovement", {
+      x: this.myPlayer.x,
+      y: this.myPlayer.y,
+      direction: this.myUser.facingTo,
+    });
   }
 
   private stopPlayer() {

@@ -2,7 +2,7 @@
 import { vOnClickOutside } from "@vueuse/components";
 import type { OnClickOutsideHandler } from "@vueuse/core";
 import type { User } from "@/types/canvasTypes";
-import createGame from "@/phaser";
+import createGame from "@/game";
 /****************************************
  * DECLARATIONS
  ****************************************/

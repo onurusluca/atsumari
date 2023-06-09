@@ -1,7 +1,7 @@
 import LocalPlayer from "./LocalPlayer";
 import RemotePlayer from "./RemotePlayer";
 import type { User, Room } from "@/types/canvasTypes";
-import { MAP_SCALE_FACTOR } from "../helpers/constants";
+import { MAP_SCALE_FACTOR, Direction } from "../helpers/constants";
 
 const authStore = useAuthStore();
 
@@ -10,33 +10,21 @@ export default class PlayerManager {
   private remotePlayers: Record<string, RemotePlayer> = {};
   private isPlayerInARoom: boolean = false;
 
-  constructor(private scene: Phaser.Scene, users: User[], private rooms: Room[]) {
-    this.initializePlayers(users);
-  }
+  constructor(private scene: Phaser.Scene, users: User[], private rooms: Room[]) {}
 
-  private initializePlayers(users: User[]) {
-    console.log("Initializing players. PlayerManager.ts");
-    console.log(users);
+  public addLocalPlayer(user: User) {
+    this.localPlayer = new LocalPlayer(this.scene, user);
 
-    users.forEach((user) => {
-      if (user.id === authStore.user.id) {
-        this.localPlayer = new LocalPlayer(this.scene, user);
-        console.log("Local player initialized. PlayerManager.ts");
-      } else {
-        this.remotePlayers[user.id] = new RemotePlayer(this.scene, user);
-      }
-    });
+    console.log("New local player added. PlayerManager.ts");
   }
 
   public addRemotePlayer(newUser: User) {
     // Create new remote player if it doesn't exist and the user is not the local player
 
-    if (!this.isUserLocal(newUser)) {
-      this.remotePlayers[newUser.id] = new RemotePlayer(this.scene, newUser);
-      this.remotePlayers[newUser.id].movePlayer(newUser);
+    this.remotePlayers[newUser.id] = new RemotePlayer(this.scene, newUser);
+    this.remotePlayers[newUser.id].movePlayer(newUser);
 
-      console.log("New remote player added. PlayerManager.ts");
-    }
+    console.log("New remote player added. PlayerManager.ts");
   }
 
   public removeRemotePlayer(userId: string) {
@@ -44,15 +32,15 @@ export default class PlayerManager {
     delete this.remotePlayers[userId];
   }
 
-  public initialMoveRemotePlayers(users: User[]) {
+  /*   public initialMoveRemotePlayers(users: User[]) {
     users
       .filter((user) => !this.isUserLocal(user))
       .forEach((user) => this.remotePlayers[user.id].movePlayer(user));
-  }
+  } */
 
-  public moveRemotePlayer(user: User) {
-    if (this.remotePlayers[user.id]) {
-      this.remotePlayers[user.id].movePlayer(user);
+  public moveRemotePlayer(id: string, x: number, y: number, direction: Direction) {
+    if (this.remotePlayers[id]) {
+      this.remotePlayers[id].movePlayer(x, y, direction);
     }
   }
 

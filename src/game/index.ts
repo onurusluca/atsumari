@@ -1,12 +1,10 @@
 import * as Phaser from "phaser";
-import type { CanvasAppOptions } from "@/types/canvasTypes";
+
+// Scenes
 import Preloader from "./Preloader";
-import Game from "./Game";
+import Main from "./Main";
 
-export async function createGame(options: CanvasAppOptions): Promise<void> {
-  // Get stuff sent from Space.vue
-  const { gameMapJson, gameMapTileset, users } = options;
-
+export default async function createGame(): Promise<void> {
   let gameInstance = new Phaser.Game({
     type: Phaser.AUTO, // Phaser will use WebGL if available, if not it will use Canvas
     parent: "atsumari-game",
@@ -30,7 +28,7 @@ export async function createGame(options: CanvasAppOptions): Promise<void> {
     audio: {
       disableWebAudio: true,
     },
-    scene: [new Preloader(gameMapTileset, gameMapJson, users), new Game(users)],
+    scene: [Preloader, Main],
     scale: {
       mode: Phaser.Scale.FIT, // Fit to window
       autoCenter: Phaser.Scale.CENTER_BOTH, // Center game
@@ -52,28 +50,4 @@ export async function createGame(options: CanvasAppOptions): Promise<void> {
       //limit: 15
     },
   });
-
-  // On destroyGame emit, destroy the game
-  /*   emitter.on("destroyGame", async () => {
-    // Stop game loop
-    gameInstance.loop.stop();
-
-    // Loop through each scene in the game
-    for (let scene of gameInstance.scene.getScenes(true)) {
-      scene.sys.events.shutdown();
-      // Stop the scene
-      scene.scene.stop();
-
-      // Remove the scene from the game
-      gameInstance.scene.remove(scene.sys.settings.key);
-    }
-
-    // Remove game canvas from the DOM
-    if (gameInstance.canvas.parentNode) {
-      gameInstance.canvas.parentNode.removeChild(gameInstance.canvas);
-    }
-
-    // Destroy the game instance
-    gameInstance.destroy(true);
-  }); */
 }

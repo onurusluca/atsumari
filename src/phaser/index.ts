@@ -1,5 +1,4 @@
 import * as Phaser from "phaser";
-import socket from "@/composables/useSocketIO";
 
 // Scenes
 import Preloader from "./Preloader";

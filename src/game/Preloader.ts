@@ -2,7 +2,7 @@ import Phaser from "phaser";
 import { TileMap } from "@/types/canvasTypes";
 import { User } from "@/types/canvasTypes";
 
-import Tileset from "./images/maps/tileset.png";
+import Tileset from "./images/maps/tileset_nature-map.png";
 import MapJSON from "./images/maps/nature-map.json";
 
 import CharacterSpriteFrames from "./images/characters/character-sprite-frames.json";
@@ -17,13 +17,19 @@ export default class Preloader extends Phaser.Scene {
   }
 
   preload() {
-    this.load.atlas("car", getCharacterSpriteSheet("boy.png"), CharacterSpriteFrames);
+    this.load.atlas(
+      "character-sprite-name",
+      getCharacterSpriteSheet("boy.png"),
+      CharacterSpriteFrames
+    );
 
     this.load.image("shadow", ShadowSprite);
 
     this.load.image("tiles", Tileset);
     this.load.tilemapTiledJSON("map", MapJSON);
 
-    this.scene.start("main");
+    this.load.on("complete", () => {
+      this.scene.start("main-scene");
+    });
   }
 }
