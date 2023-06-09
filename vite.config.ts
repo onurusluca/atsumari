@@ -86,6 +86,23 @@ export default defineConfig(({ mode }) => {
           // https://github.com/antfu/unplugin-icons#auto-importing
           IconsResolver({
             prefix: false,
+            // Import icons from this collection https://icon-sets.iconify.design
+            // Easy icon finding: https://icones.netlify.app/
+
+            // TODO: Use less icon sets
+            enabledCollections: [
+              "carbon",
+              "ph",
+              "logos",
+              "ri",
+              "teenyicons",
+              "svg-spinners",
+              "gridicons",
+              "radix-icons",
+              "fluent-emoji",
+              "ion",
+              "fluent-emoji-flat",
+            ],
           }),
         ],
       }),

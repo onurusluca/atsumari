@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import socket from "@/composables/useSocketIO";
+const generalStore = useGeneralStore();
 
 export default class Main extends Phaser.Scene {
   otherPlayers: Phaser.Physics.Arcade.Group;
@@ -12,8 +13,9 @@ export default class Main extends Phaser.Scene {
 
   create() {
     socket.on("connect", () => {
-      console.log("Connected to server");
+      socket.emit("joinRoom", generalStore.spaceId);
     });
+
     this.cameras.main.setBackgroundColor("rgb(0, 0, 255)");
     this.otherPlayers = this.physics.add.group();
     socket.on("currentPlayers", (players: any) => {

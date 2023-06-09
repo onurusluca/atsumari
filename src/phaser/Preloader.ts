@@ -14,8 +14,7 @@ export default class Preloader extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image("car", getCharacterSpriteSheet("car.png"));
-
+    this.load.atlas("car", getCharacterSpriteSheet("boy.png"), CharacterSpriteFrames);
     this.scene.start("main");
   }
 }

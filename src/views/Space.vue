@@ -18,6 +18,7 @@ const userId = authStore.user?.id;
 let users = reactive<Array<User>>([]);
 
 onMounted(async () => {
+  generalStore.spaceId = spaceId;
   createGame();
 });
 

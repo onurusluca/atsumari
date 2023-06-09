@@ -3,7 +3,7 @@ import { debugDraw } from "./helpers/debug";
 import PlayerManager from "./player/PlayerManager";
 import type { User, Room } from "@/types/canvasTypes";
 import { getCharacterSpriteSheet } from "./images/characters/imports";
-import CharacterSpriteFrames from "./images/character-sprite-frames.json";
+import CharacterSpriteFrames from "./images/characters/character-sprite-frames.json";
 
 import { MAP_SCALE_FACTOR } from "./helpers/constants";
 
@@ -22,12 +22,6 @@ export default class Game extends Phaser.Scene {
   create() {
     this.playerManager = new PlayerManager(this, this.users, this.rooms);
     this.createPlayersAndStartGame();
-
-    emitter.on("newUserJoined", (user) => this.onUserJoin(user));
-    emitter.on("userLeft", (user) => this.onUserLeave(user));
-    emitter.on("userPositionUpdated", (user) =>
-      this.playerManager!.moveRemotePlayer(user)
-    );
 
     this.playerManager.initialMoveRemotePlayers(this.users);
   }
@@ -98,8 +92,8 @@ export default class Game extends Phaser.Scene {
     // Using 16x16 tiles, so scale up by 2x. Instead of zooming in, we scale up the tilemap and sprites to keep the ui elements on screen and keep the picture crisp.
 
     // Create map using the loaded tilemap in Preloader
-    const map = this.make.tilemap({ key: "world-map" });
-    const tileset = map.addTilesetImage("phaser-tiles", "world-tiles", 16, 16, 1, 2);
+    const map = this.make.tilemap({ key: "map" });
+    const tileset = map.addTilesetImage("tiles", "world-tiles", 16, 16, 1, 2);
     const groundLayer = map.createLayer("ground-layer", tileset!, 0, 0);
     const wallsLayer = map.createLayer("walls-layer", tileset!, 0, 0);
     const roomObjectLayer = map.getObjectLayer("roomObjectLayer")!["objects"];

@@ -11,6 +11,9 @@ const EnvVariables = {
 
   // WebRTC
   webRtcApiBaseUrl: import.meta.env.VITE_WEBRTC_API_BASE_URL as string,
+
+  // Realtime
+  realtimeApiUrl: import.meta.env.VITE_REALTIME_API_URL as string,
 };
 
 export { EnvVariables };
