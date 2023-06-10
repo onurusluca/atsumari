@@ -17,6 +17,7 @@
     "@vueuse/components": "^10.1.2",
     "@vueuse/core": "^10.1.2",
     "@vueuse/head": "^1.1.26",
+    "emittery": "^1.0.1",
     "nanoid": "^4.0.2",
     "phaser": "^3.60.0",
     "picmo": "^5.8.4",

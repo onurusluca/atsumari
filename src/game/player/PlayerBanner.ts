@@ -29,7 +29,8 @@ export class PlayerBanner extends Phaser.GameObjects.Container {
   private statusIcon: Phaser.GameObjects.Graphics;
   private playerName: Phaser.GameObjects.Text;
   private playerType: Phaser.GameObjects.Text;
-  private playerStatus: Phaser.GameObjects.Text;
+  private userCustomTextStatus?: Phaser.GameObjects.Text;
+  private bannerHeight = 30;
   constructor(
     scene: Phaser.Scene,
     x: number,
@@ -70,25 +71,41 @@ export class PlayerBanner extends Phaser.GameObjects.Container {
       )
       .setOrigin(0, 0.5);
 
-    // Online, offline, away, etc.
-    this.playerStatus = scene.add
-      .text(playerStatusPosition.x, playerStatusPosition.y, userCustomTextStatus, {
-        color: "rgba(255,255,255,0.8)",
-        fontSize: "14px",
-      })
-      .setOrigin(0, 0.5);
+    if (userCustomTextStatus) {
+      this.userCustomTextStatus = scene.add
+        .text(playerStatusPosition.x, playerStatusPosition.y, userCustomTextStatus, {
+          color: "rgba(255,255,255,0.8)",
+          fontSize: "14px",
+        })
+        .setOrigin(0, 0.5);
+
+      // Increase banner height to accommodate status text
+      this.bannerHeight = 42;
+    }
 
     // Banner body
     // Calculate the banner width
+    // Only use userCustomTextStatus.width in the calculation if userCustomTextStatus exists
     bannerWidth =
-      this.playerStatus.width > this.playerName.width + this.playerType.width
-        ? this.playerStatus.width + bannerPadding
+      this.userCustomTextStatus &&
+      this.userCustomTextStatus.width > this.playerName.width + this.playerType.width
+        ? this.userCustomTextStatus.width + bannerPadding
         : this.playerName.width + this.playerType.width + bannerPadding;
+
     this.background = scene.add.graphics({ x: 0, y: 0 });
     this.background.fillStyle(parseInt(userBannerColor.replace(/^#/, ""), 16), 1);
-    this.background.fillRoundedRect(0, 0, bannerWidth, bannerHeight, 10); // Rounded corners
+    this.background.fillRoundedRect(0, 0, bannerWidth, this.bannerHeight, 10); // Rounded corners
 
-    this.add([this.background, this.statusIcon, this.playerName, this.playerType]);
+    const elements = [
+      this.background,
+      this.statusIcon,
+      this.playerName,
+      this.playerType,
+    ];
+    if (this.userCustomTextStatus) {
+      elements.push(this.userCustomTextStatus);
+    }
+    this.add(elements);
 
     scene.add.existing(this);
   }

@@ -20,6 +20,9 @@ dependencies:
   '@vueuse/head':
     specifier: ^1.1.26
     version: 1.1.26(vue@3.3.4)
+  emittery:
+    specifier: ^1.0.1
+    version: 1.0.1
   nanoid:
     specifier: ^4.0.2
     version: 4.0.2
@@ -1447,6 +1450,11 @@ packages:
     dependencies:
       safe-buffer: 5.2.1
     dev: true
+
+  /emittery@1.0.1:
+    resolution: {integrity: sha512-2ID6FdrMD9KDLldGesP6317G78K7km/kMcwItRtVFva7I/cSEOIaLpewaUb+YLXVwdAp3Ctfxh/V5zIl1sj7dQ==}
+    engines: {node: '>=14.16'}
+    dev: false
 
   /emojibase@6.1.0:
     resolution: {integrity: sha512-1GkKJPXP6tVkYJHOBSJHoGOr/6uaDxZ9xJ6H7m6PfdGXTmQgbALHLWaVRY4Gi/qf5x/gT/NUXLPuSHYLqtLtrQ==}

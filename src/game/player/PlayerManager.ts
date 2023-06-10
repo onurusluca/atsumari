@@ -21,8 +21,8 @@ export default class PlayerManager {
 
     this.remotePlayers[newUser.id] = new RemotePlayer(this.scene, newUser);
     this.remotePlayers[newUser.id].movePlayer(
-      newUser.x,
-      newUser.y,
+      newUser.lastPosition.x,
+      newUser.lastPosition.y,
       newUser.facingTo as Direction
     );
 

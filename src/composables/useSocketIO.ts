@@ -1,9 +1,8 @@
 /* import { io, Socket } from "socket.io-client";
 import { EnvVariables } from "@/envVariables";
 
-let socket: Socket; // Keep socket as a variable accessible within the module.
+let socket: Socket;
 
-// Export a function to setup the socket and join a room.
 export function joinRoom(spaceId: string) {
   socket = io(EnvVariables.realtimeApiUrl);
   socket.on("connect", () => {
@@ -11,7 +10,6 @@ export function joinRoom(spaceId: string) {
   });
 }
 
-// Also export a function to get the current socket.
 export function getSocket(): Socket {
   if (!socket) {
     throw new Error("Must join a room before getting the socket.");

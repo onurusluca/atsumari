@@ -4,6 +4,10 @@ import { PlayerBanner } from "./PlayerBanner";
 import { User, Direction, ControlKeys } from "@/types/canvasTypes";
 import socket from "@/composables/useSocketIO";
 
+const gameLocalStorage = useStorage("atsumari_auth", {
+  lastPosition: { x: 0, y: 0 },
+});
+
 export default class Player {
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private wasd!: Record<ControlKeys, Phaser.Input.Keyboard.Key>;
@@ -165,6 +169,11 @@ export default class Player {
             y: this.myPlayer.y,
             direction: this.myUser.facingTo,
           });
+
+          gameLocalStorage.value.lastPosition = {
+            x: this.myPlayer.x,
+            y: this.myPlayer.y,
+          };
         }
       });
     });

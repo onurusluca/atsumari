@@ -19,7 +19,7 @@ export default class Preloader extends Phaser.Scene {
   preload() {
     this.load.atlas(
       "character-sprite-name",
-      getCharacterSpriteSheet("boy.png"),
+      getCharacterSpriteSheet("dog.png"),
       CharacterSpriteFrames
     );
 

@@ -4,9 +4,12 @@ import PlayerManager from "./player/PlayerManager";
 import type { User, Room } from "@/types/canvasTypes";
 
 import { MAP_SCALE_FACTOR } from "./helpers/constants";
-
 import socket from "@/composables/useSocketIO";
+
 const generalStore = useGeneralStore();
+const gameLocalStorage = useStorage("atsumari_auth", {
+  lastPosition: { x: 0, y: 0 },
+});
 
 export default class Maim extends Phaser.Scene {
   private playerManager?: PlayerManager;
@@ -29,16 +32,16 @@ export default class Maim extends Phaser.Scene {
       console.log("currentPlayers", players);
 
       Object.keys(players).forEach((id) => {
-        if (players[id].playerId === socket.id) {
+        if (players[id].id === socket.id) {
           this.playerManager!.addLocalPlayer({
             id: socket.id,
             userName: "onurrr!",
             x: 50,
             y: 30,
             facingTo: "down",
-            lastPosition: {
-              x: 45,
-              y: 25,
+            lastPosition: gameLocalStorage.value.lastPosition || {
+              x: 200,
+              y: 200,
             },
             characterSprite: "sprite2.png",
             characterSpriteName: "dog.png",
@@ -87,8 +90,8 @@ export default class Maim extends Phaser.Scene {
       });
     });
 
-    socket.on("playerDisconnected", (playerId) => {
-      this.onUserLeave(playerId);
+    socket.on("playerDisconnected", (id) => {
+      this.onUserLeave(id);
     });
 
     socket.on("playerMoved", (playerInfo) => {
@@ -145,7 +148,7 @@ export default class Maim extends Phaser.Scene {
       .getPlayer() as Phaser.Physics.Arcade.Sprite;
 
     // Follow player with camera
-    // this.cameras.main.startFollow(localPlayer);
+    this.cameras.main.startFollow(localPlayer);
 
     // Add collision between player and walls
     this.physics.add.collider(localPlayer, wallsLayer!);
@@ -197,9 +200,6 @@ export default class Maim extends Phaser.Scene {
       map.widthInPixels * MAP_SCALE_FACTOR,
       map.heightInPixels * MAP_SCALE_FACTOR
     );
-
-    // When Phaser is ready, log a message in the console
-    emitter.emit("gameLoaded");
 
     return { groundLayer, wallsLayer };
   }

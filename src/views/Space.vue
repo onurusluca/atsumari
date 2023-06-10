@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import { vOnClickOutside } from "@vueuse/components";
 import type { OnClickOutsideHandler } from "@vueuse/core";
 import type { User } from "@/types/canvasTypes";
+
+import { vOnClickOutside } from "@vueuse/components";
 import createGame from "@/game";
-/****************************************
- * DECLARATIONS
- ****************************************/
+
 const { t } = useI18n();
 const authStore = useAuthStore();
 const generalStore = useGeneralStore();
@@ -13,12 +12,14 @@ const generalStore = useGeneralStore();
 const route = useRouter();
 const spaceId = String(route.currentRoute.value.params.id);
 const spaceName = String(route.currentRoute.value.params.name);
-const userId = authStore.user?.id;
 
 let users = reactive<Array<User>>([]);
 
 onMounted(async () => {
   generalStore.spaceId = spaceId;
+  generalStore.spaceName = spaceName;
+  generalStore.users = users;
+
   createGame();
 });
 
