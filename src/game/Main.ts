@@ -2,8 +2,6 @@ import Phaser from "phaser";
 import { debugDraw } from "./helpers/debug";
 import PlayerManager from "./player/PlayerManager";
 import type { User, Room } from "@/types/canvasTypes";
-/* import { getCharacterSpriteSheet } from "./images/characters/imports";
-import CharacterSpriteFrames from "./images/characters/character-sprite-frames.json"; */
 
 import { MAP_SCALE_FACTOR } from "./helpers/constants";
 
@@ -11,13 +9,11 @@ import socket from "@/composables/useSocketIO";
 const generalStore = useGeneralStore();
 
 export default class Maim extends Phaser.Scene {
-  private readonly users: User[] = [];
   private playerManager?: PlayerManager;
   private rooms: Room[];
 
-  constructor(users: User[]) {
+  constructor() {
     super("main-scene");
-    this.users = users;
 
     this.rooms = [];
   }
@@ -26,7 +22,7 @@ export default class Maim extends Phaser.Scene {
     socket.on("connect", () => {
       socket.emit("joinRoom", generalStore.spaceId);
 
-      this.playerManager = new PlayerManager(this, this.users, this.rooms);
+      this.playerManager = new PlayerManager(this, this.rooms);
     });
 
     socket.on("currentPlayers", (players: any) => {
@@ -39,7 +35,7 @@ export default class Maim extends Phaser.Scene {
             userName: "onurrr!",
             x: 50,
             y: 30,
-            facingTo: "south",
+            facingTo: "down",
             lastPosition: {
               x: 45,
               y: 25,
@@ -72,6 +68,8 @@ export default class Maim extends Phaser.Scene {
     });
 
     socket.on("newPlayer", (playerInfo) => {
+      console.log("newPlayer", playerInfo);
+
       this.onUserJoin({
         id: playerInfo.id,
         userName: "remotePlayer",
@@ -131,7 +129,7 @@ export default class Maim extends Phaser.Scene {
   private onUserLeave(id: string) {
     console.log(`User has left:`, id);
     // Remove user from remote players
-    this.playerManager!.removeRemotePlayer(id);
+    this.playerManager!.destroyRemotePlayer(id);
     // Remove user sprite and animations
     // FIXME: This is not done yet, currently instead of removing the sprite, we keep it but won't load it again
     /*  this.anims.remove(`${user.id}-down`);

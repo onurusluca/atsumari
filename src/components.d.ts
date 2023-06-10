@@ -35,7 +35,7 @@ declare module '@vue/runtime-core' {
     Join: typeof import('./components/space/webrtc/Join.vue')['default']
     Joystick: typeof import('./components/space/Joystick.vue')['default']
     Loading: typeof import('./components/nav/Loading.vue')['default']
-    'Logos:googleIcon': typeof import("~icons/logos/google-icon")["default"]
+    'Logos:googleIcon': typeof import('~icons/logos/google-icon')['default']
     MainMenu: typeof import('./components/space/MainMenu.vue')['default']
     MicCameraScreen: typeof import('./components/space/webrtc/MicCameraScreen.vue')['default']
     Navbar: typeof import('./components/nav/dashboard/Navbar.vue')['default']
@@ -70,7 +70,7 @@ declare module '@vue/runtime-core' {
     SpaceSettingsLeftbar: typeof import('./components/nav/dashboard/SpaceSettingsLeftbar.vue')['default']
     SpaceSettingsTopbar: typeof import('./components/nav/dashboard/SpaceSettingsTopbar.vue')['default']
     'SvgSpinners:90RingWithBg': typeof import('~icons/svg-spinners/90-ring-with-bg')['default']
-    'Teenyicons:lockSolid': typeof import("~icons/teenyicons/lock-solid")["default"]
+    'Teenyicons:lockSolid': typeof import('~icons/teenyicons/lock-solid')['default']
     Toast: typeof import('./components/global/Toast.vue')['default']
   }
 }

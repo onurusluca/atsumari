@@ -1,16 +1,14 @@
 import LocalPlayer from "./LocalPlayer";
 import RemotePlayer from "./RemotePlayer";
-import type { User, Room } from "@/types/canvasTypes";
-import { MAP_SCALE_FACTOR, Direction } from "../helpers/constants";
-
-const authStore = useAuthStore();
+import { User, Room, Direction } from "@/types/canvasTypes";
+import { MAP_SCALE_FACTOR } from "../helpers/constants";
 
 export default class PlayerManager {
   private localPlayer!: LocalPlayer;
   private remotePlayers: Record<string, RemotePlayer> = {};
   private isPlayerInARoom: boolean = false;
 
-  constructor(private scene: Phaser.Scene, users: User[], private rooms: Room[]) {}
+  constructor(private scene: Phaser.Scene, private rooms: Room[]) {}
 
   public addLocalPlayer(user: User) {
     this.localPlayer = new LocalPlayer(this.scene, user);
@@ -22,21 +20,25 @@ export default class PlayerManager {
     // Create new remote player if it doesn't exist and the user is not the local player
 
     this.remotePlayers[newUser.id] = new RemotePlayer(this.scene, newUser);
-    this.remotePlayers[newUser.id].movePlayer(newUser);
+    this.remotePlayers[newUser.id].movePlayer(
+      newUser.x,
+      newUser.y,
+      newUser.facingTo as Direction
+    );
 
     console.log("New remote player added. PlayerManager.ts");
   }
 
-  public removeRemotePlayer(userId: string) {
-    this.remotePlayers[userId].destroyPlayer();
-    delete this.remotePlayers[userId];
-  }
+  public destroyRemotePlayer(userId: string) {
+    console.log(this.remotePlayers);
 
-  /*   public initialMoveRemotePlayers(users: User[]) {
-    users
-      .filter((user) => !this.isUserLocal(user))
-      .forEach((user) => this.remotePlayers[user.id].movePlayer(user));
-  } */
+    if (this.remotePlayers[userId]) {
+      this.remotePlayers[userId].destroyPlayer();
+      delete this.remotePlayers[userId];
+    } else {
+      console.log(`No remote player with the id: ${userId}`);
+    }
+  }
 
   public moveRemotePlayer(id: string, x: number, y: number, direction: Direction) {
     if (this.remotePlayers[id]) {
@@ -90,9 +92,5 @@ export default class PlayerManager {
 
   public getRemotePlayers(): Record<string, RemotePlayer> {
     return this.remotePlayers as Record<string, RemotePlayer>;
-  }
-
-  private isUserLocal(user: User) {
-    return authStore.user?.id === user.id;
   }
 }

@@ -1,17 +1,3 @@
-export enum Direction {
-  Up = "up",
-  Down = "down",
-  Left = "left",
-  Right = "right",
-}
-
-export enum ControlKeys {
-  W = "W",
-  A = "A",
-  S = "S",
-  D = "D",
-}
-
 interface Position {
   readonly x: number;
   readonly y: number;

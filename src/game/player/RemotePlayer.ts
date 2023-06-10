@@ -1,6 +1,6 @@
 import Phaser from "phaser";
-import type { User } from "@/types/canvasTypes";
-import { Direction, UserConstants, Depths } from "../helpers/constants";
+import { Direction, User } from "@/types/canvasTypes";
+import { UserConstants, Depths } from "../helpers/constants";
 import { PlayerBanner } from "./PlayerBanner";
 
 export default class RemotePlayer {
@@ -65,10 +65,11 @@ export default class RemotePlayer {
       key: animationKey,
       frames: [
         {
-          key: this.user.id,
+          key: "character-sprite-name",
           frame: `walk-${direction}-0`,
         },
       ],
+      frameRate: 10,
     });
   }
 

@@ -56,8 +56,8 @@ devDependencies:
     specifier: ^1.3.1
     version: 1.3.1
   '@types/node':
-    specifier: ^20.2.5
-    version: 20.2.5
+    specifier: ^20.2.6
+    version: 20.2.6
   '@vitejs/plugin-vue':
     specifier: ^4.2.3
     version: 4.2.3(vite@4.3.9)(vue@3.3.4)
@@ -80,8 +80,8 @@ devDependencies:
     specifier: ^1.10.0
     version: 1.10.0
   livekit-server-sdk:
-    specifier: ^1.2.1
-    version: 1.2.1
+    specifier: ^1.2.2
+    version: 1.2.2
   npm-run-all:
     specifier: ^4.1.5
     version: 4.1.5
@@ -108,7 +108,7 @@ devDependencies:
     version: 0.24.1(vue@3.3.4)
   vite:
     specifier: ^4.3.9
-    version: 4.3.9(@types/node@20.2.5)(sass@1.63.3)
+    version: 4.3.9(@types/node@20.2.6)(sass@1.63.3)
   vue-tsc:
     specifier: ^1.6.5
     version: 1.6.5(typescript@5.0.4)
@@ -684,8 +684,8 @@ packages:
     resolution: {integrity: sha512-Hr5Jfhc9eYOQNPYO5WLDq/n4jqijdHNlDXjuAQkkt+mWdQR+XJToOHrsD4cPaMXpn6KO7y2+wM8AZEs8VpBLVA==}
     dev: true
 
-  /@types/node@20.2.5:
-    resolution: {integrity: sha512-JJulVEQXmiY9Px5axXHeYGLSjhkZEnD+MDPDGbCbIAbMslkKwmygtZFy1X6s/075Yo94sf8GuSlFfPzysQrWZQ==}
+  /@types/node@20.2.6:
+    resolution: {integrity: sha512-GQBWUtGoefMEOx/vu+emHEHU5aw6JdDoEtZhoBrHFPZbA/YNRFfN996XbBASEWdvmLSLyv9FKYppYGyZjCaq/g==}
 
   /@types/phoenix@1.6.0:
     resolution: {integrity: sha512-qwfpsHmFuhAS/dVd4uBIraMxRd56vwBUYQGZ6GpXnFuM2XMRFJbIyruFKKlW2daQliuYZwe0qfn/UjFCDKic5g==}
@@ -701,7 +701,7 @@ packages:
   /@types/websocket@1.0.5:
     resolution: {integrity: sha512-NbsqiNX9CnEfC1Z0Vf4mE1SgAJ07JnRYcNex7AJ9zAVzmiGHmjKFEk7O4TJIsgv2B1sLEb6owKFZrACwdYngsQ==}
     dependencies:
-      '@types/node': 20.2.5
+      '@types/node': 20.2.6
     dev: false
 
   /@typescript-eslint/eslint-plugin@5.59.9(@typescript-eslint/parser@5.59.9)(eslint@8.42.0)(typescript@5.0.4):
@@ -880,7 +880,7 @@ packages:
       vite: ^4.0.0
       vue: ^3.2.25
     dependencies:
-      vite: 4.3.9(@types/node@20.2.5)(sass@1.63.3)
+      vite: 4.3.9(@types/node@20.2.6)(sass@1.63.3)
       vue: 3.3.4
     dev: true
 
@@ -2395,8 +2395,8 @@ packages:
       webrtc-adapter: 8.2.2
     dev: true
 
-  /livekit-server-sdk@1.2.1:
-    resolution: {integrity: sha512-XLXRZlEF49u02cIMjXJB67yNmeAI4jjR5qHrkF6SGtdZDmHigTWHM+R5dgTCAYrr8ErEoIB5f/dCFIMvtKBEzg==}
+  /livekit-server-sdk@1.2.2:
+    resolution: {integrity: sha512-0yRLPxDRuF7BoFwh5DieQlgwcyvkonA2li+xrSmNDi7SFmuSqXwpnnqyvK0DtlNBw2YHOvs2Tf71rAhQkQbADg==}
     dependencies:
       axios: 1.4.0
       camelcase-keys: 7.0.2
@@ -2908,7 +2908,7 @@ packages:
       '@protobufjs/path': 1.1.2
       '@protobufjs/pool': 1.1.0
       '@protobufjs/utf8': 1.1.0
-      '@types/node': 20.2.5
+      '@types/node': 20.2.6
       long: 5.2.3
     dev: true
 
@@ -2983,8 +2983,8 @@ packages:
       glob: 7.2.3
     dev: true
 
-  /rollup@3.24.0:
-    resolution: {integrity: sha512-OgraHOIg2YpHQTjl0/ymWfFNBEyPucB7lmhXrQUh38qNOegxLapSPFs9sNr0qKR75awW41D93XafoR2QfhBdUQ==}
+  /rollup@3.24.1:
+    resolution: {integrity: sha512-REHe5dx30ERBRFS0iENPHy+t6wtSEYkjrhwNsLyh3qpRaZ1+aylvMUdMBUHWUD/RjjLmLzEvY8Z9XRlpcdIkHA==}
     engines: {node: '>=14.18.0', npm: '>=8.0.0'}
     hasBin: true
     optionalDependencies:
@@ -3518,7 +3518,7 @@ packages:
       spdx-expression-parse: 3.0.1
     dev: true
 
-  /vite@4.3.9(@types/node@20.2.5)(sass@1.63.3):
+  /vite@4.3.9(@types/node@20.2.6)(sass@1.63.3):
     resolution: {integrity: sha512-qsTNZjO9NoJNW7KnOrgYwczm0WctJ8m/yqYAMAK9Lxt4SoySUfS5S8ia9K7JHpa3KEeMfyF8LoJ3c5NeBJy6pg==}
     engines: {node: ^14.18.0 || >=16.0.0}
     hasBin: true
@@ -3543,10 +3543,10 @@ packages:
       terser:
         optional: true
     dependencies:
-      '@types/node': 20.2.5
+      '@types/node': 20.2.6
       esbuild: 0.17.19
       postcss: 8.4.24
-      rollup: 3.24.0
+      rollup: 3.24.1
       sass: 1.63.3
     optionalDependencies:
       fsevents: 2.3.2
