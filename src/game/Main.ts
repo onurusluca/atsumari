@@ -6,6 +6,9 @@ import type { User, Room } from "@/types/canvasTypes";
 import { MAP_SCALE_FACTOR } from "./helpers/constants";
 import socket from "@/composables/useSocketIO";
 
+import CharacterSpriteFrames from "./images/characters/character-sprite-frames.json";
+import { getCharacterSpriteSheet } from "./images/characters/imports";
+
 const generalStore = useGeneralStore();
 const gameLocalStorage = useStorage("atsumari_auth", {
   lastPosition: { x: 0, y: 0 },
@@ -28,6 +31,10 @@ export default class Maim extends Phaser.Scene {
       this.playerManager = new PlayerManager(this, this.rooms);
     });
 
+    socket.on("disconnect", (reason) => {
+      console.log(`Socket disconnected: ${reason}`);
+    });
+
     socket.on("currentPlayers", (players: any) => {
       console.log("currentPlayers", players);
 
@@ -48,7 +55,20 @@ export default class Maim extends Phaser.Scene {
             userStatus: "offline",
             userPersonalMessage: "I am ONUR!",
           });
+          console.log(id);
         } else {
+          /*  this.load.atlas(
+            newUser.id,
+            getCharacterSpriteSheet(newUser.characterSpriteName),
+            CharacterSpriteFrames
+          );
+
+          this.load.once("complete", () => {
+            this.playerManager!.addRemotePlayer(newUser);
+          });
+
+          this.load.start();  */
+
           this.playerManager!.addRemotePlayer({
             id: id,
             userName: "remotePlayer",
@@ -112,10 +132,8 @@ export default class Maim extends Phaser.Scene {
 
   private onUserJoin(newUser: User) {
     console.log(`New user joined:`, newUser);
-    this.playerManager!.addRemotePlayer(newUser);
-
     // Load the atlas for the new user and then create the player
-    /*  this.load.atlas(
+    this.load.atlas(
       newUser.id,
       getCharacterSpriteSheet(newUser.characterSpriteName),
       CharacterSpriteFrames
@@ -123,10 +141,9 @@ export default class Maim extends Phaser.Scene {
 
     this.load.once("complete", () => {
       this.playerManager!.addRemotePlayer(newUser);
-      console.log(this.users);
     });
 
-    this.load.start(); */
+    this.load.start();
   }
 
   private onUserLeave(id: string) {

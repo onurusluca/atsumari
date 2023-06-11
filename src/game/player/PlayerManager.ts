@@ -20,11 +20,11 @@ export default class PlayerManager {
     // Create new remote player if it doesn't exist and the user is not the local player
 
     this.remotePlayers[newUser.id] = new RemotePlayer(this.scene, newUser);
-    this.remotePlayers[newUser.id].movePlayer(
+    /*     this.remotePlayers[newUser.id].movePlayer(
       newUser.lastPosition.x,
       newUser.lastPosition.y,
       newUser.facingTo as Direction
-    );
+    ); */
 
     console.log("New remote player added. PlayerManager.ts");
   }
@@ -40,9 +40,9 @@ export default class PlayerManager {
     }
   }
 
-  public moveRemotePlayer(id: string, x: number, y: number, direction: Direction) {
+  public moveRemotePlayer(id: string, x: number, y: number, facingTo: Direction) {
     if (this.remotePlayers[id]) {
-      this.remotePlayers[id].movePlayer(x, y, direction);
+      this.remotePlayers[id].movePlayer(x, y, facingTo);
     }
   }
 
