@@ -23,6 +23,10 @@ onMounted(async () => {
   createGame();
 });
 
+onUnmounted(() => {
+  emitter.emit("destroyGame");
+});
+
 /****************************************
  * UI
  ****************************************/

@@ -10,7 +10,7 @@ import CharacterSpriteFrames from "./images/characters/character-sprite-frames.j
 import { getCharacterSpriteSheet } from "./images/characters/imports";
 
 const generalStore = useGeneralStore();
-const gameLocalStorage = useStorage("atsumari_auth", {
+const gameLocalStorage = useStorage("atsumari_game", {
   lastPosition: { x: 0, y: 0 },
 });
 
@@ -26,7 +26,21 @@ export default class Maim extends Phaser.Scene {
 
   create() {
     socket.on("connect", () => {
-      socket.emit("joinRoom", generalStore.spaceId);
+      socket.emit("joinRoom", generalStore.spaceId, {
+        id: socket.id,
+        userName: this.getRandomWord(),
+        x: 50,
+        y: 30,
+        facingTo: "down",
+        lastPosition: gameLocalStorage.value.lastPosition || {
+          x: 200,
+          y: 200,
+        },
+        characterSprite: "sprite2.png",
+        characterSpriteName: "dog.png",
+        userStatus: "offline",
+        userPersonalMessage: "I am ONUR!",
+      });
 
       this.playerManager = new PlayerManager(this, this.rooms);
     });
@@ -40,74 +54,40 @@ export default class Maim extends Phaser.Scene {
 
       Object.keys(players).forEach((id) => {
         if (players[id].id === socket.id) {
-          this.playerManager!.addLocalPlayer({
-            id: socket.id,
-            userName: "onurrr!",
-            x: 50,
-            y: 30,
-            facingTo: "down",
-            lastPosition: gameLocalStorage.value.lastPosition || {
-              x: 200,
-              y: 200,
-            },
-            characterSprite: "sprite2.png",
-            characterSpriteName: "dog.png",
-            userStatus: "offline",
-            userPersonalMessage: "I am ONUR!",
-          });
-          console.log(id);
-        } else {
-          /*  this.load.atlas(
-            newUser.id,
-            getCharacterSpriteSheet(newUser.characterSpriteName),
+          this.load.atlas(
+            players[id].id,
+            getCharacterSpriteSheet(players[id].characterSpriteName),
             CharacterSpriteFrames
           );
 
           this.load.once("complete", () => {
-            this.playerManager!.addRemotePlayer(newUser);
+            this.playerManager!.addLocalPlayer(players[id]);
+            console.log(id);
+            this.createPlayersAndStartGame();
           });
 
-          this.load.start();  */
+          this.load.start();
+        } else {
+          this.load.atlas(
+            players[id].id,
+            getCharacterSpriteSheet(players[id].characterSpriteName),
+            CharacterSpriteFrames
+          );
 
-          this.playerManager!.addRemotePlayer({
-            id: id,
-            userName: "remotePlayer",
-            x: 10,
-            y: 20,
-            facingTo: "down",
-            lastPosition: {
-              x: 5,
-              y: 10,
-            },
-            characterSprite: "sprite.png",
-            characterSpriteName: "boy.png",
-            userStatus: "online",
-            userPersonalMessage: "Hello, everyone!",
+          this.load.once("complete", () => {
+            this.playerManager!.addRemotePlayer(players[id]);
+            console.log(id);
           });
+
+          this.load.start();
         }
       });
-
-      this.createPlayersAndStartGame();
     });
 
     socket.on("newPlayer", (playerInfo) => {
       console.log("newPlayer", playerInfo);
 
-      this.onUserJoin({
-        id: playerInfo.id,
-        userName: "remotePlayer",
-        x: 10,
-        y: 20,
-        facingTo: "down",
-        lastPosition: {
-          x: 5,
-          y: 10,
-        },
-        characterSprite: "sprite.png",
-        characterSpriteName: "boy.png",
-        userStatus: "online",
-        userPersonalMessage: "Hello, everyone!",
-      });
+      this.onUserJoin(playerInfo);
     });
 
     socket.on("playerDisconnected", (id) => {
@@ -115,11 +95,13 @@ export default class Maim extends Phaser.Scene {
     });
 
     socket.on("playerMoved", (playerInfo) => {
+      console.log("Main: playerMoved", playerInfo);
+
       this.playerManager!.moveRemotePlayer(
         playerInfo.id,
         playerInfo.x,
         playerInfo.y,
-        playerInfo.direction
+        playerInfo.facingTo
       );
     });
   }
@@ -219,5 +201,28 @@ export default class Maim extends Phaser.Scene {
     );
 
     return { groundLayer, wallsLayer };
+  }
+
+  private getRandomWord() {
+    // Characters that can be used in the random word
+    const alphabet = "abcdefghijklmnopqrstuvwxyz";
+
+    // Randomly select a word length between 4 and 10
+    const wordLength = Math.floor(Math.random() * 7) + 4;
+
+    // Initialize the word as an empty string
+    let word = "";
+
+    // Build the word
+    for (let i = 0; i < wordLength; i++) {
+      // Randomly select a character from the alphabet
+      const randomIndex = Math.floor(Math.random() * alphabet.length);
+      const randomChar = alphabet[randomIndex];
+
+      // Add the character to the word
+      word += randomChar;
+    }
+
+    return word;
   }
 }

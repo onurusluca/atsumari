@@ -50,4 +50,27 @@ export default async function createGame(): Promise<void> {
       //limit: 15
     },
   });
+
+  emitter.on("destroyGame", async () => {
+    // Stop game loop
+    gameInstance.loop.stop();
+
+    // Loop through each scene in the game
+    for (let scene of gameInstance.scene.getScenes(true)) {
+      scene.sys.events.shutdown();
+      // Stop the scene
+      scene.scene.stop();
+
+      // Remove the scene from the game
+      gameInstance.scene.remove(scene.sys.settings.key);
+    }
+
+    // Remove game canvas from the DOM
+    if (gameInstance.canvas.parentNode) {
+      gameInstance.canvas.parentNode.removeChild(gameInstance.canvas);
+    }
+
+    // Destroy the game instance
+    gameInstance.destroy(true);
+  });
 }

@@ -19,11 +19,13 @@ export default class RemotePlayer {
 
   private createPlayer() {
     // walk-down-0 is the name of the frame in the .json file
+    console.log("user", this.user);
+
     this.remotePlayer = this.scene.physics.add
       .sprite(
         this.user.lastPosition.x,
         this.user.lastPosition.y,
-        "character-sprite-name" /* this.user.id */, // sprite sheet name set in preload for each user
+        this.user.id /* this.user.id */, // sprite sheet name set in preload for each user
         "walk-down-0"
       )
       .setScale(UserConstants.PLAYER_SCALE)
@@ -65,7 +67,7 @@ export default class RemotePlayer {
       key: animationKey,
       frames: [
         {
-          key: "character-sprite-name",
+          key: this.user.id,
           frame: `walk-${direction}-0`,
         },
       ],
@@ -91,7 +93,6 @@ export default class RemotePlayer {
       "#FFA5004d",
       Depths.RemotePlayerBanner
     );
-    this.updatePlayerBanner();
   }
 
   updatePlayerBanner() {
@@ -105,7 +106,6 @@ export default class RemotePlayer {
     this.shadow = this.scene.add.sprite(0, 0, "shadow");
     this.shadow.setScale(4);
     this.shadow.setDepth(Depths.Shadow); // Render shadow below the player but above the map/background
-    this.updateShadow();
   }
 
   private updateShadow() {
