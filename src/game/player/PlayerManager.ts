@@ -20,11 +20,9 @@ export default class PlayerManager {
     // Create new remote player if it doesn't exist and the user is not the local player
 
     this.remotePlayers[newUser.id] = new RemotePlayer(this.scene, newUser);
-    this.remotePlayers[newUser.id].movePlayer(
-      newUser.lastPosition.x,
-      newUser.lastPosition.y,
-      newUser.facingTo as Direction
-    );
+    if (this.remotePlayers[newUser.id]) {
+      this.remotePlayers[newUser.id].updatePlayerBanner();
+    }
 
     console.log("New remote player added. PlayerManager.ts");
   }
@@ -43,6 +41,12 @@ export default class PlayerManager {
   public moveRemotePlayer(id: string, x: number, y: number, facingTo: Direction) {
     if (this.remotePlayers[id]) {
       this.remotePlayers[id].movePlayer(x, y, facingTo);
+    }
+  }
+
+  public stopRemotePlayer(id: string, x: number, y: number, facingTo: Direction) {
+    if (this.remotePlayers[id]) {
+      this.remotePlayers[id].stopPlayer(x, y, facingTo);
     }
   }
 
@@ -77,7 +81,7 @@ export default class PlayerManager {
           isPlayerInARoom: true,
           roomName: inRoom.name,
         });
-        console.log("Player is in a room. PlayerManager.ts");
+        console.log("Player is in a room. PlayerManager.ts", inRoom);
       }
     } else if (this.isPlayerInARoom) {
       this.isPlayerInARoom = false;

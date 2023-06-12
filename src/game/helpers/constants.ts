@@ -15,11 +15,12 @@ export const UserConstants = {
 export const MAP_SCALE_FACTOR: number = 2;
 
 export const Depths = {
+  // Higher number means on top
   Map: 0,
   Player: 4,
   PlayerBanner: 5,
   RemotePlayer: 3,
-  RemotePlayerBanner: 4,
+  RemotePlayerBanner: 5,
   Shadow: 1,
 
   /*

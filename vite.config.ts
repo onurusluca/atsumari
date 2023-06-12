@@ -7,7 +7,6 @@ import AutoImport from "unplugin-auto-import/vite";
 import Icons from "unplugin-icons/vite";
 import VueI18nPlugin from "@intlify/unplugin-vue-i18n/vite";
 import IconsResolver from "unplugin-icons/resolver";
-
 // https://vitejs.dev/config/
 
 export default defineConfig(({ mode }) => {
@@ -55,7 +54,6 @@ export default defineConfig(({ mode }) => {
 
     plugins: [
       vue({ include: [/\.vue$/] }),
-
       // https://github.com/antfu/unplugin-auto-import
       AutoImport({
         imports: [
@@ -124,7 +122,7 @@ export default defineConfig(({ mode }) => {
     ],
 
     optimizeDeps: {
-      include: ["@vueuse/core", "@vueuse/head", "vue", "vue-router"],
+      include: ["@vueuse/core", "vue", "vue-router", "@vueuse/head"],
     },
   };
 });

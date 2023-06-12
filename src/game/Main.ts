@@ -104,6 +104,15 @@ export default class Maim extends Phaser.Scene {
         playerInfo.facingTo
       );
     });
+
+    socket.on("playerStopped", (playerInfo) => {
+      this.playerManager!.stopRemotePlayer(
+        playerInfo.id,
+        playerInfo.x,
+        playerInfo.y,
+        playerInfo.facingTo
+      );
+    });
   }
 
   update(/* time: number, delta: number */) {

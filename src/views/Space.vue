@@ -48,6 +48,11 @@ const handleChatMenuOpen = () => {
   onlineUsersMenuOpen.value = false;
   chatMenuOpen.value = !chatMenuOpen.value;
 };
+
+// Set document head tag
+useHead({
+  title: `Atsumari 🍉 |  ${spaceName}`,
+});
 </script>
 
 <template>

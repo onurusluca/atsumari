@@ -164,18 +164,20 @@ export default class Player {
         if (this.keysDown.length === 0) {
           this.myPlayer.setVelocity(0);
 
-          socket.emit("playerMovement", {
+          /*    socket.emit("playerMovement", {
+            x: this.myPlayer.x,
+            y: this.myPlayer.y,
+            facingTo: this.myUser.facingTo,
+          }); */
+
+          // Emit player stopped moving to stop animation on other clients
+          socket.emit("playerStopped", {
             x: this.myPlayer.x,
             y: this.myPlayer.y,
             facingTo: this.myUser.facingTo,
           });
-          console.log(
-            "Sending player movement to server",
-            this.myPlayer.x,
-            this.myPlayer.y,
-            this.myUser.facingTo
-          );
 
+          // Save last position in local storage
           gameLocalStorage.value.lastPosition = {
             x: this.myPlayer.x,
             y: this.myPlayer.y,
@@ -242,11 +244,11 @@ export default class Player {
     // Normalize and scale the velocity so that player can't move faster along a diagonal
     this.myPlayer.body!.velocity.normalize().scale(UserConstants.PLAYER_SPEED);
 
-    /*    socket.emit("playerMovement", {
+    socket.emit("playerMovement", {
       x: this.myPlayer.x,
       y: this.myPlayer.y,
-      direction: this.myUser.facingTo,
-    }); */
+      facingTo: this.myUser.facingTo,
+    });
   }
 
   private stopPlayer() {

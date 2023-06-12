@@ -10,11 +10,13 @@ export default class RemotePlayer {
   private playerBanner!: PlayerBanner;
   private playerBannerWidth!: number;
   private shadow!: Phaser.GameObjects.Sprite;
+  private moving: boolean;
 
   constructor(private scene: Phaser.Scene, user: User) {
     this.user = user;
     this.createPlayer();
     this.playerBannerWidth = this.playerBanner.getBannerWidth();
+    this.moving = false;
   }
 
   private createPlayer() {
@@ -51,6 +53,29 @@ export default class RemotePlayer {
     const directions = Object.values(Direction);
     directions.forEach((direction) => {
       this.createIdleAnimation(direction);
+      this.createWalkAnimation(direction); // Create walk animation for each direction
+    });
+  }
+
+  private createWalkAnimation(direction: Direction) {
+    const animationKey = this.getAnimationKey(
+      `remotePlayer${this.user.id}`,
+      "walk",
+      direction
+    );
+
+    // If the animation already exists, don't recreate it
+    if (this.scene.anims.exists(animationKey)) return;
+    this.scene.anims.create({
+      key: animationKey,
+      frames: this.scene.anims.generateFrameNames(this.user.id, {
+        prefix: `walk-${direction}-`,
+        start: 0,
+        end: 3,
+        zeroPad: 1,
+      }),
+      frameRate: 8,
+      repeat: -1,
     });
   }
 
@@ -93,6 +118,8 @@ export default class RemotePlayer {
       "#FFA5004d",
       Depths.RemotePlayerBanner
     );
+
+    this.updatePlayerBanner();
   }
 
   updatePlayerBanner() {
@@ -117,12 +144,32 @@ export default class RemotePlayer {
     this.user.y = y;
     this.remotePlayer.setPosition(x, y);
 
-    this.remotePlayer.anims.play(
-      this.getAnimationKey(`remotePlayer${this.user.id}`, "idle", direction),
-      true
-    );
+    // Only start the walking animation if the player was not moving before
+    if (!this.moving) {
+      this.remotePlayer.anims.play(
+        this.getAnimationKey(`remotePlayer${this.user.id}`, "walk", direction),
+        true
+      );
+    }
+
+    // Now the player is moving
+    this.moving = true;
+
     this.updatePlayerBanner();
     this.updateShadow();
+  }
+
+  public stopPlayer(x: number, y: number, direction: Direction) {
+    // Only play the idle animation if the player was moving before
+    if (this.moving) {
+      this.remotePlayer.anims.play(
+        this.getAnimationKey(`remotePlayer${this.user.id}`, "idle", direction),
+        true
+      );
+    }
+
+    // Now the player is not moving
+    this.moving = false;
   }
 
   public destroyPlayer() {

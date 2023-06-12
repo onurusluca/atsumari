@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { createAccessToken } from "@/composables/useWebrtc";
 import { Room, RoomEvent, Participant } from "livekit-client";
+import { EnvVariables } from "@/envVariables";
 
 const { t } = useI18n();
 const authStore = useAuthStore();
@@ -22,22 +23,21 @@ let isUserInARoom = ref<boolean>(false);
 let userToken = ref<string>("");
 let isCurrentlyConnected = ref<boolean>(false);
 
-const wssUrl = ref("wss://atsumari.livekit.cloud");
+const wssUrl = ref(`wss://${EnvVariables.livekitHostUrl}`);
 const remoteVideoContainer = ref();
 onMounted(() => {});
 
-emitter.once("playerInRoom").then(async (data) => {
-  if (data.isPlayerInARoom === true) {
+emitter.on("playerInRoom", async (data) => {
+  console.log("Emit received", data, isCurrentlyConnected.value);
+
+  if (data.isPlayerInARoom === true && !isCurrentlyConnected.value) {
     console.log("in room", data);
 
     isUserInARoom.value = true;
     roomName.value = data.roomName;
-
+    isCurrentlyConnected.value = true;
     await joinRoom();
-    if (webRtcStore.devices.isMicrophoneEnabled) {
-      room.localParticipant.setMicrophoneEnabled(true);
-    }
-  } else if (data.isPlayerInARoom === false) {
+  } else if (data.isPlayerInARoom === false && isCurrentlyConnected) {
     isUserInARoom.value = false;
     roomName.value = "";
 
@@ -108,18 +108,35 @@ const room = new Room({
   },
 });
 
+const joinRoom = async () => {
+  userToken.value = await createToken();
+
+  if (userToken.value) {
+    console.log("User token is created", userToken.value);
+
+    await prepareForConnection();
+  }
+};
+
+const leaveRoom = () => {
+  room.disconnect();
+  isCurrentlyConnected.value = false;
+};
+
 const createToken = async (): Promise<string> => {
   try {
+    console.log("Creating token");
+
     const createdToken = (await createAccessToken(
       roomName.value,
-      generalStore.userName
+      generalStore.userName || Math.random().toString(36).substring(7)
     )) as string;
 
     if (createdToken.includes("error")) {
       console.log("Failed to create token.", createdToken);
       throw new Error("Failed to create token: " + createdToken);
     } else {
-      console.log("CREATED TOKEN", createdToken);
+      console.log("Token created", createdToken);
       return createdToken as string;
     }
   } catch (error) {
@@ -129,14 +146,34 @@ const createToken = async (): Promise<string> => {
 };
 
 const prepareForConnection = async () => {
+  console.log("Preparing connection...");
+
   try {
     await room.prepareConnection(wssUrl.value);
+    console.log("Connection prepared.");
   } catch (error) {
     console.log("Failed to prepare connection.", error);
   }
 
+  // Connect to room
+  try {
+    await room.connect(wssUrl.value, userToken.value);
+    isCurrentlyConnected.value = true;
+    console.log("Connected to room.");
+  } catch (error) {
+    console.log("Failed to connect to room.", error);
+
+    // If token is invalid, create a new token and try again
+    /*  createToken().then(async (token: string) => {
+      userToken.value = token;
+      await joinRoom();
+    }); */
+  }
+
   // Subscribe remote video and display it
   room.on(RoomEvent.TrackSubscribed, function (remoteTrack) {
+    console.log("Trying to subscribe to remote track.");
+
     const track = remoteTrack.attach();
     // Style the video
     // TODO: For some reason, I have to style the video here. I can't style it in the template.
@@ -148,48 +185,30 @@ const prepareForConnection = async () => {
     track.style.boxShadow = "0 0 1rem #000";
 
     remoteVideoContainer.value.appendChild(track);
-    console.log("TRACK: ", track);
+    console.log("Track subscribed: ", track);
   });
 
   // Unsubscribe remote video and remove it
   room.on(RoomEvent.TrackUnsubscribed, function (remoteTrack) {
+    console.log("Trying to unsubscribe from remote track.");
+
     const track = remoteTrack.detach();
     remoteVideoContainer.value.removeChild(track);
+
+    console.log("Track unsubscribed : ", track);
+
+    // Reset style
+    track.style.width = "";
+    track.style.height = "";
+    track.style.objectFit = "";
+    track.style.borderRadius = "";
+    track.style.border = "";
+    track.style.boxShadow = "";
   });
-
-  // Connect to room
-  try {
-    await room.connect(wssUrl.value, userToken.value);
-    isCurrentlyConnected.value = true;
-    console.log("Connected to room.");
-  } catch (error) {
-    console.log("Failed to connect to room.", error);
-
-    // If token is invalid, create a new token and try again
-    createToken().then(async (token: string) => {
-      userToken.value = token;
-      await joinRoom();
-    });
-  }
 
   // Enable camera and microphone
   // await room.localParticipant.setMicrophoneEnabled(true);
   // webRtcStore.devices.isMicrophoneEnabled = true;
-};
-
-const joinRoom = async () => {
-  userToken.value = await createToken();
-
-  if (userToken.value) {
-    console.log(userToken.value);
-
-    await prepareForConnection();
-  }
-};
-
-const leaveRoom = () => {
-  room.disconnect();
-  isCurrentlyConnected.value = false;
 };
 
 // WATCHERS
