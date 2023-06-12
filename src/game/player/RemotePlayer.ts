@@ -145,12 +145,10 @@ export default class RemotePlayer {
     this.remotePlayer.setPosition(x, y);
 
     // Only start the walking animation if the player was not moving before
-    if (!this.moving) {
-      this.remotePlayer.anims.play(
-        this.getAnimationKey(`remotePlayer${this.user.id}`, "walk", direction),
-        true
-      );
-    }
+    this.remotePlayer.anims.play(
+      this.getAnimationKey(`remotePlayer${this.user.id}`, "walk", direction),
+      true
+    );
 
     // Now the player is moving
     this.moving = true;

@@ -2,9 +2,6 @@ import { supabase } from "@/utils/supabaseInit";
 import type { SpacesType, ProfilesType } from "@/api/types";
 import { TileMap } from "@/types/canvasTypes";
 
-export let userName: string = "";
-export let characterSpriteName: string = "";
-export let initialSetupCompleted: boolean = false;
 export let gameMapJson: TileMap | null = null;
 export let gameMapTileset: string = "";
 
@@ -29,14 +26,27 @@ export const handleReadProfile = async (userId: string, spaceId: string) => {
     );
 
     if (userNameForThisSpace && userProfile.character_sprite) {
-      userName = userNameForThisSpace[spaceId];
-      characterSpriteName = userProfile.character_sprite;
-      initialSetupCompleted = true;
+      return {
+        userName: userNameForThisSpace[spaceId],
+        characterSpriteName: userProfile.character_sprite,
+        initialSetupCompleted: true,
+      };
     } else {
-      initialSetupCompleted = false;
+      return {
+        userName: "",
+        characterSpriteName: "",
+        initialSetupCompleted: false,
+      };
     }
-  } catch (error: any) {
-    console.warn("READ PROFILES CATCH ERROR: ", error.message);
+  } catch (error: unknown) {
+    console.warn("READ PROFILES CATCH ERROR: ", error);
+
+    return {
+      userName: "",
+      characterSpriteName: "",
+      initialSetupCompleted: false,
+      error: error,
+    };
   }
 };
 
@@ -152,7 +162,7 @@ export const addSpaceToVisitedSpaces = async (
   if (error) throw error;
 };
 
-// After all the initial setups are done in the modal, do the preparations
+/* // After all the initial setups are done in the modal, do the preparations
 export const handleInitialSetupCompleted = async (
   userId: string,
   spaceId: string,
@@ -163,4 +173,4 @@ export const handleInitialSetupCompleted = async (
   // Assuming initialPreparations and doRealtimeStuff are defined elsewhere.
   // await initialPreparations();
   // doRealtimeStuff();
-};
+}; */

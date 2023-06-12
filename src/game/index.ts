@@ -12,7 +12,7 @@ export default async function createGame(): Promise<void> {
       default: "arcade",
       arcade: {
         gravity: { y: 0 }, // Top down game, so no gravity
-        debug: false, // Enable debug
+        debug: true, // Enable debugging
         // TODO: Add QuadTree
       },
     },

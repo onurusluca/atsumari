@@ -28,7 +28,7 @@ export default class Maim extends Phaser.Scene {
     socket.on("connect", () => {
       socket.emit("joinRoom", generalStore.spaceId, {
         id: socket.id,
-        userName: this.getRandomWord(),
+        userName: generalStore.userName,
         x: 50,
         y: 30,
         facingTo: "down",
@@ -36,10 +36,9 @@ export default class Maim extends Phaser.Scene {
           x: 200,
           y: 200,
         },
-        characterSprite: "sprite2.png",
-        characterSpriteName: "dog.png",
-        userStatus: "offline",
-        userPersonalMessage: "I am ONUR!",
+        characterSpriteName: generalStore.characterSpriteName,
+        userStatus: "online",
+        userPersonalMessage: `I'm ${generalStore.userName}! I'm new here!`,
       });
 
       this.playerManager = new PlayerManager(this, this.rooms);
@@ -106,6 +105,7 @@ export default class Maim extends Phaser.Scene {
     });
 
     socket.on("playerStopped", (playerInfo) => {
+      console.log("Main: playerStopped", playerInfo);
       this.playerManager!.stopRemotePlayer(
         playerInfo.id,
         playerInfo.x,
@@ -210,28 +210,5 @@ export default class Maim extends Phaser.Scene {
     );
 
     return { groundLayer, wallsLayer };
-  }
-
-  private getRandomWord() {
-    // Characters that can be used in the random word
-    const alphabet = "abcdefghijklmnopqrstuvwxyz";
-
-    // Randomly select a word length between 4 and 10
-    const wordLength = Math.floor(Math.random() * 7) + 4;
-
-    // Initialize the word as an empty string
-    let word = "";
-
-    // Build the word
-    for (let i = 0; i < wordLength; i++) {
-      // Randomly select a character from the alphabet
-      const randomIndex = Math.floor(Math.random() * alphabet.length);
-      const randomChar = alphabet[randomIndex];
-
-      // Add the character to the word
-      word += randomChar;
-    }
-
-    return word;
   }
 }

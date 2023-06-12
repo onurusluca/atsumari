@@ -5,6 +5,8 @@ import type { User } from "@/types/canvasTypes";
 import { vOnClickOutside } from "@vueuse/components";
 import createGame from "@/game";
 
+import { handleReadProfile } from "@/composables/useProfileHandler";
+
 const { t } = useI18n();
 const authStore = useAuthStore();
 const generalStore = useGeneralStore();
@@ -19,6 +21,15 @@ onMounted(async () => {
   generalStore.spaceId = spaceId;
   generalStore.spaceName = spaceName;
   generalStore.users = users;
+
+  const profileData = await handleReadProfile(authStore.user.id, spaceId);
+  if (profileData.error) {
+    console.error(profileData.error);
+  } else {
+    generalStore.userName = profileData.userName;
+    generalStore.characterSpriteName = profileData.characterSpriteName;
+    generalStore.initialSetupCompleted = profileData.initialSetupCompleted;
+  }
 
   createGame();
 });

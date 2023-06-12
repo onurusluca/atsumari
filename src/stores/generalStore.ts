@@ -5,9 +5,10 @@ export const useGeneralStore = defineStore("generalStore", {
   state: () => {
     return {
       spaceId: "" as string,
+      users: [] as User[],
       spaceName: "" as string,
       userName: "" as string,
-      users: [] as User[],
+      characterSpriteName: "" as string,
       userStatus: "online" as string,
       userPersonalMessage: "" as string,
       initialSetupCompleted: false as boolean,

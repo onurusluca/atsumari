@@ -171,7 +171,7 @@ export default class Player {
           }); */
 
           // Emit player stopped moving to stop animation on other clients
-          socket.emit("playerStopped", {
+          socket.emit("playerStop", {
             x: this.myPlayer.x,
             y: this.myPlayer.y,
             facingTo: this.myUser.facingTo,
