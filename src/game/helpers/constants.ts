@@ -6,13 +6,13 @@ interface Position {
 export const UserConstants = {
   PLAYER_INITIAL_POSITION: { x: 600, y: 600 } as Position,
   PLAYER_SPEED: 500 as const,
-  PLAYER_SCALE: 4 as const,
+  PLAYER_SCALE: 3 as const,
   PLAYER_BODY_SIZE: { width: 15, height: 15 },
   PLAYER_BODY_OFFSET: { x: 1, y: 1 } as Position,
-  PLAYER_HUD_OFFSET: { /*  x: 60, */ y: 80 } as Position,
+  PLAYER_HUD_OFFSET: { /*  x: 60, */ y: 70 } as Position,
 };
 
-export const MAP_SCALE_FACTOR: number = 2;
+export const MAP_SCALE_FACTOR: number = 1.5;
 
 export const Depths = {
   // Higher number means on top

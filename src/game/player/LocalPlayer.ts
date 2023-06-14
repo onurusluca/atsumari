@@ -124,7 +124,7 @@ export default class Player {
 
   private createShadow() {
     this.shadow = this.scene.add.sprite(this.myPlayer.x, this.myPlayer.y, "shadow");
-    this.shadow.setScale(4);
+    this.shadow.setScale(3);
     this.shadow.setDepth(Depths.Shadow); // Render shadow below the player but above the map/background
   }
 

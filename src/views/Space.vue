@@ -15,6 +15,8 @@ const route = useRouter();
 const spaceId = String(route.currentRoute.value.params.id);
 const spaceName = String(route.currentRoute.value.params.name);
 
+let initialSetupCompleted = ref<Boolean>(true);
+
 let users = reactive<Array<User>>([]);
 
 onMounted(async () => {
@@ -22,21 +24,36 @@ onMounted(async () => {
   generalStore.spaceName = spaceName;
   generalStore.users = users;
 
+  await handleReadAndSetProfileStuff().then(() => {
+    if (initialSetupCompleted.value) {
+      createGame();
+    }
+  });
+});
+onUnmounted(() => {
+  emitter.emit("destroyGame");
+});
+
+// After all the initial setups are done in the modal, do the preparations
+const handleInitialSetupCompleted = async () => {
+  initialSetupCompleted.value = true;
+  await handleReadAndSetProfileStuff().then(() => {
+    if (initialSetupCompleted.value) {
+      createGame();
+    }
+  });
+};
+
+const handleReadAndSetProfileStuff = async () => {
   const profileData = await handleReadProfile(authStore.user.id, spaceId);
   if (profileData.error) {
     console.error(profileData.error);
   } else {
     generalStore.userName = profileData.userName;
     generalStore.characterSpriteName = profileData.characterSpriteName;
-    generalStore.initialSetupCompleted = profileData.initialSetupCompleted;
+    initialSetupCompleted.value = profileData.initialSetupCompleted;
   }
-
-  createGame();
-});
-
-onUnmounted(() => {
-  emitter.emit("destroyGame");
-});
+};
 
 /****************************************
  * UI
@@ -152,11 +169,11 @@ useHead({
     <Joystick />
 
     <!-- Initial setup modal -->
-    <!--  <InitialCharacterSetupModal
+    <InitialCharacterSetupModal
       v-if="!initialSetupCompleted"
       :space-id="spaceId"
       @initial-setup-completed="handleInitialSetupCompleted"
-    /> -->
+    />
   </div>
 </template>
 

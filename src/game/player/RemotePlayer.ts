@@ -131,7 +131,7 @@ export default class RemotePlayer {
 
   private createShadow() {
     this.shadow = this.scene.add.sprite(0, 0, "shadow");
-    this.shadow.setScale(4);
+    this.shadow.setScale(3);
     this.shadow.setDepth(Depths.Shadow); // Render shadow below the player but above the map/background
   }
 

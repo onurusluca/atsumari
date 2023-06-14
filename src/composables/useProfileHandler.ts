@@ -1,5 +1,5 @@
 import { supabase } from "@/utils/supabaseInit";
-import type { SpacesType, ProfilesType } from "@/api/types";
+import type { SpacesType, ProfilesType } from "@/types/supabaseTypes";
 import { TileMap } from "@/types/canvasTypes";
 
 export let gameMapJson: TileMap | null = null;
@@ -161,16 +161,3 @@ export const addSpaceToVisitedSpaces = async (
 
   if (error) throw error;
 };
-
-/* // After all the initial setups are done in the modal, do the preparations
-export const handleInitialSetupCompleted = async (
-  userId: string,
-  spaceId: string,
-  spaceName: string
-) => {
-  initialSetupCompleted = true;
-  await handleReadProfile(userId, spaceId);
-  // Assuming initialPreparations and doRealtimeStuff are defined elsewhere.
-  // await initialPreparations();
-  // doRealtimeStuff();
-}; */

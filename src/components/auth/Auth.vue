@@ -174,6 +174,7 @@ const { pressed } = useMousePressed({ target: revealPasswordButtonRef });
           autofocus
           type="email"
           name="email"
+          autocomplete="email"
           id="email"
           required
           class="form__text-input"
