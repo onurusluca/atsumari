@@ -24,7 +24,7 @@ let bannerWidth = 0;
 const bannerHeight = 42;
 const bannerPadding = 30;
 
-export class PlayerBanner extends Phaser.GameObjects.Container {
+export default class PlayerBanner extends Phaser.GameObjects.Container {
   private background: Phaser.GameObjects.Graphics;
   private statusIcon: Phaser.GameObjects.Graphics;
   private playerName: Phaser.GameObjects.Text;

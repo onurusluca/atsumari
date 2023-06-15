@@ -24,7 +24,7 @@ const initChannel = (spaceId: string) => {
 const getUserPayload = (
   x: number,
   y: number,
-  facingTo: string,
+  direction: string,
   userId: string,
   userName: string,
   characterSpriteName: string
@@ -34,13 +34,13 @@ const getUserPayload = (
   characterSpriteName,
   x,
   y,
-  facingTo,
+  direction,
 });
 
 const sendUserAction = (
   x: number,
   y: number,
-  facingTo: string,
+  direction: string,
   userId: string,
   userName: string,
   characterSpriteName: string
@@ -48,12 +48,12 @@ const sendUserAction = (
   broadCastChannel.send({
     type: "broadcast",
     event: EVENT_SEND_USER_POSITION,
-    payload: getUserPayload(x, y, facingTo, userId, userName, characterSpriteName),
+    payload: getUserPayload(x, y, direction, userId, userName, characterSpriteName),
   });
 
   console.log(
     "sendUserAction",
-    getUserPayload(x, y, facingTo, userId, userName, characterSpriteName)
+    getUserPayload(x, y, direction, userId, userName, characterSpriteName)
   );
 };
 

@@ -19,16 +19,6 @@ export type DevicesStoreTypes = {
   isScreenSharing: boolean;
 };
 
-// The Payload type for the broadcast message
-export type Payload = {
-  id: string;
-  userName: string;
-  characterSpriteName: string;
-  x: number;
-  y: number;
-  facingTo: string;
-};
-
 // The Channel type represents a broadcasting channel
 export type Channel = {
   send: (data: any) => void;

@@ -4,7 +4,7 @@ export interface User {
   userName: string;
   x: number;
   y: number;
-  facingTo: string;
+  direction: Direction;
   lastPosition: {
     x: number;
     y: number;

@@ -1,14 +1,18 @@
 import Phaser from "phaser";
 import { UserConstants, Depths } from "../helpers/constants";
-import { PlayerBanner } from "./PlayerBanner";
+import PlayerBanner from "./PlayerBanner";
 import { User, Direction, ControlKeys } from "@/types/canvasTypes";
 import socket from "@/composables/useSocketIO";
+import { useStorage } from "@vueuse/core";
 
-const gameLocalStorage = useStorage("atsumari_game", {
-  lastPosition: { x: 0, y: 0 },
-});
+const gameLocalStorage = useStorage<{ lastPosition: { x: number; y: number } }>(
+  "atsumari_game",
+  {
+    lastPosition: { x: 0, y: 0 },
+  }
+);
 
-export default class Player {
+export default class LocalPlayer {
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private wasd!: Record<ControlKeys, Phaser.Input.Keyboard.Key>;
   private keysDown: ControlKeys[] = [];
@@ -26,7 +30,6 @@ export default class Player {
     this.createControls();
     this.playerBannerWidth = this.playerBanner.getBannerWidth();
   }
-
   private createPlayer() {
     // walk-down-0 is the name of the frame in the .json file
     this.myPlayer = this.scene.physics.add
@@ -167,14 +170,14 @@ export default class Player {
           /*    socket.emit("playerMovement", {
             x: this.myPlayer.x,
             y: this.myPlayer.y,
-            facingTo: this.myUser.facingTo,
+            direction: this.myUser.direction,
           }); */
 
           // Emit player stopped moving to stop animation on other clients
           socket.emit("playerStop", {
             x: this.myPlayer.x,
             y: this.myPlayer.y,
-            facingTo: this.myUser.facingTo,
+            direction: this.myUser.direction,
           });
 
           // Save last position in local storage
@@ -187,34 +190,38 @@ export default class Player {
     });
   }
 
-  public handlePlayerMovement() {
+  public handlePlayerMovement(): void {
     const speed = UserConstants.PLAYER_SPEED * this.scene.game.loop.delta;
     let xVelocity = 0;
     let yVelocity = 0;
-    let direction = null;
 
-    if (this.keysDown.includes(ControlKeys.W)) {
-      yVelocity -= speed;
-      direction = Direction.Up;
-      this.myUser.facingTo = "up";
-    }
+    // get the last key pressed from the queue, if any
+    const lastKey = this.keysDown[this.keysDown.length - 1];
+    let direction: Direction | null = null;
 
-    if (this.keysDown.includes(ControlKeys.S)) {
-      yVelocity += speed;
-      direction = Direction.Down;
-      this.myUser.facingTo = "down";
-    }
-
-    if (this.keysDown.includes(ControlKeys.A)) {
-      xVelocity -= speed;
-      direction = Direction.Left;
-      this.myUser.facingTo = "left";
-    }
-
-    if (this.keysDown.includes(ControlKeys.D)) {
-      xVelocity += speed;
-      direction = Direction.Right;
-      this.myUser.facingTo = "right";
+    if (lastKey) {
+      switch (lastKey) {
+        case ControlKeys.W:
+          yVelocity -= speed;
+          direction = Direction.Up;
+          this.myUser.direction = Direction.Up;
+          break;
+        case ControlKeys.S:
+          yVelocity += speed;
+          direction = Direction.Down;
+          this.myUser.direction = Direction.Down;
+          break;
+        case ControlKeys.A:
+          xVelocity -= speed;
+          direction = Direction.Left;
+          this.myUser.direction = Direction.Left;
+          break;
+        case ControlKeys.D:
+          xVelocity += speed;
+          direction = Direction.Right;
+          this.myUser.direction = Direction.Right;
+          break;
+      }
     }
 
     if (direction) {
@@ -230,7 +237,7 @@ export default class Player {
     this.updateShadow();
   }
 
-  movePlayer(xVelocity: number, yVelocity: number, direction: Direction) {
+  public movePlayer(xVelocity: number, yVelocity: number, direction: Direction): void {
     // Stop any previous movement from the last frame
     this.myPlayer.setVelocity(0);
 
@@ -247,11 +254,11 @@ export default class Player {
     socket.emit("playerMovement", {
       x: this.myPlayer.x,
       y: this.myPlayer.y,
-      facingTo: this.myUser.facingTo,
+      direction: this.myUser.direction,
     });
   }
 
-  private stopPlayer() {
+  private stopPlayer(): void {
     this.myPlayer.setVelocity(0, 0);
     const currentDirection = this.myPlayer.anims.currentAnim?.key?.split(
       "-"
@@ -264,7 +271,7 @@ export default class Player {
     }
   }
 
-  public getPlayer() {
+  public getPlayer(): Phaser.Physics.Arcade.Sprite {
     return this.myPlayer;
   }
 }
