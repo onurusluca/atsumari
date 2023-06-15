@@ -26,6 +26,7 @@ export default class Maim extends Phaser.Scene {
 
   create() {
     socket.on("connect", () => {
+      // Send my info to the server
       socket.emit("joinRoom", generalStore.spaceId, {
         id: socket.id,
         userName: generalStore.userName,
@@ -44,6 +45,7 @@ export default class Maim extends Phaser.Scene {
       this.playerManager = new PlayerManager(this, this.rooms);
     });
 
+    // Error handling
     socket.on("disconnect", (reason) => {
       console.log(`Socket disconnected: ${reason}`);
     });
@@ -53,6 +55,7 @@ export default class Maim extends Phaser.Scene {
 
       Object.keys(players).forEach((id) => {
         if (players[id].id === socket.id) {
+          // Local player
           this.load.atlas(
             players[id].id,
             getCharacterSpriteSheet(players[id].characterSpriteName),
@@ -67,6 +70,7 @@ export default class Maim extends Phaser.Scene {
 
           this.load.start();
         } else {
+          // Remote players
           this.load.atlas(
             players[id].id,
             getCharacterSpriteSheet(players[id].characterSpriteName),
@@ -75,7 +79,6 @@ export default class Maim extends Phaser.Scene {
 
           this.load.once("complete", () => {
             this.playerManager!.addRemotePlayer(players[id]);
-            console.log(id);
           });
 
           this.load.start();
@@ -86,7 +89,10 @@ export default class Maim extends Phaser.Scene {
     socket.on("newPlayer", (playerInfo) => {
       console.log("newPlayer", playerInfo);
 
-      this.onUserJoin(playerInfo);
+      // If the player doesn't exist, add them
+      if (!this.playerManager!.getRemotePlayer(playerInfo.id)) {
+        this.onUserJoin(playerInfo);
+      }
     });
 
     socket.on("playerDisconnected", (id) => {

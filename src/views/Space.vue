@@ -90,6 +90,9 @@ useHead({
   </section> -->
 
   <div class="space">
+    <!-- Game parent -->
+    <div id="space__game-parent"></div>
+
     <!-- Bottom control -->
     <div class="bottom-control">
       <div class="bottom-control__left">

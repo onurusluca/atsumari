@@ -118,8 +118,6 @@ export default class RemotePlayer {
       "#FFA5004d",
       Depths.RemotePlayerBanner
     );
-
-    this.updatePlayerBanner();
   }
 
   updatePlayerBanner() {

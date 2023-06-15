@@ -7,7 +7,7 @@ import Main from "./Main";
 export default async function createGame(): Promise<void> {
   let gameInstance = new Phaser.Game({
     type: Phaser.AUTO, // Phaser will use WebGL if available, if not it will use Canvas
-    parent: "atsumari-game",
+    parent: "space__game-parent",
     physics: {
       default: "arcade",
       arcade: {
@@ -32,9 +32,9 @@ export default async function createGame(): Promise<void> {
     scale: {
       mode: Phaser.Scale.FIT, // Fit to window
       autoCenter: Phaser.Scale.CENTER_BOTH, // Center game
-      parent: "phaser-game", // ID of the DOM element to which the canvas should be added
+      parent: "space__game-parent",
       width: window.innerWidth,
-      height: window.innerHeight,
+      height: window.innerHeight - 60, // Height of the bottom bar
     },
     render: {
       roundPixels: true,
@@ -44,14 +44,18 @@ export default async function createGame(): Promise<void> {
     },
     fps: {
       //limit: 165,
-      //limit: 144
+      //limit: 144s
       //limit: 60
       //limit: 40
       //limit: 15
     },
   });
 
+  console.log("gameInstance", gameInstance);
+
   emitter.on("destroyGame", async () => {
+    console.warn("destroying game");
+
     // Stop game loop
     gameInstance.loop.stop();
 
@@ -64,6 +68,8 @@ export default async function createGame(): Promise<void> {
       // Remove the scene from the game
       gameInstance.scene.remove(scene.sys.settings.key);
     }
+
+    gameInstance.renderer.destroy();
 
     // Remove game canvas from the DOM
     if (gameInstance.canvas.parentNode) {

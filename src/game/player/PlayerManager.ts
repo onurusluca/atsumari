@@ -22,6 +22,8 @@ export default class PlayerManager {
     this.remotePlayers[newUser.id] = new RemotePlayer(this.scene, newUser);
     if (this.remotePlayers[newUser.id]) {
       this.remotePlayers[newUser.id].updatePlayerBanner();
+
+      console.log("New remote player added. PlayerManager.ts");
     }
 
     console.log("New remote player added. PlayerManager.ts");
@@ -96,5 +98,9 @@ export default class PlayerManager {
 
   public getRemotePlayers(): Record<string, RemotePlayer> {
     return this.remotePlayers as Record<string, RemotePlayer>;
+  }
+
+  public getRemotePlayer(id: number): RemotePlayer {
+    return this.remotePlayers[id];
   }
 }
