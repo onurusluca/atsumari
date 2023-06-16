@@ -91,6 +91,8 @@ export default class RemotePlayer {
       "#FFA5004d",
       Depths.RemotePlayerBanner
     );
+
+    this.updatePlayerBanner();
   }
 
   private updatePlayerBanner(): void {
@@ -105,6 +107,8 @@ export default class RemotePlayer {
       .sprite(0, 0, "shadow")
       .setScale(3)
       .setDepth(Depths.Shadow);
+
+    this.updateShadow();
   }
 
   private updateShadow(): void {

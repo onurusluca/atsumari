@@ -23,8 +23,7 @@ let showEmailVerification = ref<boolean>(false);
 let rememberMeChecked = ref<boolean>(false);
 
 const authLocalStorage = useStorage("atsumari_auth", {
-  rememberMeCheckedLocal: null,
-  tokenExpiry: 0,
+  tokenExpiry: "",
 });
 
 onMounted(() => {});
@@ -33,24 +32,22 @@ onMounted(() => {});
  * API CALLS
  ****************************************/
 const handleLogin = async () => {
-  // Set the session expiration time according to the user's remember me preference
-  const sessionDuration = rememberMeChecked.value ? 30 * 24 * 60 * 60 : 24 * 60 * 60; // 30 days or 1 day in seconds
-
   try {
     loading.value = true;
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email: email.value,
       password: password.value,
-      expires_in: sessionDuration,
     });
-
-    authLocalStorage.value.tokenExpiry = sessionDuration;
 
     if (error) {
       errorUi.value = t("auth.login.invalidCredentials");
       errorUiSecond.value = t("auth.login.tryAgain");
     } else {
-      router.push({ name: "Home" });
+      console.log("logged in", data);
+
+      rememberMeChecked
+        ? (authLocalStorage.value.tokenExpiry = data.session.expires_at)
+        : (authLocalStorage.value.tokenExpiry = "");
     }
   } catch (error) {
     if (error instanceof Error) {

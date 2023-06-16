@@ -9,16 +9,19 @@ const authStore = useAuthStore();
 
 const authLocalStorage = useStorage("atsumari_auth", {
   rememberMeCheckedLocal: null,
-  tokenExpiry: 0,
+  tokenExpiry: "", // Set at 'Remember me' checkbox
 });
 
 let session = ref();
 onMounted(async () => {
-  /*   // if token is expired, refresh it
-  if (authLocalStorage.value.tokenExpiry) {
-    const tokenExpiry = authLocalStorage.value.tokenExpiry;
+  // if token is  close to expiry, refresh it
+  if (
+    session.value &&
+    authLocalStorage.value.tokenExpiry &&
+    authLocalStorage.value.tokenExpiry !== ""
+  ) {
     const now = new Date();
-    const expiryDate = new Date(tokenExpiry);
+    const expiryDate = new Date(authLocalStorage.value.tokenExpiry);
     if (now > expiryDate) {
       console.log("token expired");
 
@@ -33,9 +36,12 @@ onMounted(async () => {
         } else {
           authLocalStorage.value.tokenExpiry = data.expires_at;
         }
-      } catch (error) {}
+      } catch (error) {
+        console.warn("ERROR: Failed to refresh token", error);
+        throw error;
+      }
     }
-  } */
+  }
 
   // listen for auth events (e.g. sign in, sign out, refresh)
   // set session based on the auth event
