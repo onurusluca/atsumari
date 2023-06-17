@@ -50,7 +50,8 @@ export default async function createGame(): Promise<void> {
   });
 
   // Destroy game instance on unmount
-  emitter.on("destroyGame", async () => {
+  // TODO: This is buggy. It will make the game won't load again after unmounting. Or EVEN after refreshing the page.
+  /* emitter.on("destroyGame", async () => {
     gameInstance.loop.stop();
 
     for (let scene of gameInstance.scene.getScenes(true)) {
@@ -66,5 +67,5 @@ export default async function createGame(): Promise<void> {
     }
 
     gameInstance.destroy(true);
-  });
+  }); */
 }
