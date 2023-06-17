@@ -67,8 +67,6 @@ button:disabled {
 }
 
 .btn-icon {
-
-
   background-color: transparent;
   border: none;
   border-radius: 0.5rem;
@@ -76,6 +74,7 @@ button:disabled {
   color: var(--text-100);
   outline: max(1px, 0.15em) solid transparent;
 
+  padding: 0.5rem;
 
   svg {
     color: var(--text-100);

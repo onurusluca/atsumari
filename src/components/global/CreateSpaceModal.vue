@@ -199,7 +199,7 @@ function showToast(toastTypeProp: string) {
 
   setTimeout(() => {
     toastOpen.value = false;
-  }, 5500);
+  }, 2000);
 }
 
 // Go to space

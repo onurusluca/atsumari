@@ -5,7 +5,10 @@ import type { User } from "@/types/canvasTypes";
 import { vOnClickOutside } from "@vueuse/components";
 import createGame from "@/game";
 
-import { handleReadProfile } from "@/composables/useProfileHandler";
+import {
+  handleReadProfile,
+  addSpaceToVisitedSpaces,
+} from "@/composables/useProfileHandler";
 
 const { t } = useI18n();
 const authStore = useAuthStore();
@@ -28,6 +31,8 @@ onMounted(async () => {
     const profileData = await handleReadAndSetProfileStuff();
     if (profileData && initialSetupCompleted.value) {
       await createGame();
+
+      await handleAddSpaceToVisitedSpaces(authStore.user.id, spaceId, spaceName);
     }
   } catch (error) {
     console.error("An error occurred during setup:", error);
@@ -90,7 +95,7 @@ const handleChatMenuOpen = () => {
 
 // Set document head tag
 useHead({
-  title: `${spaceName} |Atsumari 🍉`,
+  title: `${spaceName} | Atsumari 🍉`,
 });
 </script>
 

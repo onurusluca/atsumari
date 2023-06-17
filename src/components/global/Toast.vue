@@ -32,7 +32,7 @@ defineProps<{
     </div>
 
     <!-- Icons -->
-    <!--  <div class="toast__right">
+    <div class="toast__right">
       <carbon-checkmark-outline
         v-if="toastTheme === 'successToast'"
         class="toast-icon"
@@ -48,7 +48,7 @@ defineProps<{
         class="toast-icon"
         style="font-size: 2rem; color: red"
       />
-    </div> -->
+    </div>
   </div>
 </template>
 
@@ -86,7 +86,7 @@ defineProps<{
     height: 100%;
     width: 3rem;
 
-    background-color: var(--toast-success);
+    background-color: var(--success);
     border-radius: 0 0.5rem 0.5rem 0;
   }
 

@@ -192,24 +192,24 @@ export interface Database {
           created_at: string | null
           id: string
           name: string
-          visited_user_id: string
+          user_id: string
         }
         Insert: {
           created_at?: string | null
           id?: string
           name: string
-          visited_user_id: string
+          user_id: string
         }
         Update: {
           created_at?: string | null
           id?: string
           name?: string
-          visited_user_id?: string
+          user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "visited_spaces_visited_user_id_fkey"
-            columns: ["visited_user_id"]
+            foreignKeyName: "visited_spaces_user_id_fkey"
+            columns: ["user_id"]
             referencedRelation: "users"
             referencedColumns: ["id"]
           }

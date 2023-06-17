@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { SpacesType } from "@/api/types";
+import type { SpacesType } from "@/types/supabaseTypes";
 import type { OnClickOutsideHandler } from "@vueuse/core";
 import { vOnClickOutside } from "@vueuse/components";
 import { getCurrentUrlOrigin } from "@/utils/general";
@@ -28,7 +28,7 @@ const handleReadUserSpaces = async () => {
     let { data: spaces, error } = await supabase
       .from("spaces")
       .select("*")
-      .eq("user_id", authStore?.session?.user?.id);
+      .eq("user_id", authStore.session.user.id);
     if (spaces) {
       userSpaces = spaces;
       isUserSpacesLoaded.value = true;
@@ -53,7 +53,7 @@ const handleReadVisitedSpaces = async () => {
     let { data: spaces, error } = await supabase
       .from("visited_spaces")
       .select("*")
-      .eq("visited_user_id", authStore?.session?.user?.id);
+      .eq("user_id", authStore.session.user.id);
     if (spaces) {
       visitedSpaces = spaces;
       isVisitedSpacesLoaded.value = true;
@@ -79,7 +79,6 @@ supabase
     "postgres_changes",
     { event: "*", schema: "public", table: "spaces" },
     async () => {
-      console.log("Spaces changed!");
       await handleReadUserSpaces();
     }
   )
@@ -132,7 +131,7 @@ function showToast(toastTypeProp: string) {
 
   setTimeout(() => {
     toastOpen.value = false;
-  }, 5500);
+  }, 2000);
 }
 </script>
 
@@ -292,7 +291,9 @@ function showToast(toastTypeProp: string) {
                 <button
                   @click="
                     onCopyToClipboard(
-                      `${getCurrentUrlOrigin()}/space/${item.id}/${slugify(item.name)}`
+                      `${getCurrentUrlOrigin()}/space/${item.space_id}/${slugify(
+                        item.name
+                      )}`
                     )
                   "
                   class="btn btn-icon"
@@ -383,11 +384,12 @@ function showToast(toastTypeProp: string) {
       </p>
     </div>
 
+    <!-- No visited spaces -->
     <div
       v-if="showNoVisitedSpacesMessage && activeTab === 'visitedSpaces'"
       class="home__no-spaces"
     >
-      <fluent-emoji:sad-but-relieved-face style="font-size: 5rem" />
+      <fluent-emoji:disappointed-face style="font-size: 5rem" />
 
       <p class="no-spaces__message">
         {{ t("home.spaces.noVisitedSpacesMessage") }}
@@ -448,6 +450,7 @@ function showToast(toastTypeProp: string) {
         align-items: center;
         justify-content: space-between;
 
+        padding: 0.2rem;
         .top__title {
           font-size: 1.2rem;
           font-weight: 600;
@@ -456,8 +459,8 @@ function showToast(toastTypeProp: string) {
         .top__space-settings {
           .space-settings__menu-dropdown {
             position: absolute;
-            top: 2.2rem;
-            right: 0;
+            top: 2.5rem;
+            right: -3rem;
             z-index: $menu-z-index;
           }
         }
@@ -465,7 +468,7 @@ function showToast(toastTypeProp: string) {
       .space__image-container {
         position: relative;
         height: 14rem;
-        padding: 0.4rem 0.8rem;
+        margin: 0.4rem;
 
         &:hover {
           .image-container__image {
@@ -496,7 +499,7 @@ function showToast(toastTypeProp: string) {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 0.5rem 0.5rem 0.3rem 0.5rem;
+        /*     padding: 0.5rem 0.5rem 0.3rem 0.5rem; */
 
         .bottom__left {
           display: flex;

@@ -36,16 +36,16 @@
 }
 
 // Slide up
-.slide-left-fade-enter-active {
+.slide-up-enter-active {
   transition: all 80ms ease-out;
 }
 
-.slide-left-fade-leave-active {
+.slide-up-leave-active {
   transition: all 80ms cubic-bezier(1, 0.5, 0.8, 1);
 }
 
-.slide-left-fade-enter-from,
-.slide-left-fade-leave-to {
+.slide-up-enter-from,
+.slide-up-leave-to {
   transform: translateY(10px);
   opacity: 0;
 }

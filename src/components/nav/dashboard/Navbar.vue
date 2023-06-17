@@ -219,7 +219,7 @@ const onClickShowModal = () => {
     .right__avatar {
       background-color: var(--brand-green);
       border-radius: 50%;
-      padding: 0;
+      padding: 0 !important;
 
       .avatar__img {
         width: 3.5rem;

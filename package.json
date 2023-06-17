@@ -36,7 +36,7 @@
     "@vue/eslint-config-prettier": "^7.1.0",
     "@vue/eslint-config-typescript": "^11.0.3",
     "@vue/tsconfig": "^0.4.0",
-    "eslint": "^8.42.0",
+    "eslint": "^8.43.0",
     "eslint-plugin-vue": "^9.14.1",
     "livekit-client": "^1.11.2",
     "livekit-server-sdk": "^1.2.3",
@@ -49,6 +49,6 @@
     "unplugin-icons": "^0.16.3",
     "unplugin-vue-components": "^0.24.1",
     "vite": "^4.3.9",
-    "vue-tsc": "^1.6.5"
+    "vue-tsc": "^1.8.0"
   }
 }

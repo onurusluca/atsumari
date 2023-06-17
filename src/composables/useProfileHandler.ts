@@ -112,11 +112,13 @@ export const handleAddSpaceToVisitedSpaces = async (
   try {
     const visitedSpaces = await getVisitedSpaces(userId);
 
-    if (!visitedSpaces.some((space: SpacesType) => space.id === spaceId)) {
+    // If the space is not in the visited spaces of the user
+    if (!visitedSpaces.some((space: SpacesType) => space.space_id === spaceId)) {
       const userSpaces = await getUserSpaces(userId, spaceName);
 
+      // If the user doesn't own the space
       if (!userSpaces.some((space: SpacesType) => space.id === spaceId)) {
-        await addSpaceToVisitedSpaces(spaceName, spaceId, userId);
+        await addSpaceToVisitedSpaces(userId, spaceId, spaceName);
       }
     }
   } catch (error) {
@@ -129,10 +131,12 @@ export const getVisitedSpaces = async (userId: string) => {
   const { data: spaces, error } = await supabase
     .from<SpacesType>("visited_spaces")
     .select("*")
-    .eq("visited_user_id", userId);
+    .eq("user_id", userId);
 
   if (error) throw error;
-  return spaces || [];
+  console.log("spaces: ", spaces);
+
+  return spaces;
 };
 
 // Get user spaces
@@ -149,14 +153,14 @@ export const getUserSpaces = async (userId: string, spaceName: string) => {
 
 // Add space to visited spaces
 export const addSpaceToVisitedSpaces = async (
-  spaceName: string,
+  userId: string,
   spaceId: string,
-  userId: string
+  spaceName: string
 ) => {
   const { error } = await supabase.from("visited_spaces").insert({
+    user_id: userId,
+    space_id: spaceId,
     name: spaceName,
-    id: spaceId,
-    visited_user_id: userId,
   });
 
   if (error) throw error;
