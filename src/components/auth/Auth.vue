@@ -45,6 +45,8 @@ const handleLogin = async () => {
     } else {
       console.log("logged in", data);
 
+      router.push({ name: "Home" });
+
       rememberMeChecked
         ? (authLocalStorage.value.tokenExpiry = data.session.expires_at)
         : (authLocalStorage.value.tokenExpiry = "");
@@ -70,7 +72,7 @@ const handleRegister = async () => {
       showEmailVerification.value = true;
     }
     if (error) {
-      checkYourEmail.value = t("auth.register.checkEmail");
+      /*  checkYourEmail.value = t("auth.register.checkEmail"); */
     }
     return;
   } catch (error) {
@@ -235,6 +237,12 @@ const { pressed } = useMousePressed({ target: revealPasswordButtonRef });
         <p class="warning__info">{{ checkYourEmail }}</p>
       </div>
 
+      <div v-if="showEmailVerification" class="form__warning">
+        <p class="warning__success">
+          {{ t("auth.register.signUpSuccess") }}
+        </p>
+      </div>
+
       <!-- Submit button -->
       <button type="submit" class="btn btn-main form__submit-btn" :disabled="loading">
         <span v-if="!loading">
@@ -372,6 +380,11 @@ const { pressed } = useMousePressed({ target: revealPasswordButtonRef });
 
     .warning__info {
       color: var(--brand-green);
+      font-weight: 600;
+    }
+
+    .warning__success {
+      color: var(--success);
       font-weight: 600;
     }
   }

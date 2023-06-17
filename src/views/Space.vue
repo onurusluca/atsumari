@@ -47,11 +47,12 @@ const handleInitialSetupCompleted = async () => {
 const handleReadAndSetProfileStuff = async () => {
   const profileData = await handleReadProfile(authStore.user.id, spaceId);
   if (profileData.error) {
-    console.error(profileData.error);
+    initialSetupCompleted.value = false;
+    console.error("PROFILE READ ERROR: ", profileData.error);
   } else {
     generalStore.userName = profileData.userName;
     generalStore.characterSpriteName = profileData.characterSpriteName;
-    initialSetupCompleted.value = profileData.initialSetupCompleted;
+    initialSetupCompleted.value = true;
   }
 };
 
@@ -79,7 +80,7 @@ const handleChatMenuOpen = () => {
 
 // Set document head tag
 useHead({
-  title: `Atsumari 🍉 |  ${spaceName}`,
+  title: `${spaceName} |Atsumari 🍉`,
 });
 </script>
 
@@ -183,21 +184,27 @@ useHead({
 <style scoped lang="scss">
 .space {
   background-color: #222;
-  .canvas-container {
-    /*   width: 100%;
-    height: 100vh; */
 
-    .canvas-container__right-click-menu {
-      position: absolute;
-      z-index: 1000;
-      background-color: var(--bg-300);
-      color: var(--text-100);
-      outline: 2px solid var(--border);
+  .right-click-menu {
+    position: absolute;
+    z-index: 1000;
+    background-color: var(--bg-300);
+    color: var(--text-100);
+    outline: 2px solid var(--border);
 
-      &:hover {
-        background-color: var(--soft-hover);
-      }
+    &:hover {
+      background-color: var(--soft-hover);
     }
+  }
+
+  #space__game-parent {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    overflow: hidden;
   }
 
   .bottom-control {

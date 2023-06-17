@@ -109,7 +109,7 @@ auth:
   register:
     topTitle: Let's get started!
     subTitle: Create a new account
-    checkEmail: Check your email to confirm your account
+    signUpSuccess: Sign up success! Please check your email to verify your account.
   logout: Sign Out
 
 ##### USER #####

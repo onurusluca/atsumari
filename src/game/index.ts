@@ -28,11 +28,11 @@ const gameConfig: Phaser.Types.Core.GameConfig = {
   },
   scene: [Preloader, Main],
   scale: {
-    mode: Phaser.Scale.FIT,
+    mode: Phaser.Scale.RESIZE,
     autoCenter: Phaser.Scale.CENTER_BOTH,
     parent: "space__game-parent",
-    width: window.innerWidth,
-    height: window.innerHeight - 60,
+    /*   width: window.innerWidth,
+    height: window.innerHeight - 60, */
   },
   render: {
     roundPixels: true,

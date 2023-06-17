@@ -91,11 +91,9 @@ export default class RemotePlayer {
       "#FFA5004d",
       Depths.RemotePlayerBanner
     );
-
-    this.updatePlayerBanner();
   }
 
-  private updatePlayerBanner(): void {
+  public updatePlayerBanner(): void {
     this.playerBanner.updatePosition(
       this.user.x - this.playerBannerWidth / 2,
       this.user.y - UserConstants.PLAYER_HUD_OFFSET.y
@@ -107,11 +105,9 @@ export default class RemotePlayer {
       .sprite(0, 0, "shadow")
       .setScale(3)
       .setDepth(Depths.Shadow);
-
-    this.updateShadow();
   }
 
-  private updateShadow(): void {
+  public updateShadow(): void {
     this.shadow.setPosition(this.user.x, this.user.y + this.remotePlayer.height - 10);
   }
 
