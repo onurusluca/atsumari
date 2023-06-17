@@ -20,21 +20,43 @@ let initialSetupCompleted = ref<Boolean>(true);
 let users = reactive<Array<User>>([]);
 
 onMounted(async () => {
-  generalStore.spaceId = spaceId;
-  generalStore.spaceName = spaceName;
-  generalStore.users = users;
+  try {
+    generalStore.spaceId = spaceId;
+    generalStore.spaceName = spaceName;
+    generalStore.users = users;
 
-  await handleReadAndSetProfileStuff().then(() => {
-    if (initialSetupCompleted.value) {
-      createGame();
+    const profileData = await handleReadAndSetProfileStuff();
+    if (profileData && initialSetupCompleted.value) {
+      await createGame();
     }
-  });
+  } catch (error) {
+    console.error("An error occurred during setup:", error);
+  }
 });
+
 onUnmounted(() => {
   emitter.emit("destroyGame");
 });
 
-// After all the initial setups are done in the modal, do the preparations
+const handleReadAndSetProfileStuff = async () => {
+  try {
+    const profileData = await handleReadProfile(authStore.user.id, spaceId);
+    if (profileData.error) {
+      initialSetupCompleted.value = false;
+      console.error("PROFILE READ ERROR: ", profileData.error);
+    } else {
+      generalStore.userName = profileData.userName;
+      generalStore.characterSpriteName = profileData.characterSpriteName;
+      initialSetupCompleted.value = true;
+    }
+    return profileData;
+  } catch (error) {
+    console.error("An error occurred during profile data retrieval:", error);
+    return null;
+  }
+};
+
+// (If user doesn't have profile in this space) after all the initial setups are done in the modal, do the preparations
 const handleInitialSetupCompleted = async () => {
   initialSetupCompleted.value = true;
   await handleReadAndSetProfileStuff().then(() => {
@@ -42,18 +64,6 @@ const handleInitialSetupCompleted = async () => {
       createGame();
     }
   });
-};
-
-const handleReadAndSetProfileStuff = async () => {
-  const profileData = await handleReadProfile(authStore.user.id, spaceId);
-  if (profileData.error) {
-    initialSetupCompleted.value = false;
-    console.error("PROFILE READ ERROR: ", profileData.error);
-  } else {
-    generalStore.userName = profileData.userName;
-    generalStore.characterSpriteName = profileData.characterSpriteName;
-    initialSetupCompleted.value = true;
-  }
 };
 
 /****************************************

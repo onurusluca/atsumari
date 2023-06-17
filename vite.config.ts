@@ -39,7 +39,7 @@ export default defineConfig(({ mode }) => {
         },
       },
 
-      // This is to prevent "Local data URIs are not supported" error. Phaser doesn't support data URIs. This will make it load the assets from the server instead.(It will include images as assets rather than data URIs). Size should be less than the size of the image.
+      // This is to prevent "Local data URIs are not supported" error. Phaser doesn't support data URIs. This will make it load the assets from the server instead.(It will include images as assets rather than data URIs). Size should be less than the size of the image. https://stackoverflow.com/questions/69431297/certain-files-not-being-bundled-in-vitejs
       assetsInlineLimit: 100,
     },
     define: {

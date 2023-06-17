@@ -19,9 +19,6 @@ export default class PlayerManager {
 
   public addRemotePlayer(newUser: User): void {
     this.remotePlayers[newUser.id] = new RemotePlayer(this.scene, newUser);
-    /*
-    this.remotePlayers[newUser.id].updatePlayerBanner();
-    this.remotePlayers[newUser.id].updateShadow(); */
 
     console.log("New remote player added. PlayerManager.ts");
   }
