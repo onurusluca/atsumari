@@ -81,8 +81,8 @@ export default class RemotePlayer {
   private createPlayerBanner(): void {
     this.playerBanner = new PlayerBanner(
       this.scene,
-      0,
-      0,
+      this.user.lastPosition.x,
+      this.user.lastPosition.y - UserConstants.PLAYER_HUD_OFFSET.y,
       this.user.userStatus,
       this.user.userName,
       "remote",
@@ -90,6 +90,14 @@ export default class RemotePlayer {
       "#ffffff",
       "#FFA5004d",
       Depths.RemotePlayerBanner
+    );
+    // Get banner width after it's created
+    this.playerBannerWidth = this.playerBanner.getBannerWidth();
+
+    // Update banner position using the newly calculated width
+    this.playerBanner.updatePosition(
+      this.user.lastPosition.x - this.playerBannerWidth / 2,
+      this.user.lastPosition.y - UserConstants.PLAYER_HUD_OFFSET.y
     );
   }
 
@@ -102,7 +110,11 @@ export default class RemotePlayer {
 
   private createShadow(): void {
     this.shadow = this.scene.add
-      .sprite(0, 0, "shadow")
+      .sprite(
+        this.user.lastPosition.x,
+        this.user.lastPosition.y + this.remotePlayer.height - 10,
+        "shadow"
+      )
       .setScale(3)
       .setDepth(Depths.Shadow);
   }
