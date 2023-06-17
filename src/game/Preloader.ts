@@ -10,7 +10,7 @@ export default class Preloader extends Phaser.Scene {
   }
 
   preload() {
-    // this.load.image("shadow", ShadowSprite);
+    this.load.image("shadow", ShadowSprite);
 
     this.load.image("tiles", Tileset);
     this.load.tilemapTiledJSON("map", MapJSON);
