@@ -14,7 +14,7 @@ const emit = defineEmits(["change", "delete"]);
 let email = ref<string>("");
 let password = ref<any>(null);
 
-let loading = ref(false);
+let loading = ref<boolean>(false);
 let errorUi = ref<string>("");
 let errorUiSecond = ref<string>("");
 let checkYourEmail = ref<string>("");
@@ -23,6 +23,7 @@ let showEmailVerification = ref<boolean>(false);
 let rememberMeChecked = ref<boolean>(false);
 
 const authLocalStorage = useStorage("atsumari_auth", {
+  rememberMeCheckedLocalStorage: "false",
   tokenExpiry: "",
 });
 
@@ -45,11 +46,11 @@ const handleLogin = async () => {
     } else {
       console.log("logged in", data);
 
-      router.push({ name: "Home" });
+      rememberMeChecked.value
+        ? (authLocalStorage.rememberMeCheckedLocalStorage = "true")
+        : (authLocalStorage.rememberMeCheckedLocalStorage = "false");
 
-      rememberMeChecked
-        ? (authLocalStorage.value.tokenExpiry = data.session.expires_at)
-        : (authLocalStorage.value.tokenExpiry = "");
+      router.push({ name: "Home" });
     }
   } catch (error) {
     if (error instanceof Error) {
@@ -224,7 +225,7 @@ const { pressed } = useMousePressed({ target: revealPasswordButtonRef });
             t("forms.inputs.rememberMe")
           }}</label>
         </div>
-        <router-link to="" class="auth__link">
+        <router-link to="/forgot-password" class="auth__link">
           {{ t("auth.shared.forgotPassword") }}
         </router-link>
       </div>
@@ -281,8 +282,9 @@ const { pressed } = useMousePressed({ target: revealPasswordButtonRef });
   height: max-content;
   padding: 2rem;
 
-  // border: 1px solid var(--border);
-  // box-shadow: 0 0 0.5rem var(--shadow);
+  border: 1px solid var(--border);
+  box-shadow: 0 0 20px 5px var(--shadow-darker);
+  border-radius: $borderRadius;
   .auth__top {
     display: flex;
     flex-direction: column;
@@ -345,7 +347,6 @@ const { pressed } = useMousePressed({ target: revealPasswordButtonRef });
 
       margin-top: 2rem;
 
-      color: #222;
       border: none;
 
       .submit-btn__lock-icon {
@@ -386,14 +387,6 @@ const { pressed } = useMousePressed({ target: revealPasswordButtonRef });
     .warning__success {
       color: var(--success);
       font-weight: 600;
-    }
-  }
-
-  .auth__link {
-    color: var(--primary-100);
-    font-weight: bold;
-    &:hover {
-      filter: brightness(0.9);
     }
   }
 }

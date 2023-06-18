@@ -21,6 +21,8 @@ buttons:
   createSpace: Create Space
   upgrade: Upgrade
   deleteSpace: Delete Space
+  sendResetLink: Send Reset Link
+  resetPassword: Reset Password
 
 language:
   language: Language
@@ -111,6 +113,16 @@ auth:
     subTitle: Create a new account
     signUpSuccess: Sign up success! Please check your email to verify your account.
   logout: Sign Out
+  forgotPassword:
+    title: Forgot Password
+    enterEmail: Enter your email address and we'll send you a link to reset your password.
+    sendResetLink: Send Reset Link
+    resetLinkSent: Reset link sent!
+    newPassword:
+      title: New Password
+      description: Enter a new password for your account registered with this email
+      resetPassword: Reset Password
+      passwordResetSuccess: Password reset success! You can now sign in with your new password.
 
 ##### USER #####
 user:

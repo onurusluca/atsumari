@@ -102,7 +102,7 @@ button:disabled {
 
 .btn-main {
 
-  color: #fff;
+  color: #222;
   background-color: var(--main-btn-bg);
 
   &:hover {
@@ -163,7 +163,7 @@ button:disabled {
   }
 }
 
-
+// For Space bottom bar
 .btn-bottom-control {
   display: flex;
   flex-direction: column;
@@ -188,6 +188,13 @@ button:disabled {
 
   }
 
+}
 
+.auth__link {
+  color: var(--primary-100);
+  font-weight: bold;
 
+  &:hover {
+    filter: brightness(0.9);
+  }
 }

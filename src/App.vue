@@ -8,38 +8,30 @@ const route = useRouter();
 const authStore = useAuthStore();
 
 const authLocalStorage = useStorage("atsumari_auth", {
-  rememberMeCheckedLocal: null,
+  rememberMeCheckedLocalStorage: "true",
   tokenExpiry: "", // Set at 'Remember me' checkbox
 });
 
 let session = ref();
 onMounted(async () => {
-  // if token is  close to expiry, refresh it
-  if (
-    session.value &&
-    authLocalStorage.value.tokenExpiry &&
-    authLocalStorage.value.tokenExpiry !== ""
-  ) {
-    const now = new Date();
-    const expiryDate = new Date(authLocalStorage.value.tokenExpiry);
-    if (now > expiryDate) {
-      console.log("token expired");
+  if (authLocalStorage.rememberMeCheckedLocalStorage === "true") {
+    // if token is  close to expiry, refresh it
+    console.log("token expired");
 
-      try {
-        const { data, error } = await supabase.auth.refreshSession();
+    try {
+      const { data, error } = await supabase.auth.refreshSession();
 
-        console.log("token refreshed");
+      console.log("token refreshed");
 
-        if (error) {
-          console.log(error);
-          throw error;
-        } else {
-          authLocalStorage.value.tokenExpiry = data.expires_at;
-        }
-      } catch (error) {
-        console.warn("ERROR: Failed to refresh token", error);
+      if (error) {
+        console.log(error);
         throw error;
+      } else {
+        authLocalStorage.value.tokenExpiry = data.expires_at;
       }
+    } catch (error) {
+      console.warn("ERROR: Failed to refresh token", error);
+      throw error;
     }
   }
 

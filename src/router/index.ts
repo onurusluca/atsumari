@@ -55,10 +55,19 @@ const router = createRouter({
       component: () => import("@/views/auth/RegisterView.vue"),
     },
     {
+      path: "/forgot-password",
+      name: "ForgotPassword",
+      component: () => import("@/views/auth/ForgotPassword.vue"),
+      props: (route) => ({
+        newPassword: route.query.new_password,
+        email: route.query.email,
+      }),
+    },
+    /*    {
       path: "/account",
       name: "Account",
       component: () => import("@/views/auth/Account.vue"),
-    },
+    }, */
     // end auth
 
     // Space (room)
