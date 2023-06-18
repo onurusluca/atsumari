@@ -1,7 +1,5 @@
 <script setup lang="ts">
 const { t } = useI18n();
-const authStore = useAuthStore();
-const generalStore = useGeneralStore();
 const route = useRouter();
 
 let isNewPassword = route.currentRoute.value.query.new_password;

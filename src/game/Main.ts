@@ -67,19 +67,16 @@ export default class Main extends Phaser.Scene {
   }
 
   private handleDisconnect(reason: string) {
-    console.log(`Socket disconnected: ${reason}`);
+    console.error(`Socket disconnected: ${reason}`);
   }
 
   private handleCurrentPlayers(players: Record<string, User>) {
-    console.log("currentPlayers", players);
-
     Object.values(players).forEach((player) => {
       this.loadPlayerSprite(player);
       const callback =
         player.id === socket.id
           ? () => {
               this.playerManager?.addLocalPlayer(player);
-              console.log(player.id);
               this.createPlayersAndStartGame();
             }
           : () => this.playerManager?.addRemotePlayer(player);
@@ -90,7 +87,6 @@ export default class Main extends Phaser.Scene {
   }
 
   private handleNewPlayer(playerInfo: User) {
-    console.log("newPlayer", playerInfo);
     this.onUserJoin(playerInfo);
   }
 
@@ -99,7 +95,6 @@ export default class Main extends Phaser.Scene {
   }
 
   private handlePlayerMoved(playerInfo: User) {
-    console.log("Main: playerMoved", playerInfo);
     this.playerManager?.moveRemotePlayer(
       playerInfo.id,
       playerInfo.x,
@@ -109,12 +104,10 @@ export default class Main extends Phaser.Scene {
   }
 
   private handlePlayerStopped(playerInfo: User) {
-    console.log("Main: playerStopped", playerInfo);
     this.playerManager?.stopRemotePlayer(playerInfo.id, playerInfo.direction);
   }
 
   private onUserJoin(newUser: User) {
-    console.log(`New user joined:`, newUser);
     this.loadPlayerSprite(newUser);
 
     this.load.once("complete", () => {
@@ -124,7 +117,6 @@ export default class Main extends Phaser.Scene {
     this.load.start();
   }
   private onUserLeave(id: string) {
-    console.log(`User has left:`, id);
     // Remove user from remote players
     this.playerManager?.destroyRemotePlayer(id);
     // Remove user sprite and animations

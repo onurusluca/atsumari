@@ -1,5 +1,5 @@
 import { supabase } from "@/utils/supabaseInit";
-import type { SpacesType, ProfilesType } from "@/types/supabaseTypes";
+import type { SpacesType, VisitedSpacesType } from "@/types/supabaseTypes";
 import { TileMap } from "@/types/canvasTypes";
 
 export let gameMapJson: TileMap | null = null;
@@ -11,7 +11,7 @@ export const handleReadProfile = async (userId: string, spaceId: string) => {
     if (!userId) throw new Error("No user ID found in authStore session");
 
     const { data: profiles, error } = await supabase
-      .from<ProfilesType>("profiles")
+      .from("profiles")
       .select("*")
       .eq("id", userId);
 
@@ -110,17 +110,16 @@ export const handleAddSpaceToVisitedSpaces = async (
   spaceName: string
 ) => {
   try {
-    const visitedSpaces = await getVisitedSpaces(userId);
-
-    // If the space is not in the visited spaces of the user
-    if (!visitedSpaces.some((space: SpacesType) => space.space_id === spaceId)) {
-      const userSpaces = await getUserSpaces(userId, spaceName);
-
-      // If the user doesn't own the space
-      if (!userSpaces.some((space: SpacesType) => space.id === spaceId)) {
-        await addSpaceToVisitedSpaces(userId, spaceId, spaceName);
+    await getVisitedSpaces(userId).then(async (res) => {
+      if (!res.some((space) => space.space_id === spaceId)) {
+        await getUserSpaces(userId).then(async (res) => {
+          // If the user doesn't own the space
+          if (!res.some((space: VisitedSpacesType) => space.id === spaceId)) {
+            await addSpaceToVisitedSpaces(userId, spaceId, spaceName);
+          }
+        });
       }
-    }
+    });
   } catch (error) {
     console.error("Error in handleAddSpaceToVisitedSpaces: ", error);
   }
@@ -129,26 +128,24 @@ export const handleAddSpaceToVisitedSpaces = async (
 // Get visited spaces
 export const getVisitedSpaces = async (userId: string) => {
   const { data: spaces, error } = await supabase
-    .from<SpacesType>("visited_spaces")
+    .from("visited_spaces")
     .select("*")
     .eq("user_id", userId);
 
   if (error) throw error;
-  console.log("spaces: ", spaces);
 
   return spaces;
 };
 
 // Get user spaces
-export const getUserSpaces = async (userId: string, spaceName: string) => {
+export const getUserSpaces = async (userId: string) => {
   const { data: spaces, error } = await supabase
-    .from<SpacesType>("spaces")
+    .from("spaces")
     .select("*")
-    .eq("user_id", userId)
-    .eq("name", spaceName);
+    .eq("user_id", userId);
 
   if (error) throw error;
-  return spaces || [];
+  return spaces;
 };
 
 // Add space to visited spaces
@@ -157,11 +154,13 @@ export const addSpaceToVisitedSpaces = async (
   spaceId: string,
   spaceName: string
 ) => {
-  const { error } = await supabase.from("visited_spaces").insert({
-    user_id: userId,
-    space_id: spaceId,
-    name: spaceName,
-  });
+  const { error } = await supabase.from("visited_spaces").insert([
+    {
+      user_id: userId,
+      space_id: spaceId,
+      name: spaceName,
+    },
+  ]);
 
   if (error) throw error;
 };

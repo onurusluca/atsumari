@@ -20,12 +20,7 @@ export default class RemotePlayer {
 
   private createPlayer(): void {
     this.remotePlayer = this.scene.physics.add
-      .sprite(
-        this.user.lastPosition.x,
-        this.user.lastPosition.y,
-        this.user.id,
-        "walk-down-0"
-      )
+      .sprite(this.user.x, this.user.y, this.user.id, "walk-down-0")
       .setScale(UserConstants.PLAYER_SCALE)
       .setDepth(Depths.RemotePlayer);
 
@@ -124,8 +119,6 @@ export default class RemotePlayer {
   }
 
   public movePlayer(x: number, y: number, direction: Direction): void {
-    console.log("RemotePlayer movePlayer", x, y, direction);
-
     if (!direction) {
       console.error("Invalid direction:", direction);
       return;

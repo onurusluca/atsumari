@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { SpacesType } from "@/types/supabaseTypes";
+import type { SpacesType, VisitedSpacesType } from "@/types/supabaseTypes";
 import type { OnClickOutsideHandler } from "@vueuse/core";
 import { vOnClickOutside } from "@vueuse/components";
 import { getCurrentUrlOrigin } from "@/utils/general";
@@ -9,7 +9,7 @@ const { t } = useI18n();
 const authStore = useAuthStore();
 
 let userSpaces = reactive<SpacesType[]>([]);
-let visitedSpaces = reactive<SpacesType[]>([]);
+let visitedSpaces = reactive<VisitedSpacesType[]>([]);
 let isUserSpacesLoaded = ref<boolean>(false);
 let isVisitedSpacesLoaded = ref<boolean>(false);
 let showNoUserSpacesMessage = ref<boolean>(false);
@@ -328,7 +328,7 @@ function showToast(toastTypeProp: string) {
             :to="{
               name: 'Space',
               params: {
-                id: item.id,
+                id: item.space_id,
                 name: slugify(item.name),
               },
             }"

@@ -34,8 +34,6 @@ export default class PlayerManager {
     y: number,
     direction: Direction
   ): void {
-    console.log("Moving remote player. PlayerManager.ts", id, x, y, direction);
-
     this.remotePlayers[id]?.movePlayer(x, y, direction);
   }
 
