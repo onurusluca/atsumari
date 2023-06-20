@@ -1,5 +1,5 @@
 /* import { io, Socket } from "socket.io-client";
-import { EnvVariables } from "@/envVariables";
+import  EnvVariables  from "@/envVariables";
 
 let socket: Socket;
 
@@ -19,7 +19,7 @@ export function getSocket(): Socket {
  */
 
 import { io } from "socket.io-client";
-import { EnvVariables } from "@/envVariables";
+import EnvVariables from "@/envVariables";
 
 const socket = io(EnvVariables.realtimeApiUrl);
 export default socket;

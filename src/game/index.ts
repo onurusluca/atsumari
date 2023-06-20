@@ -6,7 +6,6 @@ import Main from "./Main";
 
 const gameConfig: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
-  parent: "space__game-parent",
   physics: {
     default: "arcade",
     arcade: {
@@ -14,7 +13,7 @@ const gameConfig: Phaser.Types.Core.GameConfig = {
       debug: false,
     },
   },
-  backgroundColor: "#38393D",
+  backgroundColor: "#e63956",
   dom: {
     createContainer: false,
   },
@@ -38,11 +37,15 @@ const gameConfig: Phaser.Types.Core.GameConfig = {
     roundPixels: true,
     pixelArt: true,
   },
-  fps: {},
+  fps: {
+    // target: 60,
+  },
 };
 
 export default async function createGame(): Promise<void> {
   let gameInstance = new Phaser.Game(gameConfig);
+
+  console.log("Game instance created", gameInstance);
 
   // Resize game to fit window
   window.addEventListener("resize", () => {

@@ -34,7 +34,7 @@ export default class Main extends Phaser.Scene {
 
   update(/* time: number, delta: number */) {
     if (this.playerManager?.getLocalPlayer()) {
-      this.playerManager?.handleLocalPlayerMovement();
+      this.playerManager.handleLocalPlayerMovement();
     }
   }
 
@@ -47,6 +47,8 @@ export default class Main extends Phaser.Scene {
   }
 
   private handleConnect() {
+    console.log("Socket connected");
+
     // Send my info to the server
     socket.emit("joinRoom", generalStore.spaceId, {
       id: socket.id,

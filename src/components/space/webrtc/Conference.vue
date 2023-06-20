@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { createAccessToken } from "@/composables/useWebrtc";
 import { Room, RoomEvent, Participant } from "livekit-client";
-import { EnvVariables } from "@/envVariables";
+import EnvVariables from "@/envVariables";
 
 const { t } = useI18n();
 const authStore = useAuthStore();

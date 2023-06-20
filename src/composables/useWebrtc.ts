@@ -1,4 +1,4 @@
-import { EnvVariables } from "@/envVariables";
+import EnvVariables from "@/envVariables";
 import type { Room, RoomEvent } from "livekit-client";
 
 const WEBRTC_BASE_URL = EnvVariables.webRtcApiBaseUrl;

@@ -17,4 +17,4 @@ const EnvVariables = {
   realtimeApiUrl: import.meta.env.VITE_REALTIME_API_URL as string,
 };
 
-export { EnvVariables };
+export default EnvVariables;

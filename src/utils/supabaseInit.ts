@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
-import { EnvVariables } from "@/envVariables";
+import EnvVariables from "@/envVariables";
 
 export const supabase: SupabaseClient = createClient(
   EnvVariables.supabaseUrl,

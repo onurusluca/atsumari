@@ -7,8 +7,11 @@ import AutoImport from "unplugin-auto-import/vite";
 import Icons from "unplugin-icons/vite";
 import VueI18nPlugin from "@intlify/unplugin-vue-i18n/vite";
 import IconsResolver from "unplugin-icons/resolver";
-// https://vitejs.dev/config/
 
+// Simplifies static file copying during build, aiding efficient asset management for web apps using Vite.
+import { viteStaticCopy } from "vite-plugin-static-copy";
+
+// https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   // Load env file based on `mode` in the current working directory.
   // Set the third parameter to '' to load all env regardless of the `VITE_` prefix.
@@ -118,6 +121,15 @@ export default defineConfig(({ mode }) => {
         runtimeOnly: true,
         compositionOnly: true,
         include: [path.resolve(__dirname, "./locales/**")],
+      }),
+
+      viteStaticCopy({
+        targets: [
+          {
+            src: "src/game/melon/data/*",
+            dest: "data/",
+          },
+        ],
       }),
 
       // https://vitejs.dev/guide/build.html#chunking-strategy

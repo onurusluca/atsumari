@@ -30,6 +30,8 @@ onMounted(async () => {
 
     const profileData = await handleReadAndSetProfileStuff();
     if (profileData && initialSetupCompleted.value) {
+      console.log("PROFILE DATA FETCHED: ", profileData);
+
       await createGame();
 
       await handleAddSpaceToVisitedSpaces(authStore.user.id, spaceId, spaceName);
