@@ -126,7 +126,7 @@ export default defineConfig(({ mode }) => {
       viteStaticCopy({
         targets: [
           {
-            src: "src/game/melon/data/*",
+            src: "src/game/images/characters/*",
             dest: "data/",
           },
         ],

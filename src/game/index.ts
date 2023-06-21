@@ -1,4 +1,5 @@
 import * as Phaser from "phaser";
+import socket from "@/composables/useSocketIO";
 
 // Scenes
 import Preloader from "./Preloader";
@@ -42,7 +43,7 @@ const gameConfig: Phaser.Types.Core.GameConfig = {
   },
 };
 
-export default async function createGame(): Promise<void> {
+async function createGame(): Promise<void> {
   let gameInstance = new Phaser.Game(gameConfig);
 
   console.log("Game instance created", gameInstance);
@@ -53,22 +54,38 @@ export default async function createGame(): Promise<void> {
   });
 
   // Destroy game instance on unmount
-  // TODO: This is buggy. It will make the game won't load again after unmounting. Or EVEN after refreshing the page.
-  /* emitter.on("destroyGame", async () => {
-    gameInstance.loop.stop();
+  emitter.on("destroyGame", async () => {
+    destroyGame(gameInstance);
+  });
+}
 
-    for (let scene of gameInstance.scene.getScenes(true)) {
-      scene.sys.events.shutdown();
-      scene.scene.stop();
-      gameInstance.scene.remove(scene.sys.settings.key);
-    }
+export default async function startGame() {
+  socket.on("connect", createGame);
+  console.log("Socket connected");
+}
 
-    gameInstance.renderer.destroy();
+function destroyGame(gameInstance: Phaser.Game) {
+  // Stop game loop
+  gameInstance.loop.stop();
 
-    if (gameInstance.canvas.parentNode) {
-      gameInstance.canvas.parentNode.removeChild(gameInstance.canvas);
-    }
+  // Stop and remove all scenes
+  gameInstance.scene.getScenes(true).forEach((scene) => {
+    scene.sys.settings.active = false; // Deactivate the scene
+    scene.input.shutdown(); // Shutdown scene input
+    scene.sys.shutdown(); // Shutdown the scene
+    gameInstance.scene.remove(scene.sys.settings.key); // Remove the scene from the game
+  });
 
-    gameInstance.destroy(true);
-  }); */
+  // Remove any canvas elements added by Phaser
+  if (gameInstance.canvas.parentNode) {
+    gameInstance.canvas.parentNode.removeChild(gameInstance.canvas);
+  }
+
+  // Destroy the game instance
+  gameInstance.destroy(true, false);
+
+  window.removeEventListener("resize", () => {
+    gameInstance.scale.resize(window.innerWidth, window.innerHeight - 60);
+  });
+  console.log("Destroying game instance");
 }

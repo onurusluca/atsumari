@@ -3,7 +3,7 @@ import type { OnClickOutsideHandler } from "@vueuse/core";
 import type { User } from "@/types/canvasTypes";
 
 import { vOnClickOutside } from "@vueuse/components";
-import createGame from "@/game";
+import startGame from "@/game";
 
 import {
   handleReadProfile,
@@ -32,7 +32,7 @@ onMounted(async () => {
     if (profileData && initialSetupCompleted.value) {
       console.log("PROFILE DATA FETCHED: ", profileData);
 
-      await createGame();
+      await startGame();
 
       await handleAddSpaceToVisitedSpaces(authStore.user.id, spaceId, spaceName);
     }
@@ -41,9 +41,16 @@ onMounted(async () => {
   }
 });
 
+// FIXME: We need to refresh the page when the user leaves the space becasue the game cannot be detached from the DOM completely
 onUnmounted(() => {
-  emitter.emit("destroyGame");
+  // Reload page
+  window.location.reload();
 });
+
+/* route.beforeEach((to, from, next) => {
+
+  next();
+}); */
 
 const handleReadAndSetProfileStuff = async () => {
   try {
@@ -66,9 +73,9 @@ const handleReadAndSetProfileStuff = async () => {
 // (If user doesn't have profile in this space) after all the initial setups are done in the modal, do the preparations
 const handleInitialSetupCompleted = async () => {
   initialSetupCompleted.value = true;
-  await handleReadAndSetProfileStuff().then(() => {
+  await handleReadAndSetProfileStuff().then(async () => {
     if (initialSetupCompleted.value) {
-      createGame();
+      await startGame();
     }
   });
 };

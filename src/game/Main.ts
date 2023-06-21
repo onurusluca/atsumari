@@ -23,7 +23,7 @@ export default class Main extends Phaser.Scene {
   }
 
   create() {
-    socket.on("connect", this.handleConnect.bind(this));
+    this.handleConnect();
     socket.on("disconnect", this.handleDisconnect.bind(this));
     socket.on("currentPlayers", this.handleCurrentPlayers.bind(this));
     socket.on("newPlayer", this.handleNewPlayer.bind(this));
@@ -47,7 +47,7 @@ export default class Main extends Phaser.Scene {
   }
 
   private handleConnect() {
-    console.log("Socket connected");
+    console.log("Main scene connected to socket");
 
     // Send my info to the server
     socket.emit("joinRoom", generalStore.spaceId, {
@@ -72,20 +72,24 @@ export default class Main extends Phaser.Scene {
     console.error(`Socket disconnected: ${reason}`);
   }
 
-  private handleCurrentPlayers(players: Record<string, User>) {
-    Object.values(players).forEach((player) => {
+  private async handleCurrentPlayers(players: Record<string, User>) {
+    for (const player of Object.values(players)) {
       this.loadPlayerSprite(player);
-      const callback =
-        player.id === socket.id
-          ? () => {
-              this.playerManager?.addLocalPlayer(player);
-              this.createPlayersAndStartGame();
-            }
-          : () => this.playerManager?.addRemotePlayer(player);
 
-      this.load.once("complete", callback);
-      this.load.start();
-    });
+      const isLocalPlayer = player.id === socket.id;
+      if (isLocalPlayer) {
+        await new Promise((resolve) => {
+          this.load.once("complete", resolve);
+          this.load.start();
+        });
+
+        this.playerManager?.addLocalPlayer(player);
+        this.createPlayersAndStartGame();
+      } else {
+        this.load.once("complete", () => this.playerManager?.addRemotePlayer(player));
+        this.load.start();
+      }
+    }
   }
 
   private handleNewPlayer(playerInfo: User) {
