@@ -3,7 +3,7 @@ import { createPicker, NativeRenderer, i18n, lightTheme, darkTheme } from "picmo
 import { isDark } from "@/utils/dark";
 import { vOnClickOutside } from "@vueuse/components";
 import type { OnClickOutsideHandler } from "@vueuse/core";
-import { formattedMessageSentTime } from "@/utils/formattedMessageSentTime";
+import { formattedMessageSentTime } from "@/utils/calculateSentTime";
 
 import type { MessagesType } from "@/api/types";
 
