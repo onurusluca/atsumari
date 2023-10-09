@@ -1,5 +1,7 @@
 # atsumari
 
+First implementation of Atsumari. Feel free to use it as open-source and learning purposes. `Code not used anymore. ` 
+
 ## Notes
 
 If possible, add libraries, files or any imports to autoimport
